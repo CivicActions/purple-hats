@@ -13,6 +13,17 @@ exports.getCurrentDate = () => {
   return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 };
 
+exports.getCurrentTime = () => {
+  return new Date().toLocaleTimeString('en-GB', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour12: true,
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+};
+
 exports.validateUrl = url => {
   const invalidURLends = [
     '.gif',
@@ -21,6 +32,7 @@ exports.validateUrl = url => {
     '.png',
     '.pdf',
     '.doc',
+    '.docx',
     '.css',
     '.svg',
     '.js',
@@ -30,9 +42,14 @@ exports.validateUrl = url => {
     '.tgz',
     '.zip',
     '.xls',
+    '.xlsx',
     '.ppt',
+    '.pptx',
     '.ico',
     '.woff',
+    '.webp',
+    '.avif',
+    '.epub',
   ];
   return !invalidURLends.some(urlEnd => url.includes(urlEnd));
 };
@@ -59,16 +76,5 @@ exports.createAndUpdateFolders = async (scanDetails, randomToken) => {
     if (exists) {
       await fs.copy('errors.txt', `${logPath}/${randomToken}.txt`);
     }
-  });
-};
-
-exports.getCurrentTime = () => {
-  return new Date().toLocaleTimeString('en-GB', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour12: true,
-    hour: 'numeric',
-    minute: '2-digit',
   });
 };
