@@ -88,10 +88,10 @@ if [ -d "results/$currentDate/$randomToken" ]; then
 
     # Test for the command before attempting to open the report
     if [ -n "command -v open" ]; then
-        open -a "Google Chrome" "results/$currentDate/$randomToken/reports/report.html"
+        open "results/$currentDate/$randomToken/reports/report.html"
     elif [ -n "command -v xdg-open" ]; then
         # Linux equivalent of open
-        xdg-open -a "Google Chrome" "results/$currentDate/$randomToken/reports/report.html"
+        xdg-open "results/$currentDate/$randomToken/reports/report.html"
     else
         echo "The scan has been completed."
         current_dir=$(pwd)
