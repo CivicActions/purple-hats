@@ -29,7 +29,7 @@ exports.crawlDomain = async (url, randomToken, host) => {
         const results = await runAxeScript(page, host);
         await dataset.pushData(results);
         urlsCrawled.scanned.push(currentUrl);
-
+        console.log(currentUrl);
         await Apify.utils.enqueueLinks({
           page,
           selector: 'a',

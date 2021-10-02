@@ -70,6 +70,9 @@ const writeHTML = async (allissues, storagePath) => {
   }
 
   /* Count impactOrder, url  */
+  let wcagIDsum = [];
+  const wcagCounts = {};
+  let wcagIDvar = '';
   let criticalCount = seriousCount = moderateCount = minorCount = order = 0;
   for (var i in allissues) {
     order = allissues[i].order;
@@ -79,13 +82,20 @@ const writeHTML = async (allissues, storagePath) => {
     else if (order == 0) { ++minorCount; }
     else { }
     allissues[i].id = i;
+    if (allissues[i].wcagID) {
+      wcagIDvar = allissues[i].wcagID;
+      wcagIDsum.push(wcagIDvar);
+    }
   }
   i++;
+
+  wcagIDsum.forEach(function (x) { wcagCounts[x] = (wcagCounts[x] || 0) + 1; });
+  /* This should be able to get into Mustache {{wcagCounts}} {{{.}}} {{/wcagCounts}} */
 
   if (allissues.length > maxHTMLdisplay) allissues.length = maxHTMLdisplay;
 
   const finalResultsInJson = JSON.stringify(
-    { startTime: getCurrentTime(), count: i, htmlCount: allissues.length, domain: domainURL, countURLsCrawled, totalTime, criticalCount, seriousCount, moderateCount, minorCount, allissues },
+    { startTime: getCurrentTime(), count: i, htmlCount: allissues.length, domain: domainURL, countURLsCrawled, totalTime, criticalCount, seriousCount, moderateCount, minorCount, wcagCounts, allissues },
     null,
     4,
   );
