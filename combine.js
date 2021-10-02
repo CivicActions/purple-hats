@@ -51,6 +51,7 @@ exports.combineRun = async details => {
   scanDetails.endTime = new Date().getTime();
   scanDetails.urlsCrawled = urlsCrawled;
   global.endTime = scanDetails.endTime;
+  global.totalTime =  Math.round((endTime - startTime)/1000);
   global.countURLsCrawled = urlsCrawled['scanned'].length;
   await createAndUpdateFolders(scanDetails, randomToken);
   await mergeFiles(randomToken);

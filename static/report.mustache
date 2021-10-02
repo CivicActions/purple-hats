@@ -210,11 +210,12 @@ class="{{impact}}-fill-icon"
                 {{#allissues}}
                 <tr>
                   <td><span class="impact {{impact}}"><span class="hidden">{{order}}</span>{{impact}}</span><br>
-                    {{#disabilities}}
+                    {{#disabilityIcons}}
                       <div class="impact-icon-size">
                         {{{.}}}
                       </div>
-                    {{/disabilities}}
+                    {{/disabilityIcons}}
+                    {{disabilities}}
                   </td>
                   <td class="issue">{{description}}<br>
                   {{#wcagLinks}}

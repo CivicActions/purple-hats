@@ -34,8 +34,14 @@ const fetchIcons = async (disabilities, impact) => {
 
 /* Compile final JSON results */
 const writeResults = async (allissues, storagePath) => {
+
+  /* Delete SVG images */
+  for (let i in allissues) {
+    delete allissues[i].disabilityIcons;
+  }
+
   const finalResultsInJson = JSON.stringify(
-    { startTime: getCurrentTime(), count: allissues.length, allissues },
+    { startTime: getCurrentTime(), count: allissues.length, domain: domainURL, countURLsCrawled, totalTime, allissues },
     null,
     4,
   );
@@ -46,7 +52,6 @@ const writeResults = async (allissues, storagePath) => {
 
 /* Provide JSON to Mustache for whole page content */
 const writeHTML = async (allissues, storagePath) => {
-  totalTime =  Math.round((endTime - startTime)/1000);
   const finalResultsInJson = JSON.stringify(
     { startTime: getCurrentTime(), count: allissues.length, allissues, domain: domainURL, countURLsCrawled, totalTime },
     null,
@@ -67,7 +72,7 @@ const flattenAxeResults = async rPath => {
   errors.forEach(error => {
     error.fixes.forEach(item => {
       const { id: errorId, impact, description, helpUrl } = error;
-      const { disabilities, wcag } = axeIssuesList.find(obj => obj.id === errorId) || {};
+      const { disabilityIcons, disabilities, wcag } = axeIssuesList.find(obj => obj.id === errorId) || {};
 
       const wcagLinks = wcag
         ? wcag.map(element => wcagList.find(obj => obj.wcag === element) || { wcag: element })
@@ -83,15 +88,15 @@ const flattenAxeResults = async rPath => {
         order: impactOrder[impact],
         wcagLinks,
         disabilities,
+        disabilityIcons,
       });
     });
   });
-
   return Promise.all(
     flattenedIssues.map(async issue => {
-      const { disabilities, impact, ...rest } = issue;
+      const { disabilityIcons, disabilities, impact, ...rest } = issue;
       const icons = disabilities ? await fetchIcons(disabilities, impact) : null;
-      return { ...rest, impact, disabilities: icons };
+      return { ...rest, impact, disabilities, disabilityIcons: icons };
     }),
   );
 };
