@@ -4,7 +4,7 @@ const path = require('path');
 const Mustache = require('mustache');
 const axeIssuesList = require('./constants/axeTypes.json');
 const wcagList = require('./constants/wcagLinks.json');
-const { allIssueFileName, impactOrder } = require('./constants/constants');
+const { allIssueFileName, impactOrder, maxHTMLdisplay } = require('./constants/constants');
 const { getCurrentTime, getStoragePath } = require('./utils');
 
 const extractFileNames = async directory => {
@@ -35,13 +35,17 @@ const fetchIcons = async (disabilities, impact) => {
 /* Compile final JSON results */
 const writeResults = async (allissues, storagePath) => {
 
-  /* Delete SVG images */
-  for (let i in allissues) {
-    delete allissues[i].disabilityIcons;
+  /* Copy without reference to allissues array */
+  var shortAllIssuesJSON = []
+  shortAllIssuesJSON = JSON.parse(JSON.stringify(allissues));
+
+  /* Delete SVG images in copy of allissues */
+  for (let i in shortAllIssuesJSON) {
+   delete shortAllIssuesJSON[i].disabilityIcons;
   }
 
   const finalResultsInJson = JSON.stringify(
-    { startTime: getCurrentTime(), count: allissues.length, domain: domainURL, countURLsCrawled, totalTime, allissues },
+    { startTime: getCurrentTime(), count: allissues.length, domain: domainURL, countURLsCrawled, totalTime, shortAllIssuesJSON },
     null,
     4,
   );
@@ -50,10 +54,38 @@ const writeResults = async (allissues, storagePath) => {
     .catch(writeResultsError => console.log('Error writing to file', writeResultsError));
 };
 
-/* Provide JSON to Mustache for whole page content */
+/* Write HTML from JSON to Mustache for whole page content */
 const writeHTML = async (allissues, storagePath) => {
+
+  /* Sort by impact order (critical, serious, moderate, minor)  */
+  allissues.sort(function (a, b) {
+    return b.order - a.order;
+  });
+
+  /* Replace array of disabilities for string of disabilities for HTML */
+  /* NOTE THIS SHOULD NOT CHANGE IN THE COMPILED JSON FILE BUT DOES! */
+
+  for (let i in allissues) {
+    allissues[i].disabilities = allissues[i].disabilities.toString().replace(/,/g, ' ').toLowerCase();
+  }
+
+  /* Count impactOrder, url  */
+  let criticalCount = seriousCount = moderateCount = minorCount = order = 0;
+  for (var i in allissues) {
+    order = allissues[i].order;
+    if (order == 3) { ++criticalCount;  }
+    else if (order == 2) { ++seriousCount; }
+    else if (order == 1) { ++moderateCount; }
+    else if (order == 0) { ++minorCount; }
+    else { }
+    allissues[i].id = i;
+  }
+  i++;
+
+  if (allissues.length > maxHTMLdisplay) allissues.length = maxHTMLdisplay;
+
   const finalResultsInJson = JSON.stringify(
-    { startTime: getCurrentTime(), count: allissues.length, allissues, domain: domainURL, countURLsCrawled, totalTime },
+    { startTime: getCurrentTime(), count: i, htmlCount: allissues.length, domain: domainURL, countURLsCrawled, totalTime, criticalCount, seriousCount, moderateCount, minorCount, allissues },
     null,
     4,
   );
@@ -68,17 +100,23 @@ const flattenAxeResults = async rPath => {
   const parsedContent = await parseContentToJson(rPath);
 
   const flattenedIssues = [];
+  var id = 1;
   const { url, page, errors } = parsedContent;
   errors.forEach(error => {
     error.fixes.forEach(item => {
       const { id: errorId, impact, description, helpUrl } = error;
       const { disabilityIcons, disabilities, wcag } = axeIssuesList.find(obj => obj.id === errorId) || {};
 
+      var wcagID = '';
+      wcagID = JSON.parse(JSON.stringify(wcag)).toString();
+
       const wcagLinks = wcag
         ? wcag.map(element => wcagList.find(obj => obj.wcag === element) || { wcag: element })
         : null;
+      ++id;
 
       flattenedIssues.push({
+        id,
         url,
         page,
         description,
@@ -86,12 +124,14 @@ const flattenAxeResults = async rPath => {
         helpUrl,
         htmlElement: item.htmlElement,
         order: impactOrder[impact],
+        wcagID,
         wcagLinks,
         disabilities,
         disabilityIcons,
       });
     });
   });
+
   return Promise.all(
     flattenedIssues.map(async issue => {
       const { disabilityIcons, disabilities, impact, ...rest } = issue;
@@ -113,9 +153,6 @@ exports.mergeFiles = async randomToken => {
       const flattenedIssues = await flattenAxeResults(rPath);
 
       allIssues = allIssues.concat(flattenedIssues);
-
-/* console.log(allIssues); */
-
 
     }),
   ).catch(flattenIssuesError => console.log('Error flattening all issues', flattenIssuesError));

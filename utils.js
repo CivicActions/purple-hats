@@ -14,7 +14,7 @@ exports.getCurrentDate = () => {
 };
 
 exports.getCurrentTime = () => {
-  return new Date().toLocaleTimeString('en-GB', {
+  return new Date().toLocaleTimeString('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',

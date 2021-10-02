@@ -33,12 +33,15 @@
               </svg>
               <div class="pl-3">
                 <h1>Accessibility Report: {{ domain }} </h1>
-                <p class="mb-0">An website crawl using Deque's Axe against WCAG 2.1 standards</p>
+                <p class="mb-0">An website crawl using Deque's Axe (v4.3.3) against WCAG 2.1 standards</p>
               </div>
             </div>
           </div>
           <div class="col-md-4 col-12 header-meta">
-            <p class="mb-0">Run on {{ startTime }}<br><strong>{{ count }} barriers in {{ countURLsCrawled }} pages (in {{ totalTime }} seconds).</strong></p>
+            <p class="mb-0">Run on {{ startTime }}<br>
+            <strong>Top {{ htmlCount }} barriers in {{ countURLsCrawled }} pages ({{ totalTime }})</strong><br>
+            <strong>Total Errors: {{ count }} </strong><br>
+            Critical: {{ criticalCount }}, Serious: {{ seriousCount }}, Moderate: {{ moderateCount }}, Minor:  {{ minorCount }}</p>
             <div class="toggleWrapper">
               <input type="checkbox" class="dm" id="dm"/>
               <label for="dm" class="toggle">
@@ -198,24 +201,23 @@ class="{{impact}}-fill-icon"
             <table id="a11y-table" class="display" style="width:100%">
               <thead>
                 <tr>
-                  <th>IMPACT</th>
-                  <th class="dt-nowrap">ISSUE</th>
-                  <th class="dt-nowrap">PAGE</th>
-                  <th class="element">HTML ELEMENT <span>Hover to view full</span></th>
-                  <th class="dt-nowrap text-center">HELP URL</th>
-                  <th class="dt-nowrap text-center">FIXED?</th>
+                  <th>Impact</th>
+                  <th class="dt-nowrap">Issue</th>
+                  <th class="dt-nowrap">Page</th>
+                  <th class="element">HTML Element <span>Hover to view full</span></th>
+                  <th class="dt-nowrap text-center">Bug Id &nbsp; / &nbsp; Help URL</th>
+                  <th class="dt-nowrap text-center">Fixed?</th>
                 </tr>
               </thead>
               <tbody>
                 {{#allissues}}
-                <tr>
+                <tr class="{{disabilities}}">
                   <td><span class="impact {{impact}}"><span class="hidden">{{order}}</span>{{impact}}</span><br>
                     {{#disabilityIcons}}
                       <div class="impact-icon-size">
                         {{{.}}}
                       </div>
                     {{/disabilityIcons}}
-                    {{disabilities}}
                   </td>
                   <td class="issue">{{description}}<br>
                   {{#wcagLinks}}
@@ -224,7 +226,7 @@ class="{{impact}}-fill-icon"
                   </td>
                   <td class="page"><a href="{{url}}" target="_blank">{{page}}</a></td>
                   <td class="element">{{htmlElement}}</td>
-                  <td class="text-center dt-nowrap"><a href="{{helpUrl}}" target="_blank">
+                  <td class="text-center dt-nowrap">{{id}} &nbsp; / &nbsp; <a href="{{helpUrl}}" target="_blank">
                     <svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1">
                       <use xlink:href="#help-url-svg"></use>
                     </svg>

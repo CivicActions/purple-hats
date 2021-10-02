@@ -1,7 +1,9 @@
 // for crawlers
 exports.axeScript = 'node_modules/axe-core/axe.min.js';
 
-exports.maxRequestsPerCrawl = 500;
+exports.maxRequestsPerCrawl = 1000;
+
+exports.maxHTMLdisplay = 250;
 
 exports.maxConcurrency = 5;
 

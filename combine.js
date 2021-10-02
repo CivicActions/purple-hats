@@ -51,7 +51,15 @@ exports.combineRun = async details => {
   scanDetails.endTime = new Date().getTime();
   scanDetails.urlsCrawled = urlsCrawled;
   global.endTime = scanDetails.endTime;
-  global.totalTime =  Math.round((endTime - startTime)/1000);
+  var totalTimeSeconds = Math.round((endTime - startTime)/1000);
+  var hours = (totalTimeSeconds / 3600);
+  var rhours = Math.floor(hours);
+  var minutes = (hours - rhours) * 60;
+  var rminutes = Math.round(minutes);
+  var seconds = (minutes - rminutes) * 60;
+  var rseconds = Math.abs(Math.round(seconds));
+
+  global.totalTime = rhours + "h " + rminutes + "m " + rseconds + "s ";
   global.countURLsCrawled = urlsCrawled['scanned'].length;
   await createAndUpdateFolders(scanDetails, randomToken);
   await mergeFiles(randomToken);
