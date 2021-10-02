@@ -32,6 +32,7 @@ const fetchIcons = async (disabilities, impact) => {
   ).catch(iconError => console.log('Error fetching all icons', iconError));
 };
 
+/* Compile final JSON results */
 const writeResults = async (allissues, storagePath) => {
   const finalResultsInJson = JSON.stringify(
     { startTime: getCurrentTime(), count: allissues.length, allissues },
@@ -43,10 +44,11 @@ const writeResults = async (allissues, storagePath) => {
     .catch(writeResultsError => console.log('Error writing to file', writeResultsError));
 };
 
+/* Provide JSON to Mustache for whole page content */
 const writeHTML = async (allissues, storagePath) => {
-
+  totalTime =  Math.round((endTime - startTime)/1000);
   const finalResultsInJson = JSON.stringify(
-    { startTime: getCurrentTime(), count: allissues.length, allissues, domain: domainURL },
+    { startTime: getCurrentTime(), count: allissues.length, allissues, domain: domainURL, countURLsCrawled, totalTime },
     null,
     4,
   );
@@ -106,6 +108,10 @@ exports.mergeFiles = async randomToken => {
       const flattenedIssues = await flattenAxeResults(rPath);
 
       allIssues = allIssues.concat(flattenedIssues);
+
+/* console.log(allIssues); */
+
+
     }),
   ).catch(flattenIssuesError => console.log('Error flattening all issues', flattenIssuesError));
 
