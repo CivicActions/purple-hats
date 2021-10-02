@@ -16,25 +16,40 @@ clean_up
 _valid_url=1
 
 echo "Welcome to HATS Accessibility Testing Tool!"
-echo "We recommend using Chrome browser for the best experience."
-echo "What would you like to scan today?"
 
-options=("sitemap file containing links" "website")
+# Allow website / sitemap to be entered at command prompt
+if [ ! -z "$1" ] && [ ! -z "$2" ]; then
+  if [ $1 = "sitemap" ] ; then
+    scanType="sitemap"
+    crawler=crawlSitemap
+  elif [ $1 = "website" ] ; then
+    scanType="website"
+    crawler=crawlDomain
+  fi
+  page=$2
 
-# Get information related to scan type as well as the URL for URL validation
-select opt in "${options[@]}"
-do
-    case $opt in
+# Without variables provide prompt message
+else
 
+  echo "You can specify a website crawl & URL through the command line with:"
+  echo "    $ bash ./run website https://example.com/"
+
+  echo "What would you like to scan today?"
+
+  options=("sitemap file containing links" "website")
+
+
+  # Get information related to scan type as well as the URL for URL validation
+  select opt in "${options[@]}"
+  do
+      case $opt in
         "sitemap file containing links")
-
             scanType="sitemap"
             crawler=crawlSitemap
             prompt_message="Please enter URL to sitemap: "
             break;;
 
         "website")
-
             prompt_website
             break;;
 
@@ -46,11 +61,12 @@ do
 
     esac
 
-done
+  done
 
-# Prompt for URL (Common across all scan types)
-read -p "$prompt_message" page
+  # Prompt for URL (Common across all scan types)
+  read -p "$prompt_message" page
 
+fi
 
 # URL validation
 while [ "$_valid_url" != 0 ]
