@@ -15,9 +15,9 @@ exports.combineRun = async details => {
     envDetails = {
       type: process.env.TYPE,
       url: process.env.URL,
-
       randomToken: process.env.RANDOMTOKEN,
     };
+
   }
 
   const { type, url, randomToken } = envDetails;
@@ -29,6 +29,8 @@ exports.combineRun = async details => {
     crawlType: type,
     requestUrl: url,
   };
+
+  global.domainURL = scanDetails.requestUrl;
 
   let urlsCrawled;
 
@@ -44,6 +46,7 @@ exports.combineRun = async details => {
     default:
       break;
   }
+
   scanDetails.endTime = new Date().getTime();
   scanDetails.urlsCrawled = urlsCrawled;
   await createAndUpdateFolders(scanDetails, randomToken);

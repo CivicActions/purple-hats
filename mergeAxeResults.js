@@ -44,12 +44,12 @@ const writeResults = async (allissues, storagePath) => {
 };
 
 const writeHTML = async (allissues, storagePath) => {
+
   const finalResultsInJson = JSON.stringify(
-    { startTime: getCurrentTime(), count: allissues.length, allissues },
+    { startTime: getCurrentTime(), count: allissues.length, allissues, domain: domainURL },
     null,
     4,
   );
-
   const musTemp = await fs
     .readFile(path.join(__dirname, '/static/report.mustache'))
     .catch(templateError => console.log('Error fetching template', templateError));
