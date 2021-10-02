@@ -121,36 +121,7 @@ Under this feature, it will also take into consideration of the presence of a lo
 **Required inputs**
 - A website URL
 
-**Sample Output - Public Domain without Login Page**
-```console
-user@user-MacBook-Pro  Desktop % cd purple-hats
-user@user-MacBook-Pro purple-hats % bash run.sh
-Welcome to HAT's Accessibility Testing Tool!
-We recommend using Chrome browser for the best experience.
-
-What would you like to scan today?
-1) sitemap.xml file containing links
-2) public domain URL
-#? 2
-Please enter domain URL: https://webscraper.io/test-sites/e-commerce/allinone
-Do you need to login to your domain? Y/N: N
-Scanning website...
-
-#The crawler will then start scraping from the file link provided above.
-#Console results
-
-user@user-MacBook-Pro purple-hats %
-```
-
-### 3. Crawling login page
-The crawler will automated the login and recursively visit the links to generate the results from **all the pages found from the input domain**.
-
-**Required inputs**
-- A website URL
-- User's login credential
-- Selectors of the username field, password field and submit button field
-
-**Sample Output - Public Domain with Login Page**
+**Sample Output**
 ```console
 user@user-MacBook-Pro  Desktop % cd purple-hats
 user@user-MacBook-Pro purple-hats %  bash run.shwebsite https://example.com/
