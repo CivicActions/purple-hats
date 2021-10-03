@@ -6,6 +6,14 @@ const axeIssuesList = require('./constants/axeTypes.json');
 const wcagList = require('./constants/wcagLinks.json');
 const { allIssueFileName, impactOrder, maxHTMLdisplay } = require('./constants/constants');
 const { getCurrentTime, getStoragePath } = require('./utils');
+global.wcagCounts = [];
+global.wcagIDsum = [];
+global.orderCount = [];
+global.id = 0;
+global.criticalCount = 0;
+global.seriousCount = 0;
+global.moderateCount = 0;
+global.minorCount = 0;
 
 const extractFileNames = async directory => {
   const allFiles = await fs
@@ -44,8 +52,14 @@ const writeResults = async (allissues, storagePath) => {
    delete shortAllIssuesJSON[i].disabilityIcons;
   }
 
+  /* Store the information about issue order totals (critical, serious, ...) */
+  orderCount = [criticalCount, seriousCount, moderateCount, minorCount];
+
+  /* Count the instances of each WCAG error in wcagIDsum and express that in wcagCounts which gets stored  */
+  wcagIDsum.forEach(function (x) { wcagCounts[x] = (wcagCounts[x] || 0) + 1; });
+
   const finalResultsInJson = JSON.stringify(
-    { startTime: getCurrentTime(), count: allissues.length, domain: domainURL, countURLsCrawled, totalTime, shortAllIssuesJSON },
+    { startTime: getCurrentTime(), count: allissues.length, domain: domainURL, countURLsCrawled, totalTime, orderCount, wcagCounts, shortAllIssuesJSON },
     null,
     4,
   );
@@ -63,39 +77,16 @@ const writeHTML = async (allissues, storagePath) => {
   });
 
   /* Replace array of disabilities for string of disabilities for HTML */
-  /* NOTE THIS SHOULD NOT CHANGE IN THE COMPILED JSON FILE BUT DOES! */
-
   for (let i in allissues) {
     allissues[i].disabilities = allissues[i].disabilities.toString().replace(/,/g, ' ').toLowerCase();
   }
 
-  /* Count impactOrder, url  */
-  let wcagIDsum = [];
-  const wcagCounts = {};
-  let wcagIDvar = '';
-  let criticalCount = seriousCount = moderateCount = minorCount = order = 0;
-  for (var i in allissues) {
-    order = allissues[i].order;
-    if (order == 3) { ++criticalCount;  }
-    else if (order == 2) { ++seriousCount; }
-    else if (order == 1) { ++moderateCount; }
-    else if (order == 0) { ++minorCount; }
-    else { }
-    allissues[i].id = i;
-    if (allissues[i].wcagID) {
-      wcagIDvar = allissues[i].wcagID;
-      wcagIDsum.push(wcagIDvar);
-    }
-  }
-  i++;
-
-  wcagIDsum.forEach(function (x) { wcagCounts[x] = (wcagCounts[x] || 0) + 1; });
-  /* This should be able to get into Mustache {{wcagCounts}} {{{.}}} {{/wcagCounts}} */
+  /* Mustache needs to somehow spit out wcagCounts info maybe in - {{wcagCounts}} {{{.}}} {{/wcagCounts}} */
 
   if (allissues.length > maxHTMLdisplay) allissues.length = maxHTMLdisplay;
 
   const finalResultsInJson = JSON.stringify(
-    { startTime: getCurrentTime(), count: i, htmlCount: allissues.length, domain: domainURL, countURLsCrawled, totalTime, criticalCount, seriousCount, moderateCount, minorCount, wcagCounts, allissues },
+    { startTime: getCurrentTime(), count: id, htmlCount: allissues.length, domain: domainURL, countURLsCrawled, totalTime, criticalCount, seriousCount, moderateCount, minorCount, wcagCounts, allissues },
     null,
     4,
   );
@@ -106,25 +97,39 @@ const writeHTML = async (allissues, storagePath) => {
   await fs.writeFile(`${storagePath}/reports/report.html`, output);
 };
 
+
 const flattenAxeResults = async rPath => {
   const parsedContent = await parseContentToJson(rPath);
-
   const flattenedIssues = [];
-  var id = 1;
   const { url, page, errors } = parsedContent;
   errors.forEach(error => {
     error.fixes.forEach(item => {
       const { id: errorId, impact, description, helpUrl } = error;
       const { disabilityIcons, disabilities, wcag } = axeIssuesList.find(obj => obj.id === errorId) || {};
 
+      ++id;
+
+      /* Get string from wcagID */
       var wcagID = '';
       wcagID = JSON.parse(JSON.stringify(wcag)).toString();
 
+      /* Get links to WCAG */
       const wcagLinks = wcag
-        ? wcag.map(element => wcagList.find(obj => obj.wcag === element) || { wcag: element })
-        : null;
-      ++id;
+        ? wcag.map(element => wcagList.find(obj => obj.wcag === element) || { wcag: element }) : null;
 
+      /* Count impactOrder, url  */
+      if (impactOrder[impact] == 3) { ++criticalCount; }
+      else if (impactOrder[impact] == 2) { ++seriousCount; }
+      else if (impactOrder[impact] == 1) { ++moderateCount; }
+      else if (impactOrder[impact] == 0) { ++minorCount; }
+      else { console.log(impactOrder[impact]) }
+
+      /* Count number of WCAG issues */
+      if (wcagID.length > 0 ) {
+        wcagCounts.push(wcagID);
+      }
+
+      /* Build array with all of the issues */
       flattenedIssues.push({
         id,
         url,
@@ -139,6 +144,7 @@ const flattenAxeResults = async rPath => {
         disabilities,
         disabilityIcons,
       });
+
     });
   });
 
@@ -167,6 +173,7 @@ exports.mergeFiles = async randomToken => {
     }),
   ).catch(flattenIssuesError => console.log('Error flattening all issues', flattenIssuesError));
 
+  /* Write the JSON then the HTML - Order Matters */
   await writeResults(allIssues, storagePath);
   await writeHTML(allIssues, storagePath);
 };

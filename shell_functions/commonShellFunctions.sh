@@ -17,8 +17,8 @@ check_installer_status(){
 
     if ! [ -d "a11y/bin" ]; then
         echo "Please run the installer script (mac-installer.sh / linux-installer.sh) to install the necessary components. For a mac it would be: "
-        echo "      chmod +x ./installers/mac-installer.sh"
-        echo "      .installers/mac-installer.sh"
+        echo "      cd installers | chmod +x ./mac-installer.sh"
+        echo "      .mac-installer.sh | cd .."
         exit 0
     fi
 
