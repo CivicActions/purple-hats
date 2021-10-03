@@ -3,8 +3,9 @@ node_modules
 venv
 .a11y_storage
 a11y
-results/
-logs/
+results
+logs
+wappalyzer
 errors.txt
 apify_storage
 .DS_Store
