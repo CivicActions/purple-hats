@@ -16,11 +16,12 @@ exports.combineRun = async details => {
       type: process.env.TYPE,
       url: process.env.URL,
       randomToken: process.env.RANDOMTOKEN,
+      wappalyzer: process.env.WAPPALYZER,
     };
 
   }
 
-  const { type, url, randomToken } = envDetails;
+  const { type, url, randomToken, wappalyzer } = envDetails;
 
   const host = getHostnameFromRegex(url);
 
@@ -32,6 +33,7 @@ exports.combineRun = async details => {
 
   global.domainURL = scanDetails.requestUrl;
   global.startTime = scanDetails.startTime;
+  global.wappalyzer_json = wappalyzer;
 
   let urlsCrawled;
 

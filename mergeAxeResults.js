@@ -60,8 +60,23 @@ const writeResults = async (allissues, storagePath) => {
   /* Count the instances of each WCAG error in wcagIDsum and express that in wcagCounts which gets stored  */
   wcagIDsum.forEach(function (x) { wcagCounts[x] = (wcagCounts[x] || 0) + 1; });
 
+    /* add information about environment if possible. */
+    if (wappalyzer_json != null) {
+      var wappalyzer_array = JSON.parse(wappalyzer_json);
+      let x = 0
+      var wappalyzer_short = []
+      while (x < wappalyzer_array['technologies'].length) {
+        if (wappalyzer_array['technologies'][x].version == null) {
+          wappalyzer_short.push(wappalyzer_array['technologies'][x].name)
+        } else {
+          wappalyzer_short.push(wappalyzer_array['technologies'][x].name + " (" + wappalyzer_array['technologies'][x].version + ")")
+        }
+        x++
+      }
+    }
+
   const finalResultsInJson = JSON.stringify(
-    { startTime: getCurrentTime(), count: allissues.length, domain: domainURL, countURLsCrawled, totalTime, orderCount, wcagCounts, shortAllIssuesJSON },
+    { startTime: getCurrentTime(), count: allissues.length, domain: domainURL, countURLsCrawled, totalTime, orderCount, wcagCounts, wappalyzer_short, shortAllIssuesJSON },
     null,
     4,
   );
@@ -84,6 +99,7 @@ const writeHTML = async (allissues, storagePath) => {
   }
 
   /* Grading evaluations - */
+  if (countURLsCrawled > 2) {
   var grade = message = "";
   var score = (minorCount + (moderateCount * 1.5) + (seriousCount * 2) + (criticalCount * 3)) / (countURLsCrawled * 5);
   switch (true) {
@@ -147,13 +163,36 @@ const writeHTML = async (allissues, storagePath) => {
         grade = "F-";
         message = "More work to eliminate automated testing errors. Don't forget manual testing."
   }
+  } else {
+    grade = "?";
+    message = "Not enough URLs to evaluate grade. Perpahs there was an error in the scan.";
+  }
 
   /* Mustache needs to somehow spit out wcagCounts info maybe in - {{wcagCounts}} {{{.}}} {{/wcagCounts}} */
 
   if (allissues.length > maxHTMLdisplay) allissues.length = maxHTMLdisplay;
 
+    /* add information about environment if possible. */
+    if (wappalyzer_json != null) {
+      var wappalyzer_array = JSON.parse(wappalyzer_json);
+      let x = 0
+      var wappalyzer_string = "Built with: "
+      while (x < wappalyzer_array['technologies'].length) {
+        if(wappalyzer_string != "Built with: ") {
+          wappalyzer_string += ", "
+        }
+
+        if (wappalyzer_array['technologies'][x].version == null) {
+          wappalyzer_string += wappalyzer_array['technologies'][x].name
+        } else {
+          wappalyzer_string += wappalyzer_array['technologies'][x].name + " (" + wappalyzer_array['technologies'][x].version + ")"
+        }
+        x++
+      }
+    }
+
   const finalResultsInJson = JSON.stringify(
-    { startTime: getCurrentTime(), count: id, htmlCount: allissues.length, domain: domainURL, countURLsCrawled, totalTime, criticalCount, seriousCount, moderateCount, minorCount, wcagCounts, grade, message, allissues },
+    { startTime: getCurrentTime(), count: id, htmlCount: allissues.length, domain: domainURL, countURLsCrawled, totalTime, criticalCount, seriousCount, moderateCount, minorCount, wcagCounts, grade, message, wappalyzer_string, allissues },
     null,
     4,
   );

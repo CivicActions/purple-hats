@@ -35,6 +35,7 @@
                 <h1>Accessibility Report: {{ domain }} </h1>
                 <p class="mb-0"><em>An website crawl using Deque's Axe (v4.3.3) against WCAG 2.1 standards. </em></p><br>
                 <p>Run on {{ startTime }}<br>
+                {{ wappalyzer_string }}<br>
                 <strong>Top {{ htmlCount }} barriers in {{ countURLsCrawled }} pages ({{ totalTime }})</strong><br>
                 <strong>Total Errors: {{ count }} </strong><br>
                 Critical: {{ criticalCount }}, Serious: {{ seriousCount }}, Moderate: {{ moderateCount }}, Minor:  {{ minorCount }}

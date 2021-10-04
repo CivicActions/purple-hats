@@ -97,10 +97,22 @@ currentDate=$(date '+%Y-%-m-%-d')
 
 echo "Scanning website..."
 
-URL="$page" LOGINID="$login_id" LOGINPWD="$login_pwd" IDSEL="$id_selector" PWDSEL="$pwd_selector" SUBMIT="$btn_selector" RANDOMTOKEN="$randomToken" TYPE="$crawler" node -e 'require("./combine").combineRun()' | tee errors.txt
+# optional ability to gather information about the frameworks involved
+if [[ -f "wappalyzer/src/drivers/npm/cli.js" ]]; then
+  cd wappalyzer
+  # wappalyzer = $(node "src/drivers/npm/cli.js" "$page" | tee errors.txt)
+  wappalyzer=$( node "src/drivers/npm/cli.js" "$page")
+  cd ..
+fi
+
+URL="$page" LOGINID="$login_id" LOGINPWD="$login_pwd" IDSEL="$id_selector" PWDSEL="$pwd_selector" SUBMIT="$btn_selector" RANDOMTOKEN="$randomToken" TYPE="$crawler" WAPPALYZER="$wappalyzer" node -e 'require("./combine").combineRun()' | tee errors.txt
 
 # Verify that the newly generated directory exists
 if [ -d "results/$currentDate/$randomToken" ]; then
+  domain=$(echo "$page" | awk -F/ '{print $3}')
+  ln -sfn "results/$currentDate/$randomToken" "results/$currentDate/$domain"
+  ln -sfn "results/$currentDate/$randomToken" "results/$domain"
+  ln -sfn "results/$currentDate/$randomToken" "last-test"
 
   # Test for the command before attempting to open the report
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then

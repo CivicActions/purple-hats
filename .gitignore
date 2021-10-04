@@ -8,4 +8,5 @@ logs
 wappalyzer
 errors.txt
 apify_storage
+last-test
 .DS_Store
