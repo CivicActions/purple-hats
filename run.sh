@@ -89,8 +89,6 @@ do
 
 done
 
-
-
 # Run the crawler
 randomToken=$(date +%s)$(openssl rand -hex 5)
 currentDate=$(date '+%Y-%-m-%-d')
@@ -113,6 +111,12 @@ if [ -d "results/$currentDate/$randomToken" ]; then
   ln -sfn "results/$currentDate/$randomToken" "results/$currentDate/$domain"
   ln -sfn "results/$currentDate/$randomToken" "results/$domain"
   ln -sfn "results/$currentDate/$randomToken" "last-test"
+
+  if ( `wkhtmltopdf` == "" ) then
+    echo "If you want a PDF export, then install wkhtmltopdf, i.e. brew install wkhtmltopdf";
+  else
+    wkhtmltopdf --enable-javascript --javascript-delay 10000 --print-media-type last-test/reports/report.html last-test/reports/report.pdf
+  fi
 
   # Test for the command before attempting to open the report
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then

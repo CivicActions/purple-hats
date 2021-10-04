@@ -95,7 +95,11 @@ const writeHTML = async (allissues, storagePath) => {
 
   /* Replace array of disabilities for string of disabilities for HTML */
   for (let i in allissues) {
-    allissues[i].disabilities = allissues[i].disabilities.toString().replace(/,/g, ' ').toLowerCase();
+    if(allissues[i].disabilities != undefined) {
+      allissues[i].disabilities = allissues[i].disabilities.toString().replace(/,/g, ' ').toLowerCase();
+    } else {
+      allissues[i].disabilities = "";
+    }
   }
 
   /* Grading evaluations - */
@@ -217,7 +221,12 @@ const flattenAxeResults = async rPath => {
 
       /* Get string from wcagID */
       var wcagID = '';
-      wcagID = JSON.parse(JSON.stringify(wcag)).toString();
+      try {
+        JSON.parse(JSON.stringify(wcag).toString());
+        wcagID = JSON.parse(JSON.stringify(wcag)).toString();
+      } catch (e) {
+        console.log("WCAG ID JSON Issue " + id + " " + wcagID + " " + page);
+      }
 
       /* Get links to WCAG */
       const wcagLinks = wcag
