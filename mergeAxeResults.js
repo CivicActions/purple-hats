@@ -213,6 +213,19 @@ const flattenAxeResults = async rPath => {
   const flattenedIssues = [];
   const { url, page, errors } = parsedContent;
   errors.forEach(error => {
+
+    /* pull out file extension from path */
+    var fileExtension = '';
+    if (page.includes(".") && !page.includes("@")) {
+       fileExtension = page.split('.').pop();
+       /* Try to cancel out the weird ones - see https://dsps.wi.gov */
+       if ( fileExtension > 5 ) {
+         fileExtension = '';
+       } else {
+       }
+
+    }
+
     error.fixes.forEach(item => {
       const { id: errorId, impact, description, helpUrl } = error;
       const { disabilityIcons, disabilities, wcag } = axeIssuesList.find(obj => obj.id === errorId) || {};
@@ -249,6 +262,7 @@ const flattenAxeResults = async rPath => {
         id,
         url,
         page,
+        fileExtension,
         description,
         impact,
         helpUrl,

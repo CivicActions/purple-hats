@@ -1,7 +1,7 @@
 // for crawlers
 exports.axeScript = 'node_modules/axe-core/axe.min.js';
 
-exports.maxRequestsPerCrawl = 100;
+exports.maxRequestsPerCrawl = 1000;
 
 exports.maxHTMLdisplay = 250;
 

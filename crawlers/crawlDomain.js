@@ -18,7 +18,7 @@ exports.crawlDomain = async (url, randomToken, host) => {
   const { dataset, requestQueue } = await createApifySubFolders(randomToken);
 
   await requestQueue.addRequest({ url });
-
+  var i = 0;
   const crawler = new Apify.PuppeteerCrawler({
     requestQueue,
     gotoFunction,
@@ -29,7 +29,8 @@ exports.crawlDomain = async (url, randomToken, host) => {
         const results = await runAxeScript(page, host);
         await dataset.pushData(results);
         urlsCrawled.scanned.push(currentUrl);
-        console.log(currentUrl);
+        ++i
+        console.log(i + " " + currentUrl);
         await Apify.utils.enqueueLinks({
           page,
           selector: 'a',

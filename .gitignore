@@ -10,3 +10,4 @@ errors.txt
 apify_storage
 last-test
 .DS_Store
+cron_scripts.sh

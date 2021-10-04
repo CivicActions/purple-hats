@@ -112,12 +112,6 @@ if [ -d "results/$currentDate/$randomToken" ]; then
   ln -sfn "results/$currentDate/$randomToken" "results/$domain"
   ln -sfn "results/$currentDate/$randomToken" "last-test"
 
-  if ( `wkhtmltopdf` == "" ) then
-    echo "If you want a PDF export, then install wkhtmltopdf, i.e. brew install wkhtmltopdf";
-  else
-    wkhtmltopdf --enable-javascript --javascript-delay 10000 --print-media-type last-test/reports/report.html last-test/reports/report.pdf
-  fi
-
   # Test for the command before attempting to open the report
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     firefox "results/$currentDate/$randomToken/reports/report.html"
@@ -128,6 +122,15 @@ if [ -d "results/$currentDate/$randomToken" ]; then
     current_dir=$(pwd)
     reportPath="$current_dir/results/$currentDate/$randomToken/reports/report.html"
     echo "You can find the report in $reportPath"
+  fi
+
+  # Provide PDF version if available
+  if command -v wkhtmltopdf &> /dev/null
+  then
+    # I should be able to use --print-media-type
+    wkhtmltopdf -q --enable-javascript --javascript-delay 1000 last-test/reports/report.html last-test/reports/report.pdf
+  else
+    echo "If you want a PDF export, then install wkhtmltopdf, i.e. brew install wkhtmltopdf";
   fi
 
 else
