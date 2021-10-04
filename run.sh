@@ -102,18 +102,18 @@ URL="$page" LOGINID="$login_id" LOGINPWD="$login_pwd" IDSEL="$id_selector" PWDSE
 # Verify that the newly generated directory exists
 if [ -d "results/$currentDate/$randomToken" ]; then
 
-    # Test for the command before attempting to open the report
-    if [ -n "command -v open" ]; then
-        open "results/$currentDate/$randomToken/reports/report.html"
-    elif [ -n "command -v xdg-open" ]; then
-        # Linux equivalent of open
-        xdg-open "results/$currentDate/$randomToken/reports/report.html"
-    else
-        echo "The scan has been completed."
-        current_dir=$(pwd)
-        reportPath="$current_dir/results/$currentDate/$randomToken/reports/report.html"
-        echo "You can find the report in $reportPath"
-    fi
+  # Test for the command before attempting to open the report
+  if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    firefox "results/$currentDate/$randomToken/reports/report.html"
+  elif [[ "$OSTYPE" == "darwin"* ]]; then
+    open "results/$currentDate/$randomToken/reports/report.html"
+  else
+    echo "The scan has been completed."
+    current_dir=$(pwd)
+    reportPath="$current_dir/results/$currentDate/$randomToken/reports/report.html"
+    echo "You can find the report in $reportPath"
+  fi
+
 else
     echo "WARNING: An unexpected error has occurred. Please try again later."
 fi
