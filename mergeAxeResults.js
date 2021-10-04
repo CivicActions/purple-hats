@@ -6,6 +6,8 @@ const axeIssuesList = require('./constants/axeTypes.json');
 const wcagList = require('./constants/wcagLinks.json');
 const { allIssueFileName, impactOrder, maxHTMLdisplay } = require('./constants/constants');
 const { getCurrentTime, getStoragePath } = require('./utils');
+
+/* There's likely a good reason not to do this */
 global.wcagCounts = [];
 global.wcagIDsum = [];
 global.orderCount = [];
@@ -81,12 +83,77 @@ const writeHTML = async (allissues, storagePath) => {
     allissues[i].disabilities = allissues[i].disabilities.toString().replace(/,/g, ' ').toLowerCase();
   }
 
+  /* Grading evaluations - */
+  var grade = message = "";
+  var score = (minorCount + (moderateCount * 1.5) + (seriousCount * 2) + (criticalCount * 3)) / (countURLsCrawled * 5);
+  switch (true) {
+    case score == 0:
+        grade = "A+";
+        message = "No axe errors, great! Don't forget manual testing."
+        break;
+    case score <= 0.1:
+        grade = "A";
+        message = "Very few axe errors left! Don't forget manual testing."
+        break;
+    case score <= 0.2:
+        grade = "A-";
+        message = "So close to getting the automated errors! Don't forget manual testing."
+        break;
+    case score <= 0.3:
+        grade = "B+";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+    case score <= 0.4:
+        grade = "B";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+    case score <= 0.5:
+        grade = "B-";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+    case score <= 1:
+        grade = "C+";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+    case score <= 2:
+        grade = "C";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+    case score <= 3:
+        grade = "C-";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+    case score <= 4:
+        grade = "D+";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+    case score <= 5:
+         grade = "D";
+         message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+    case score <= 10:
+        grade = "D-";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+    case score <= 15:
+        grade = "F+";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+    case score <= 20:
+        grade = "F";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+    default:
+        grade = "F-";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+  }
+
   /* Mustache needs to somehow spit out wcagCounts info maybe in - {{wcagCounts}} {{{.}}} {{/wcagCounts}} */
 
   if (allissues.length > maxHTMLdisplay) allissues.length = maxHTMLdisplay;
 
   const finalResultsInJson = JSON.stringify(
-    { startTime: getCurrentTime(), count: id, htmlCount: allissues.length, domain: domainURL, countURLsCrawled, totalTime, criticalCount, seriousCount, moderateCount, minorCount, wcagCounts, allissues },
+    { startTime: getCurrentTime(), count: id, htmlCount: allissues.length, domain: domainURL, countURLsCrawled, totalTime, criticalCount, seriousCount, moderateCount, minorCount, wcagCounts, grade, message, allissues },
     null,
     4,
   );
