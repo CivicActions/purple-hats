@@ -116,7 +116,7 @@ if [ -d "results/$currentDate/$randomToken" ]; then
 
   # Test for the command before attempting to open the report
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    firefox "results/$currentDate/$randomToken/reports/report.html &"
+    firefox -url "results/$currentDate/$randomToken/reports/report.html &" 
   elif [[ "$OSTYPE" == "darwin"* ]]; then
     open "results/$currentDate/$randomToken/reports/report.html &"
   else
