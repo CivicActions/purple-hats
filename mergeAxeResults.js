@@ -183,7 +183,7 @@ const writeHTML = async (allissues, storagePath) => {
     default:
         grade = "F-";
         message = "More work to eliminate automated testing errors. Don't forget manual testing."
-  }
+    }
   } else {
     grade = "?";
     message = "Not enough URLs to evaluate grade. Perpahs there was an error in the scan.";
