@@ -259,48 +259,51 @@ const flattenAxeResults = async rPath => {
 
       ++id;
 
-      /* Get string from wcagID */
-      var wcagID = '';
-      try {
-        JSON.parse(JSON.stringify(wcag).toString());
-        wcagID = JSON.parse(JSON.stringify(wcag)).toString();
-      } catch (e) {
-        console.log("WCAG ID JSON Issue " + id + " " + wcagID + " " + page);
+      // If an array needs to be excluded, skip to the next one.
+      if (!excludeExtArr.includes(fileExtension)) {
+
+        /* Get string from wcagID */
+        var wcagID = '';
+        try {
+          JSON.parse(JSON.stringify(wcag).toString());
+          wcagID = JSON.parse(JSON.stringify(wcag)).toString();
+        } catch (e) {
+          console.log("WCAG ID JSON Issue " + id + " " + wcagID + " " + page);
+        }
+
+        /* Get links to WCAG */
+        const wcagLinks = wcag
+          ? wcag.map(element => wcagList.find(obj => obj.wcag === element) || { wcag: element }) : null;
+
+        /* Count impactOrder, url  */
+        if (impactOrder[impact] == 3) { ++criticalCount; }
+        else if (impactOrder[impact] == 2) { ++seriousCount; }
+        else if (impactOrder[impact] == 1) { ++moderateCount; }
+        else if (impactOrder[impact] == 0) { ++minorCount; }
+        else { console.log(impactOrder[impact]) }
+
+        /* Count number of WCAG issues */
+        if (wcagID.length > 0 ) {
+          wcagCounts.push(wcagID);
+        }
+
+        /* Build array with all of the issues */
+        flattenedIssues.push({
+          id,
+          url,
+          page,
+          fileExtension,
+          description,
+          impact,
+          helpUrl,
+          htmlElement: item.htmlElement,
+          order: impactOrder[impact],
+          wcagID,
+          wcagLinks,
+          disabilities,
+          disabilityIcons,
+        });
       }
-
-      /* Get links to WCAG */
-      const wcagLinks = wcag
-        ? wcag.map(element => wcagList.find(obj => obj.wcag === element) || { wcag: element }) : null;
-
-      /* Count impactOrder, url  */
-      if (impactOrder[impact] == 3) { ++criticalCount; }
-      else if (impactOrder[impact] == 2) { ++seriousCount; }
-      else if (impactOrder[impact] == 1) { ++moderateCount; }
-      else if (impactOrder[impact] == 0) { ++minorCount; }
-      else { console.log(impactOrder[impact]) }
-
-      /* Count number of WCAG issues */
-      if (wcagID.length > 0 ) {
-        wcagCounts.push(wcagID);
-      }
-
-      /* Build array with all of the issues */
-      flattenedIssues.push({
-        id,
-        url,
-        page,
-        fileExtension,
-        description,
-        impact,
-        helpUrl,
-        htmlElement: item.htmlElement,
-        order: impactOrder[impact],
-        wcagID,
-        wcagLinks,
-        disabilities,
-        disabilityIcons,
-      });
-
     });
   });
 

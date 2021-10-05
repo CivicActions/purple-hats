@@ -15,18 +15,70 @@ clean_up
 #0 == SUCCESS, 1 == FAIL
 _valid_url=1
 
-echo "Welcome to HATS Accessibility Testing Tool!"
+echo "Welcome to CivicActions' Purple Hats Accessibility Testing Tool!"
 
-# Allow website / sitemap to be entered at command prompt
-if [ ! -z "$1" ] && [ ! -z "$2" ]; then
-  if [ $1 = "sitemap" ] ; then
+DOMAINNAME=""                             # https://www.example.com
+SCANTYPE=""                               # domain or sitemap
+EMAIL=""                                  # Send HTML email to on completion
+EXCLUDEEXT=""                             # Exclude extensions
+NUMBER=2000               # NOT WORKING WITH Apify - Maximum number of pages to crawl
+
+# usage() {                                 # Function: Print a help message.
+#  echo "Usage: $0 [ -d DOMAINNAME ] [ -s SCANTYPE ] [ -e EMAIL ]  [ -x EXCLUDEEXT ]  [ -n NUMBER ]" 1>&2
+# }
+#exit_abnormal() {                         # Function: Exit with error.
+#  usage
+#  exit 1
+#}
+while getopts ":d:s:e:x:n:" options; do         # Loop: Get the next option;
+                                          # use silent error checking;
+                                          # options n and t take arguments.
+  case "${options}" in                    #
+    d)                                    # If the option is d,
+      DOMAINNAME=${OPTARG}                      # set $DOMAINNAME to specified value.
+      ;;
+    s)
+      SCANTYPE=${OPTARG}                      # set $SCANTYPE to specified value.
+      ;;
+    e)
+      EMAIL=${OPTARG}                      # set $EMAIL to specified value.
+      ;;
+    x)
+      EXCLUDEEXT=${OPTARG}                      # set $EXCLUDEEXT to specified value.
+      ;;
+    n)                                    # If the option is n,
+      NUMBER=${OPTARG}                     # Set $NUMBER to specified value.
+      re_isanum='^[0-9]+$'                # Regex: match whole numbers only
+      if ! [[ $NUMBER =~ $re_isanum ]] ; then   # if $TIMES not whole:
+        echo "Error: NUMBER must be a positive, whole number."
+        exit_abnormal
+        exit 1
+      elif [ $NUMBER -eq "0" ]; then       # If it's zero:
+        echo "Error: NUMBER must be greater than zero."
+ #       exit_abnormal                     # Exit abnormally.
+      fi
+      ;;
+    :)                                    # If expected argument omitted:
+      echo "Error: -${OPTARG} requires an argument."
+#      exit_abnormal                       # Exit abnormally.
+      ;;
+    *)                                    # If unknown (any other) option:
+ #     exit_abnormal                       # Exit abnormally.
+      ;;
+  esac
+done
+
+if [ -n "$DOMAINNAME" ] ; then
+
+  page=$DOMAINNAME
+
+  if [ $SCANTYPE = "sitemap" ] ; then
     scanType="sitemap"
-    crawler=crawlSitemap
-  elif [ $1 = "website" ] ; then
+    crawler="crawlSitemap"
+  else
     scanType="website"
-    crawler=crawlDomain
+    crawler="crawlDomain"
   fi
-  page=$2
 
 # Without variables provide prompt message
 else
@@ -103,7 +155,7 @@ if [[ -f "wappalyzer/src/drivers/npm/cli.js" ]]; then
   cd ..
 fi
 
-URL="$page" LOGINID="$login_id" LOGINPWD="$login_pwd" IDSEL="$id_selector" PWDSEL="$pwd_selector" SUBMIT="$btn_selector" RANDOMTOKEN="$randomToken" TYPE="$crawler" WAPPALYZER="$wappalyzer" node -e 'require("./combine").combineRun()' | tee errors.txt
+URL="$page" LOGINID="$login_id" LOGINPWD="$login_pwd" IDSEL="$id_selector" PWDSEL="$pwd_selector" SUBMIT="$btn_selector" RANDOMTOKEN="$randomToken" TYPE="$crawler" WAPPALYZER="$wappalyzer" NUMBER="$NUMBER" EMAIL="$EMAIL" EXCLUDEEXT="$EXCLUDEEXT"  node -e 'require("./combine").combineRun()' | tee errors.txt
 
 # Verify that the newly generated directory exists
 if [ -d "results/$currentDate/$randomToken" ]; then
@@ -111,12 +163,12 @@ if [ -d "results/$currentDate/$randomToken" ]; then
   ln -sfn "results/$currentDate/$randomToken" "results/$currentDate/$domain"
   ln -sfn "results/$currentDate/$randomToken" "results/$domain"
   ln -sfn "results/$currentDate/$randomToken" "last-test"
-  tar -cjvf "results/$currentDate/$randomToken/all_issues.tar.bz2" "results/$currentDate/$randomToken/all_issues"
+  tar -cjvf "results/$currentDate/$randomToken/all_issues.tar.bz2" "results/$currentDate/$randomToken/all_issues" 2>/dev/null
   rm -fr "results/$currentDate/$randomToken/all_issues"
 
   # Test for the command before attempting to open the report
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    firefox -url "results/$currentDate/$randomToken/reports/report.html &" 
+    firefox -url "results/$currentDate/$randomToken/reports/report.html &"
   elif [[ "$OSTYPE" == "darwin"* ]]; then
     open "results/$currentDate/$randomToken/reports/report.html &"
   else
