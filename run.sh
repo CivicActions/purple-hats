@@ -111,12 +111,14 @@ if [ -d "results/$currentDate/$randomToken" ]; then
   ln -sfn "results/$currentDate/$randomToken" "results/$currentDate/$domain"
   ln -sfn "results/$currentDate/$randomToken" "results/$domain"
   ln -sfn "results/$currentDate/$randomToken" "last-test"
+  tar -cjvf "results/$currentDate/$randomToken/all_issues.tar.bz2" "results/$currentDate/$randomToken/all_issues"
+  rm -fr "results/$currentDate/$randomToken/all_issues"
 
   # Test for the command before attempting to open the report
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    firefox "results/$currentDate/$randomToken/reports/report.html"
+    firefox "results/$currentDate/$randomToken/reports/report.html &"
   elif [[ "$OSTYPE" == "darwin"* ]]; then
-    open "results/$currentDate/$randomToken/reports/report.html"
+    open "results/$currentDate/$randomToken/reports/report.html &"
   else
     echo "The scan has been completed."
     current_dir=$(pwd)

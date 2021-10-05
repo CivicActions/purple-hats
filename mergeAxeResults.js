@@ -200,7 +200,6 @@ const writeHTML = async (allissues, storagePath) => {
         console.log(wappalyzer_json);
       }
 
-
       let x = 0
       var wappalyzer_string = "Built with: "
       while (x < wappalyzer_array['technologies'].length) {
