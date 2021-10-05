@@ -22,6 +22,7 @@ SCANTYPE=""                               # domain or sitemap
 EMAIL=""                                  # Send HTML email to on completion
 EXCLUDEEXT=""                             # Exclude extensions
 NUMBER=2000               # NOT WORKING WITH Apify - Maximum number of pages to crawl
+WAPPALYZER=0                              # Set to 1 to enable wappalyzer
 
 # usage() {                                 # Function: Print a help message.
 #  echo "Usage: $0 [ -d DOMAINNAME ] [ -s SCANTYPE ] [ -e EMAIL ]  [ -x EXCLUDEEXT ]  [ -n NUMBER ]" 1>&2
@@ -45,6 +46,9 @@ while getopts ":d:s:e:x:n:" options; do         # Loop: Get the next option;
       ;;
     x)
       EXCLUDEEXT=${OPTARG}                      # set $EXCLUDEEXT to specified value.
+      ;;
+    w)
+      WAPPALYZER=${OPTARG}                      # Enable wappalyzer
       ;;
     n)                                    # If the option is n,
       NUMBER=${OPTARG}                     # Set $NUMBER to specified value.
@@ -148,7 +152,7 @@ currentDate=$(date '+%Y-%-m-%-d')
 echo "Scanning website..."
 
 # optional ability to gather information about the frameworks involved
-if [[ -f "wappalyzer/src/drivers/npm/cli.js" ]]; then
+if [ $WAPPALYZER ] && [ -f "wappalyzer/src/drivers/npm/cli.js" ]; then
   cd wappalyzer
   # wappalyzer = $(node "src/drivers/npm/cli.js" "$page" | tee errors.txt)
   wappalyzer=$( node "src/drivers/npm/cli.js" "$page")
@@ -182,7 +186,7 @@ if [ -d "results/$currentDate/$randomToken" ]; then
   if command -v wkhtmltopdf &> /dev/null
   then
     # I should be able to use --print-media-type
-    wkhtmltopdf -q --enable-javascript --javascript-delay 1000 last-test/reports/report.html last-test/reports/report.pdf
+    wkhtmltopdf -q --enable-javascript --javascript-delay 10000 last-test/reports/report.html last-test/reports/report.pdf
   else
     echo "If you want a PDF export, then install wkhtmltopdf, i.e. brew install wkhtmltopdf";
   fi

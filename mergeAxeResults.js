@@ -120,7 +120,7 @@ const writeHTML = async (allissues, storagePath) => {
   }
 
   /* Grading evaluations - */
-  if (countURLsCrawled > 2) {
+  if (countURLsCrawled > 25) {
   var grade = message = "";
   var score = (minorCount + (moderateCount * 1.5) + (seriousCount * 2) + (criticalCount * 3)) / (countURLsCrawled * 5);
   switch (true) {
@@ -245,12 +245,9 @@ const flattenAxeResults = async rPath => {
     var fileExtension = '';
     if (page.includes(".") && !page.includes("@")) {
        fileExtension = page.split('.').pop();
-       /* Try to cancel out the weird ones - see https://dsps.wi.gov */
-       if ( fileExtension > 5 ) {
-         fileExtension = '';
-       } else {
-       }
-
+       fileExtension = fileExtension.substring(0, fileExtension.indexOf('?'));
+       fileExtension = fileExtension.substring(0, fileExtension.indexOf('#'));
+       // fileExtension = limit(fileExtension, 6);
     }
 
     error.fixes.forEach(item => {
