@@ -67,7 +67,7 @@ const writeResults = async (allissues, storagePath) => {
   /* Count the instances of each WCAG error in wcagIDsum and express that in wcagCounts which gets stored  */
   wcagIDsum.forEach(function (x) { wcagCounts[x] = (wcagCounts[x] || 0) + 1; });
 
-    /* add information about environment if possible. */
+    /* add information about environment to array. */
     if (wappalyzer_json != null) {
       var wappalyzer_array = ''
       try {
@@ -78,14 +78,17 @@ const writeResults = async (allissues, storagePath) => {
       }
 
       let x = 0
-      var wappalyzer_short = []
-      while (x < wappalyzer_array['technologies'].length) {
-        if (wappalyzer_array['technologies'][x].version == null) {
-          wappalyzer_short.push(wappalyzer_array['technologies'][x].name)
-        } else {
-          wappalyzer_short.push(wappalyzer_array['technologies'][x].name + " (" + wappalyzer_array['technologies'][x].version + ")")
+      var wappalyzer_short = [];
+
+      if (wappalyzer_array['technologies']) {
+        while (x < wappalyzer_array['technologies'].length) {
+          if (wappalyzer_array['technologies'][x].version == null) {
+            wappalyzer_short.push(wappalyzer_array['technologies'][x].name)
+          } else {
+            wappalyzer_short.push(wappalyzer_array['technologies'][x].name + " (" + wappalyzer_array['technologies'][x].version + ")")
+          }
+          x++
         }
-        x++
       }
     }
 
@@ -201,18 +204,21 @@ const writeHTML = async (allissues, storagePath) => {
       }
 
       let x = 0
-      var wappalyzer_string = "Built with: "
-      while (x < wappalyzer_array['technologies'].length) {
-        if(wappalyzer_string != "Built with: ") {
-          wappalyzer_string += ", "
-        }
 
-        if (wappalyzer_array['technologies'][x].version == null) {
-          wappalyzer_string += wappalyzer_array['technologies'][x].name
-        } else {
-          wappalyzer_string += wappalyzer_array['technologies'][x].name + " (" + wappalyzer_array['technologies'][x].version + ")"
+      /* Define string of libraries used. */
+      if (wappalyzer_array['technologies']) {
+        var wappalyzer_string = "Built with: "
+        while (x < wappalyzer_array['technologies'].length) {
+          if(wappalyzer_string != "Built with: ") {
+            wappalyzer_string += ", "
+          }
+          if (wappalyzer_array['technologies'][x].version == null) {
+            wappalyzer_string += wappalyzer_array['technologies'][x].name
+          } else {
+            wappalyzer_string += wappalyzer_array['technologies'][x].name + " (" + wappalyzer_array['technologies'][x].version + ")"
+          }
+          x++
         }
-        x++
       }
     }
 
