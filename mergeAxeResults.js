@@ -47,7 +47,14 @@ const writeResults = async (allissues, storagePath) => {
 
   /* Copy without reference to allissues array */
   var shortAllIssuesJSON = []
-  shortAllIssuesJSON = JSON.parse(JSON.stringify(allissues));
+  try {
+    JSON.parse(JSON.stringify(allissues));
+    shortAllIssuesJSON = JSON.parse(JSON.stringify(allissues));
+  } catch (e) {
+    console.log(allissues);
+  }
+
+
 
   /* Delete SVG images in copy of allissues */
   for (let i in shortAllIssuesJSON) {
@@ -62,7 +69,14 @@ const writeResults = async (allissues, storagePath) => {
 
     /* add information about environment if possible. */
     if (wappalyzer_json != null) {
-      var wappalyzer_array = JSON.parse(wappalyzer_json);
+      var wappalyzer_array = ''
+      try {
+        JSON.parse(wappalyzer_json);
+        wappalyzer_array = JSON.parse(wappalyzer_json);
+      } catch (e) {
+        console.log(wappalyzer_json);
+      }
+
       let x = 0
       var wappalyzer_short = []
       while (x < wappalyzer_array['technologies'].length) {
@@ -178,7 +192,15 @@ const writeHTML = async (allissues, storagePath) => {
 
     /* add information about environment if possible. */
     if (wappalyzer_json != null) {
-      var wappalyzer_array = JSON.parse(wappalyzer_json);
+      var wappalyzer_array = ''
+      try {
+        JSON.parse(wappalyzer_json);
+        wappalyzer_array = JSON.parse(wappalyzer_json);
+      } catch (e) {
+        console.log(wappalyzer_json);
+      }
+
+
       let x = 0
       var wappalyzer_string = "Built with: "
       while (x < wappalyzer_array['technologies'].length) {
