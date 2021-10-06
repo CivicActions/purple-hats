@@ -6,11 +6,13 @@ exports.maxRequestsPerCrawl = 500;
 
 exports.maxHTMLdisplay = 250;
 
+exports.waitTime = 0;
+
 exports.maxConcurrency = 5;
 
 exports.pseudoUrls = host => [
   // eslint-disable-next-line no-useless-escape
-  `[.*(?<!mailto.*)]${host}[(?!.*\.(gif|jpg|jpeg|png|webp|avif|pdf|doc|docx|css|svg|js|ts|xml|csv|epub|tgz|zip|xls|xlsx|ppt|pptx|ico|woff)).*]`,
+  `[.*(?<!mailto.*)]${host}[(?!.*\.(gif|jpg|jpeg|png|webp|avif|pdf|epub|mobi|doc|docx|css|svg|js|ts|xml|csv|tgz|zip|xls|xlsx|ppt|pptx|ico|woff)).*]`,
 ];
 
 exports.urlsCrawledObj = {

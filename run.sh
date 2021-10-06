@@ -23,6 +23,7 @@ EMAIL=""                                  # Send HTML email to on completion
 EXCLUDEEXT=""                             # Exclude extensions
 NUMBER=2000               # NOT WORKING WITH Apify - Maximum number of pages to crawl
 WAPPALYZER=0                              # Set to 1 to enable wappalyzer
+OPENBROWSER=1                             # By default open a browser after the script is run
 
 # usage() {                                 # Function: Print a help message.
 #  echo "Usage: $0 [ -d DOMAINNAME ] [ -s SCANTYPE ] [ -e EMAIL ]  [ -x EXCLUDEEXT ]  [ -n NUMBER ]" 1>&2
@@ -31,7 +32,7 @@ WAPPALYZER=0                              # Set to 1 to enable wappalyzer
 #  usage
 #  exit 1
 #}
-while getopts ":d:s:e:x:n:" options; do         # Loop: Get the next option;
+while getopts ":d:s:t:e:o:x:w:n:" options; do         # Loop: Get the next option;
                                           # use silent error checking;
                                           # options n and t take arguments.
   case "${options}" in                    #
@@ -41,8 +42,14 @@ while getopts ":d:s:e:x:n:" options; do         # Loop: Get the next option;
     s)
       SCANTYPE=${OPTARG}                      # set $SCANTYPE to specified value.
       ;;
+    t)
+      TIME2WAIT=${OPTARG}                   # set $TIME2WAIT between crawls.
+      ;;
     e)
       EMAIL=${OPTARG}                      # set $EMAIL to specified value.
+      ;;
+    o)
+      OPENBROWSER=${OPTARG}                      # 0 will disable launching browser
       ;;
     x)
       EXCLUDEEXT=${OPTARG}                      # set $EXCLUDEEXT to specified value.
@@ -151,9 +158,10 @@ currentDate=$(date '+%Y-%-m-%-d')
 
 echo "Scanning website..."
 
-if [ $WAPPALYZER == 1 ] ; then
+if [ "$WAPPALYZER" == 1 ] ; then
     # optional ability to gather information about the frameworks involved
     if [ -f "wappalyzer/src/drivers/npm/cli.js" ]; then
+    echo "Running Wappalyzer on $page"
     cd wappalyzer
     # wappalyzer = $(node "src/drivers/npm/cli.js" "$page" | tee errors.txt)
     wappalyzer=$( node "src/drivers/npm/cli.js" "$page")
@@ -161,7 +169,7 @@ if [ $WAPPALYZER == 1 ] ; then
   fi
 fi
 
-URL="$page" LOGINID="$login_id" LOGINPWD="$login_pwd" IDSEL="$id_selector" PWDSEL="$pwd_selector" SUBMIT="$btn_selector" RANDOMTOKEN="$randomToken" TYPE="$crawler" WAPPALYZER="$wappalyzer" NUMBER="$NUMBER" EMAIL="$EMAIL" EXCLUDEEXT="$EXCLUDEEXT"  node -e 'require("./combine").combineRun()' | tee errors.txt
+URL="$page" LOGINID="$login_id" LOGINPWD="$login_pwd" IDSEL="$id_selector" PWDSEL="$pwd_selector" SUBMIT="$btn_selector" RANDOMTOKEN="$randomToken" TYPE="$crawler" TIME2WAIT="$TIME2WAIT" WAPPALYZER="$wappalyzer" NUMBER="$NUMBER" EMAIL="$EMAIL" EXCLUDEEXT="$EXCLUDEEXT"  node -e 'require("./combine").combineRun()' | tee errors.txt
 
 # Verify that the newly generated directory exists
 if [ -d "results/$currentDate/$randomToken" ]; then
@@ -174,19 +182,24 @@ if [ -d "results/$currentDate/$randomToken" ]; then
   ln -sfn "$randomToken" "$domain"
   cd ../..
 
-  tar -cjvf "results/$currentDate/$randomToken/all_issues.tar.bz2" "results/$currentDate/$randomToken/all_issues" 2>/dev/null
-  rm -fr "results/$currentDate/$randomToken/all_issues"
+  # Commented out for debugging
+  # tar -cjvf "results/$currentDate/$randomToken/all_issues.tar.bz2" "results/$currentDate/$randomToken/all_issues" 2>/dev/null
+  # rm -fr "results/$currentDate/$randomToken/all_issues"
 
   # Test for the command before attempting to open the report
-  if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    firefox -url "last-test/reports/report.html &"
-  elif [[ "$OSTYPE" == "darwin"* ]]; then
-    open "last-test/reports/report.html &"
-  else
-    echo "The scan has been completed."
-    current_dir=$(pwd)
-    reportPath="$current_dir/results/$currentDate/$randomToken/reports/report.html"
-    echo "You can find the report in $reportPath"
+  if [[ "$OPENBROWSER" == 1 ]]; then
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+      echo "Open in Firefox"
+      firefox -url "last-test/reports/report.html"
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+      echo "Open in default browser"
+      open "last-test/reports/report.html"
+    else
+      echo "The scan has been completed."
+      current_dir=$(pwd)
+      reportPath="$current_dir/results/$currentDate/$randomToken/reports/report.html"
+      echo "You can find the report in $reportPath"
+    fi
   fi
 
   # Provide PDF version if available

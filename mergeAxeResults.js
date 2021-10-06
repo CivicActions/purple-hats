@@ -105,7 +105,8 @@ const writeResults = async (allissues, storagePath) => {
 /* Write HTML from JSON to Mustache for whole page content */
 const writeHTML = async (allissues, storagePath) => {
 
-  /* Sort by impact order (critical, serious, moderate, minor)  */
+  /* Sort by impact order (critical, serious, moderate, minor)
+  TODO: Would be good to add to the sort order to rank based on errors per page as well as seriousness */
   allissues.sort(function (a, b) {
     return b.order - a.order;
   });
@@ -118,6 +119,9 @@ const writeHTML = async (allissues, storagePath) => {
       allissues[i].disabilities = "";
     }
   }
+
+  console.log("countURLsCrawled " + countURLsCrawled);
+  console.log("score " + score);
 
   /* Grading evaluations - */
   if (countURLsCrawled > 25) {
@@ -186,7 +190,7 @@ const writeHTML = async (allissues, storagePath) => {
     }
   } else {
     grade = "?";
-    message = "Not enough URLs to evaluate grade. Perpahs there was an error in the scan.";
+    message = "Not enough URLs to evaluate grade. Perhaps there was an error in the scan.";
   }
 
   /* Mustache needs to somehow spit out wcagCounts info maybe in - {{wcagCounts}} {{{.}}} {{/wcagCounts}} */
@@ -203,9 +207,8 @@ const writeHTML = async (allissues, storagePath) => {
         console.log(wappalyzer_json);
       }
 
-      let x = 0
-
       /* Define string of libraries used. */
+      let x = 0
       if (wappalyzer_array['technologies']) {
         var wappalyzer_string = "Built with: "
         while (x < wappalyzer_array['technologies'].length) {
@@ -231,7 +234,28 @@ const writeHTML = async (allissues, storagePath) => {
     .readFile(path.join(__dirname, '/static/report.mustache'))
     .catch(templateError => console.log('Error fetching template', templateError));
   const output = Mustache.render(musTemp.toString(), JSON.parse(finalResultsInJson));
-  await fs.writeFile(`${storagePath}/reports/report.html`, output);
+  fs.access(storagePath, (err) => {
+    console.log(`Directory ${err ? 'does not exist' : 'exists'}`);
+  });
+
+  // await new Promise(resolve => setTimeout(resolve, 5000));
+  var reportPath = storagePath + "/reports/report.html"
+
+  await fs.writeFile(reportPath, output);
+
+/* Test both the read and write permissions
+> fs.access(reportPath, fs.constants.R_OK | fs.constants.W_OK, (err) => {
+>   console.log('\n> Checking Permission for reading" + " and writing to file');
+>   if (err)
+>     console.error('No Read and Write access');
+>   else
+>     await fs.writeFile(reportPath, output);
+>   });
+337,338d356
+<   } else {
+<     console.log("No entities in allFiles");
+*/
+
 };
 
 
@@ -330,6 +354,12 @@ exports.mergeFiles = async randomToken => {
   ).catch(flattenIssuesError => console.log('Error flattening all issues', flattenIssuesError));
 
   /* Write the JSON then the HTML - Order Matters */
-  await writeResults(allIssues, storagePath);
-  await writeHTML(allIssues, storagePath);
+  if(allFiles.length > 0) {
+    console.log("Writing issues to JSON & HTML.")
+    await writeResults(allIssues, storagePath);
+    await writeHTML(allIssues, storagePath);
+  } else {
+    console.log("No entities in allFiles.");
+  }
+
 };
