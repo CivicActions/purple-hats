@@ -151,12 +151,14 @@ currentDate=$(date '+%Y-%-m-%-d')
 
 echo "Scanning website..."
 
-# optional ability to gather information about the frameworks involved
-if [ "$WAPPALYZER" ] && [ -f "wappalyzer/src/drivers/npm/cli.js" ]; then
-  cd wappalyzer
-  # wappalyzer = $(node "src/drivers/npm/cli.js" "$page" | tee errors.txt)
-  wappalyzer=$( node "src/drivers/npm/cli.js" "$page")
-  cd ..
+if [ $WAPPALYZER == 1 ] ; then
+    # optional ability to gather information about the frameworks involved
+    if [ -f "wappalyzer/src/drivers/npm/cli.js" ]; then
+    cd wappalyzer
+    # wappalyzer = $(node "src/drivers/npm/cli.js" "$page" | tee errors.txt)
+    wappalyzer=$( node "src/drivers/npm/cli.js" "$page")
+    cd ..
+  fi
 fi
 
 URL="$page" LOGINID="$login_id" LOGINPWD="$login_pwd" IDSEL="$id_selector" PWDSEL="$pwd_selector" SUBMIT="$btn_selector" RANDOMTOKEN="$randomToken" TYPE="$crawler" WAPPALYZER="$wappalyzer" NUMBER="$NUMBER" EMAIL="$EMAIL" EXCLUDEEXT="$EXCLUDEEXT"  node -e 'require("./combine").combineRun()' | tee errors.txt
@@ -188,6 +190,7 @@ if [ -d "results/$currentDate/$randomToken" ]; then
   fi
 
   # Provide PDF version if available
+  # NOTE: This should just be done with puppeteer which is already required - https://github.com/puppeteer/puppeteer/
   if command -v wkhtmltopdf &> /dev/null
   then
     # I should be able to use --print-media-type
