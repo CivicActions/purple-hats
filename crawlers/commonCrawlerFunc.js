@@ -7,7 +7,7 @@ const filterAxeResults = (results, host) => {
   const page = url.split(host)[1];
 
   const errors = violations.map(violation => {
-    const { id, nodes, help, impact, helpUrl } = violation;
+    const { id, nodes, help, impact, helpUrl, errorCount } = violation;
     const fixes = nodes.map(node => {
       return {
         htmlElement: node.html,
@@ -25,6 +25,7 @@ const filterAxeResults = (results, host) => {
     url,
     page,
     errors,
+    errorCount: results.violations.length,
   };
 };
 

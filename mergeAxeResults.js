@@ -106,9 +106,9 @@ const writeResults = async (allissues, storagePath) => {
 const writeHTML = async (allissues, storagePath) => {
 
   /* Sort by impact order (critical, serious, moderate, minor)
-  TODO: Would be good to add to the sort order to rank based on errors per page as well as seriousness */
+  TODO: Would be good to add to the sort order to rank based on errors per page errorCount as well as seriousness */
   allissues.sort(function (a, b) {
-    return b.order - a.order;
+    return b.order - a.order || b.errorCount - a.errorCount;
   });
 
   /* Replace array of disabilities for string of disabilities for HTML */
@@ -121,12 +121,12 @@ const writeHTML = async (allissues, storagePath) => {
   }
 
   console.log("countURLsCrawled " + countURLsCrawled);
-  console.log("score " + score);
 
   /* Grading evaluations - */
   if (countURLsCrawled > 25) {
   var grade = message = "";
   var score = (minorCount + (moderateCount * 1.5) + (seriousCount * 2) + (criticalCount * 3)) / (countURLsCrawled * 5);
+  console.log("score (minor) + moderate*1.5 + serious*2 + critical*3 / urls*5 = " + score);
   switch (true) {
     case score == 0:
         grade = "A+";
@@ -273,7 +273,6 @@ const flattenAxeResults = async rPath => {
        fileExtension = fileExtension.substring(0, fileExtension.indexOf('#'));
        // fileExtension = limit(fileExtension, 6);
     }
-
     error.fixes.forEach(item => {
       const { id: errorId, impact, description, helpUrl } = error;
       const { disabilityIcons, disabilities, wcag } = axeIssuesList.find(obj => obj.id === errorId) || {};
@@ -289,7 +288,8 @@ const flattenAxeResults = async rPath => {
           JSON.parse(JSON.stringify(wcag).toString());
           wcagID = JSON.parse(JSON.stringify(wcag)).toString();
         } catch (e) {
-          console.log("WCAG ID JSON Issue " + id + " " + wcagID + " " + page);
+          console.log("Issue loading wcag JSON string when looking for WCAG ID " + id + " " + wcagID + " " + page);
+          console.log(wcag);
         }
 
         /* Get links to WCAG */
