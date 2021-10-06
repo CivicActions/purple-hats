@@ -37,25 +37,25 @@ while getopts ":d:s:t:e:o:x:w:n:" options; do         # Loop: Get the next optio
                                           # options n and t take arguments.
   case "${options}" in                    #
     d)                                    # If the option is d,
-      DOMAINNAME=${OPTARG}                      # set $DOMAINNAME to specified value.
+      DOMAINNAME=${OPTARG}                      # Set $DOMAINNAME to specified value.
       ;;
     s)
-      SCANTYPE=${OPTARG}                      # set $SCANTYPE to specified value.
+      SCANTYPE=${OPTARG}                      # Set $SCANTYPE to specified value.
       ;;
     t)
-      TIME2WAIT=${OPTARG}                   # set $TIME2WAIT between crawls.
+      TIME2WAIT=${OPTARG}                   # Set $TIME2WAIT between crawls: 0
       ;;
     e)
-      EMAIL=${OPTARG}                      # set $EMAIL to specified value.
+      EMAIL=${OPTARG}                      # Set $EMAIL to specified value.
       ;;
     o)
-      OPENBROWSER=${OPTARG}                      # 0 will disable launching browser
+      OPENBROWSER=${OPTARG}                      # Disable launching browser: 0
       ;;
     x)
-      EXCLUDEEXT=${OPTARG}                      # set $EXCLUDEEXT to specified value.
+      EXCLUDEEXT=${OPTARG}                      # Set $EXCLUDEEXT to specified value.
       ;;
     w)
-      WAPPALYZER=${OPTARG}                      # Enable wappalyzer
+      WAPPALYZER=${OPTARG}                      # Enable wappalyzer: 1
       ;;
     n)                                    # If the option is n,
       NUMBER=${OPTARG}                     # Set $NUMBER to specified value.
@@ -158,14 +158,17 @@ currentDate=$(date '+%Y-%-m-%-d')
 
 echo "Scanning website..."
 
-if [ "$WAPPALYZER" == 1 ] ; then
+if [[ $WAPPALYZER == 1 ]] ; then
     # optional ability to gather information about the frameworks involved
+    echo "Wappalyzer enabled"
     if [ -f "wappalyzer/src/drivers/npm/cli.js" ]; then
-    echo "Running Wappalyzer on $page"
+    echo " and running on $page"
     cd wappalyzer
     # wappalyzer = $(node "src/drivers/npm/cli.js" "$page" | tee errors.txt)
     wappalyzer=$( node "src/drivers/npm/cli.js" "$page")
     cd ..
+  else
+    echo "Wappalyzer not installed in ./wappalyzer folder"
   fi
 fi
 
