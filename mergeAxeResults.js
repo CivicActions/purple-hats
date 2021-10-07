@@ -16,6 +16,7 @@ global.criticalCount = 0;
 global.seriousCount = 0;
 global.moderateCount = 0;
 global.minorCount = 0;
+global.unknownCount = 0;
 
 const extractFileNames = async directory => {
   const allFiles = await fs
@@ -62,7 +63,7 @@ const writeResults = async (allissues, storagePath) => {
   }
 
   /* Store the information about issue order totals (critical, serious, ...) */
-  orderCount = [criticalCount, seriousCount, moderateCount, minorCount];
+  orderCount = [criticalCount, seriousCount, moderateCount, minorCount, unknownCount];
 
   /* Count the instances of each WCAG error in wcagIDsum and express that in wcagCounts which gets stored  */
   wcagIDsum.forEach(function (x) { wcagCounts[x] = (wcagCounts[x] || 0) + 1; });
@@ -226,7 +227,7 @@ const writeHTML = async (allissues, storagePath) => {
     }
 
   const finalResultsInJson = JSON.stringify(
-    { startTime: getCurrentTime(), count: id, htmlCount: allissues.length, domain: domainURL, countURLsCrawled, totalTime, criticalCount, seriousCount, moderateCount, minorCount, wcagCounts, grade, message, wappalyzer_string, allissues },
+    { startTime: getCurrentTime(), count: id, htmlCount: allissues.length, domain: domainURL, countURLsCrawled, totalTime, criticalCount, seriousCount, moderateCount, minorCount, unknownCount, wcagCounts, grade, message, wappalyzer_string, allissues },
     null,
     4,
   );
@@ -240,15 +241,10 @@ const writeHTML = async (allissues, storagePath) => {
   fs.access(storagePath, (err) => {
     console.log(`Directory ${err ? 'does not exist' : 'exists'}`);
   });
-  fs.access(reportPath, fs.constants.R_OK | fs.constants.W_OK, (err) => {
-    if (err)
-      console.error('No Read and Write access');
-  })
 
   await new Promise(resolve => setTimeout(resolve, 1000));
   await fs.writeFile(reportPath, output);
 };
-
 
 const flattenAxeResults = async rPath => {
   const parsedContent = await parseContentToJson(rPath);
@@ -271,7 +267,7 @@ const flattenAxeResults = async rPath => {
       ++id;
 
       // If an array needs to be excluded, skip to the next one.
-      if (!excludeExtArr.includes(fileExtension)) {
+      if (!fileExtension || !excludeExtArr.includes(fileExtension)) {
 
         /* Get string from wcagID */
         var wcagID = '';
@@ -288,10 +284,11 @@ const flattenAxeResults = async rPath => {
           ? wcag.map(element => wcagList.find(obj => obj.wcag === element) || { wcag: element }) : null;
 
         /* Count impactOrder, url  */
-        if (impactOrder[impact] == 3) { ++criticalCount; }
-        else if (impactOrder[impact] == 2) { ++seriousCount; }
-        else if (impactOrder[impact] == 1) { ++moderateCount; }
-        else if (impactOrder[impact] == 0) { ++minorCount; }
+        if (impactOrder[impact] == 4) { ++criticalCount; }
+        else if (impactOrder[impact] == 3) { ++seriousCount; }
+        else if (impactOrder[impact] == 2) { ++moderateCount; }
+        else if (impactOrder[impact] == 1) { ++minorCount; }
+        else if (impactOrder[impact] == 0) { ++unknownCount; }
         else { console.log(impactOrder[impact]) }
 
         /* Count number of WCAG issues */

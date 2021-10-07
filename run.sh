@@ -178,7 +178,7 @@ URL="$page" LOGINID="$login_id" LOGINPWD="$login_pwd" IDSEL="$id_selector" PWDSE
 if [ -d "results/$currentDate/$randomToken" ]; then
   domain=$(echo "$page" | awk -F/ '{print $3}')
 
-  // Add simlinks for simpler access
+  # Add simlinks for simpler access
   ln -sfn "results/$currentDate/$randomToken" "last-test"
   cd results
   ln -sfn "$currentDate/$randomToken" "$domain"
