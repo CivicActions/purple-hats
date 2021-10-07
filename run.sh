@@ -181,7 +181,7 @@ if [ -d "results/$currentDate/$randomToken" ]; then
   # Add simlinks for simpler access
   ln -sfn "results/$currentDate/$randomToken" "last-test"
   cd results
-  ln -sfn "$currentDate/$randomToken" "$domain"
+  ln -sfn "$currentDate/$randomToken" "${domain}_last"
   cd "$currentDate"
   ln -sfn "$randomToken" "$domain"
   cd ../..
@@ -192,7 +192,15 @@ if [ -d "results/$currentDate/$randomToken" ]; then
   tar -cjvf "last-test/reports/compiledResults.json.tar.bz2" "last-test/reports/compiledResults.json" 2>/dev/null
   rm "last-test/reports/compiledResults.json"
   tar -cjvf "last-test/reports/report.html.tar.bz2" "last-test/reports/report.html" 2>/dev/null
+  tar -cjvf "last-test/reports/report.csv.bz2" "last-test/reports/report.csv" 2>/dev/null
   ln  -sfn last-test/reports/report.html last-test/report.html
+
+  # Make directory for domain and store prior scans
+  cd results
+  mkdir "${domain}_reports"
+  cd "${domain}_reports"
+  ln -sfn "$currentDate" "../$currentDate/$randomToken"
+  cd ../..
 
   # Test for the command before attempting to open the report
   if [[ "$OPENBROWSER" == 1 ]]; then

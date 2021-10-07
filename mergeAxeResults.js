@@ -103,6 +103,68 @@ const writeResults = async (allissues, storagePath) => {
     .catch(writeResultsError => console.log('Error writing to file', writeResultsError));
 };
 
+/* Compile final JSON results
+NOT WORKING YET */
+const writeCSV = async (allissues, storagePath) => {
+
+  /* Copy without reference to allissues array */
+  var shortAllIssuesJSON = []
+  try {
+    JSON.parse(JSON.stringify(allissues));
+    shortAllIssuesJSON = JSON.parse(JSON.stringify(allissues));
+  } catch (e) {
+    console.log(allissues);
+  }
+
+  /* Delete SVG images in copy of allissues and flatten object to simple array */
+
+  // const issue = [];
+  let id = 0
+  let url = page = fileExtension = description  = htmlElement = helpUrl = wcagID = impact = ""
+  var shortAllIssuesARRAY = []
+  for (let i in shortAllIssuesJSON) {
+    // console.log(shortAllIssuesJSON[i]);
+    id = shortAllIssuesJSON[i].id;
+    url = shortAllIssuesJSON[i].url;
+    page = shortAllIssuesJSON[i].page;
+    fileExtension = shortAllIssuesJSON[i].fileExtension;
+    // description  = shortAllIssuesJSON[i].description;
+    // htmlElement = shortAllIssuesJSON[i].htmlElement;
+    // helpUrl = shortAllIssuesJSON[i].helpUrl;
+    wcagID = shortAllIssuesJSON[i].wcagID;
+    impact = shortAllIssuesJSON[i].impact;
+    shortAllIssuesARRAY.push({id, url, page, fileExtension, description, htmlElement, helpUrl, wcagID, impact});
+  }
+
+/*
+try {
+    console.log(require.resolve("json2csv"));
+
+const { parse } = require('json2csv');
+
+const fields = shortAllIssuesARRAY;
+const opts = { fields };
+
+try {
+  const csv = parse(shortAllIssuesARRAY, opts);
+  console.log(csv);
+} catch (err) {
+  console.error(err);
+}
+
+
+} catch(e) {
+    console.error("json2csv is not found");
+    process.exit(e.code);
+}
+*/
+
+  const fs = require('fs');
+  const writeStream = fs.createWriteStream(`${storagePath}/reports/compiledResults.csv`);
+  writeStream.write(`shortAllIssuesARRAY \n`);
+  writeStream.write('[ "' + shortAllIssuesARRAY.join('","') + '" ]\n');
+};
+
 /* Write HTML from JSON to Mustache for whole page content */
 const writeHTML = async (allissues, storagePath) => {
 
@@ -121,7 +183,7 @@ const writeHTML = async (allissues, storagePath) => {
     }
   }
 
-  console.log("Writing HTML countURLsCrawled " + countURLsCrawled + " and " + allissues.length + " errors found.");
+  console.log("Writing HTML.");
 
   /* Grading evaluations - */
   if (countURLsCrawled > 25) {
@@ -137,43 +199,43 @@ const writeHTML = async (allissues, storagePath) => {
         grade = "A";
         message = "Very few axe errors left! Don't forget manual testing."
         break;
-    case score <= 0.2:
+    case score <= 0.3:
         grade = "A-";
         message = "So close to getting the automated errors! Don't forget manual testing."
         break;
-    case score <= 0.3:
+    case score <= 0.5:
         grade = "B+";
         message = "More work to eliminate automated testing errors. Don't forget manual testing."
         break;
-    case score <= 0.4:
+    case score <= 0.7:
         grade = "B";
         message = "More work to eliminate automated testing errors. Don't forget manual testing."
         break;
-    case score <= 0.5:
+    case score <= 0.9:
         grade = "B-";
         message = "More work to eliminate automated testing errors. Don't forget manual testing."
         break;
-    case score <= 1:
+    case score <= 2:
         grade = "C+";
         message = "More work to eliminate automated testing errors. Don't forget manual testing."
         break;
-    case score <= 2:
+    case score <= 4:
         grade = "C";
         message = "More work to eliminate automated testing errors. Don't forget manual testing."
         break;
-    case score <= 3:
+    case score <= 6:
         grade = "C-";
         message = "More work to eliminate automated testing errors. Don't forget manual testing."
         break;
-    case score <= 4:
+    case score <= 8:
         grade = "D+";
         message = "More work to eliminate automated testing errors. Don't forget manual testing."
         break;
-    case score <= 5:
+    case score <= 10:
          grade = "D";
          message = "More work to eliminate automated testing errors. Don't forget manual testing."
         break;
-    case score <= 10:
+    case score <= 13:
         grade = "D-";
         message = "More work to eliminate automated testing errors. Don't forget manual testing."
         break;
@@ -239,7 +301,7 @@ const writeHTML = async (allissues, storagePath) => {
   // Test both the read and write permissions
   var reportPath = storagePath + "/reports/report.html"
   fs.access(storagePath, (err) => {
-    console.log(`Directory ${err ? 'does not exist' : 'exists'}`);
+    console.log(`${err ? 'Directory does not exist' : ''}`);
   });
 
   await new Promise(resolve => setTimeout(resolve, 1000));
@@ -345,6 +407,7 @@ exports.mergeFiles = async randomToken => {
   if(allFiles.length > 0) {
     console.log("Writing issues to JSON & HTML.")
     await writeResults(allIssues, storagePath);
+    // await writeCSV(allIssues, storagePath);
     await writeHTML(allIssues, storagePath);
   } else {
     console.log("No entities in allFiles.");
