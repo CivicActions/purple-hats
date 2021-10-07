@@ -178,6 +178,7 @@ URL="$page" LOGINID="$login_id" LOGINPWD="$login_pwd" IDSEL="$id_selector" PWDSE
 if [ -d "results/$currentDate/$randomToken" ]; then
   domain=$(echo "$page" | awk -F/ '{print $3}')
 
+  // Add simlinks for simpler access
   ln -sfn "results/$currentDate/$randomToken" "last-test"
   cd results
   ln -sfn "$currentDate/$randomToken" "$domain"
@@ -185,9 +186,13 @@ if [ -d "results/$currentDate/$randomToken" ]; then
   ln -sfn "$randomToken" "$domain"
   cd ../..
 
-  # Commented out for debugging
-  # tar -cjvf "results/$currentDate/$randomToken/all_issues.tar.bz2" "results/$currentDate/$randomToken/all_issues" 2>/dev/null
-  # rm -fr "results/$currentDate/$randomToken/all_issues"
+  # Compress most files and delete originals.
+  tar -cjvf "last-test/all_issues.tar.bz2" "last-test/all_issues" 2>/dev/null
+  rm -fr "last-test/all_issues"
+  tar -cjvf "last-test/reports/compiledResults.json.tar.bz2" "last-test/reports/compiledResults.json" 2>/dev/null
+  rm "last-test/reports/compiledResults.json"
+  tar -cjvf "last-test/reports/report.html.tar.bz2" "last-test/reports/report.html" 2>/dev/null
+  ln  -sfn last-test/reports/report.html last-test/report.html
 
   # Test for the command before attempting to open the report
   if [[ "$OPENBROWSER" == 1 ]]; then

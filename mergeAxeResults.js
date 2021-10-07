@@ -54,7 +54,7 @@ const writeResults = async (allissues, storagePath) => {
     console.log(allissues);
   }
 
-
+  console.log("Writing JSON countURLsCrawled " + countURLsCrawled + " and " + allissues.length + " errors found.");
 
   /* Delete SVG images in copy of allissues */
   for (let i in shortAllIssuesJSON) {
@@ -120,7 +120,7 @@ const writeHTML = async (allissues, storagePath) => {
     }
   }
 
-  console.log("countURLsCrawled " + countURLsCrawled);
+  console.log("Writing HTML countURLsCrawled " + countURLsCrawled + " and " + allissues.length + " errors found.");
 
   /* Grading evaluations - */
   if (countURLsCrawled > 25) {
@@ -234,28 +234,19 @@ const writeHTML = async (allissues, storagePath) => {
     .readFile(path.join(__dirname, '/static/report.mustache'))
     .catch(templateError => console.log('Error fetching template', templateError));
   const output = Mustache.render(musTemp.toString(), JSON.parse(finalResultsInJson));
+
+  // Test both the read and write permissions
+  var reportPath = storagePath + "/reports/report.html"
   fs.access(storagePath, (err) => {
     console.log(`Directory ${err ? 'does not exist' : 'exists'}`);
   });
+  fs.access(reportPath, fs.constants.R_OK | fs.constants.W_OK, (err) => {
+    if (err)
+      console.error('No Read and Write access');
+  })
 
-  // await new Promise(resolve => setTimeout(resolve, 5000));
-  var reportPath = storagePath + "/reports/report.html"
-
+  await new Promise(resolve => setTimeout(resolve, 1000));
   await fs.writeFile(reportPath, output);
-
-/* Test both the read and write permissions
-> fs.access(reportPath, fs.constants.R_OK | fs.constants.W_OK, (err) => {
->   console.log('\n> Checking Permission for reading" + " and writing to file');
->   if (err)
->     console.error('No Read and Write access');
->   else
->     await fs.writeFile(reportPath, output);
->   });
-337,338d356
-<   } else {
-<     console.log("No entities in allFiles");
-*/
-
 };
 
 
@@ -288,7 +279,7 @@ const flattenAxeResults = async rPath => {
           JSON.parse(JSON.stringify(wcag).toString());
           wcagID = JSON.parse(JSON.stringify(wcag)).toString();
         } catch (e) {
-          console.log("Issue loading wcag JSON string when looking for WCAG ID " + id + " " + wcagID + " " + page);
+          console.log("Issue loading wcag JSON string in " + id + " when looking up wcag value " + wcag + " on " + page);
           console.log(wcag);
         }
 
