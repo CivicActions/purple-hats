@@ -193,29 +193,21 @@ if [ -d "results/$currentDate/$randomToken" ]; then
   rm "last-scan/reports/compiledResults.json"
   tar -cjvf "last-scan/reports/report.html.tar.bz2" "last-scan/reports/report.html" 2>/dev/null
   tar -cjvf "last-scan/reports/report.csv.bz2" "last-scan/reports/report.csv" 2>/dev/null
-  cd last-scan
-  ln  -sfn last-scan/reports/report.html report.html
-  ln  -sfn last-scan/reports/report.html "$domain-$currentDate-report.html"
-  ln  -sfn last-scan/reports/compiledResults.json.tar.bz2 "$domain-$currentDate-compiledResults.json.tar.bz2"
-  ln  -sfn last-scan/reports/report.html.tar.bz2 "$domain-$currentDate-report.html.tar.bz2"
 
-  cd ..
+  # Add links to make it easier to access reports from last-scan directory
+  cd last-scan
+  ln  -sfn reports/report.html report.html
+  ln  -sfn reports/report.html "$domain-$currentDate-report.html"
+  ln  -sfn reports/compiledResults.json.tar.bz2 "$domain-$currentDate-compiledResults.json.tar.bz2"
+  ln  -sfn reports/report.html.tar.bz2 "$domain-$currentDate-report.html.tar.bz2"
 
   # Make directory for domain and store prior scans
-  cd results
+  cd ../results
   mkdir "${domain}_reports"
-  # cd "${domain}_reports"
   cd "${domain}_reports"
   ln -sfn "../results/$currentDate/$randomToken" "$currentDate"
   ln -sfn "../results/$currentDate/$randomToken" "last-scan"
-
-
-  # cd ../..
-
-
-# Not quite right
-
-
+  cd ../..
 
   # Test for the command before attempting to open the report
   if [[ "$OPENBROWSER" == 1 ]]; then

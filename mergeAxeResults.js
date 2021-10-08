@@ -293,7 +293,7 @@ const writeHTML = async (allissues, storagePath) => {
   if (ii != 0) {
     // wcagCountsContent += " </ul>";
   }
-  wcagCountsContent.slice(0, -1);
+  wcagCountsContent.slice(0, -2); /* Remove the ", " from above.
 
   if (allissues.length > maxHTMLdisplay) allissues.length = maxHTMLdisplay;
 

@@ -30,7 +30,7 @@ exports.crawlDomain = async (url, randomToken, host) => {
         await dataset.pushData(results);
         urlsCrawled.scanned.push(currentUrl);
         ++i
-        console.log(i + " " + currentUrl + " errors " + results.errors.length);
+        console.log("id: " + i + " errors " + results.errors.length + " url: " + currentUrl);
         await Apify.utils.enqueueLinks({
           page,
           selector: 'a',
