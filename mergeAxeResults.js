@@ -66,7 +66,7 @@ const writeResults = async (allissues, storagePath) => {
   orderCount = [criticalCount, seriousCount, moderateCount, minorCount, unknownCount];
 
   /* Count the instances of each WCAG error in wcagIDsum and express that in wcagCounts which gets stored  */
-  wcagIDsum.forEach(function (x) { wcagCounts[x] = (wcagCounts[x] || 0) + 1; });
+  // wcagIDsum.forEach(function (x) { wcagCounts[x] = (wcagCounts[x] || 0) + 1; });
 
     /* add information about environment to array. */
     if (wappalyzer_json != null) {
@@ -190,6 +190,10 @@ const writeHTML = async (allissues, storagePath) => {
   var grade = message = "";
   var score = (minorCount + (moderateCount * 1.5) + (seriousCount * 2) + (criticalCount * 3)) / (countURLsCrawled * 5);
   console.log("score (minor) + moderate*1.5 + serious*2 + critical*3 / urls*5 = " + score);
+
+  // Scoring for grade
+  // A+ = 0 ; A <= 0.1 ; A- <= 0.3 ; B+ <= 0.5 ; B <= 0.7 ; B- <= 0.9 ; C+ <= 2 ;
+  // C <= 4 C- <= 6 ; D+ <= 8 ; D <= 10 ; D- <= 13 ; F+ <= 15 ; F <= 20 ; F- >= 20
   switch (true) {
     case score == 0:
         grade = "A+";
@@ -256,7 +260,40 @@ const writeHTML = async (allissues, storagePath) => {
     message = "Not enough URLs to evaluate grade. Perhaps there was an error in the scan.";
   }
 
-  /* Mustache needs to somehow spit out wcagCounts info maybe in - {{wcagCounts}} {{{.}}} {{/wcagCounts}} */
+  // console.log(wcagCounts)
+  var wcagCountsContent = '';
+  var wcagCountsArray = [];
+  var wcagCountsArray2 = [];
+  for (let ii in wcagCounts) {
+    if(wcagCounts[ii].includes(",")) {
+      let wcagCountsSplit = wcagCounts[ii].split(",");
+      for (let iii in wcagCountsSplit) {
+        wcagCountsArray.push(wcagCountsSplit[iii]);
+      }
+    } else {
+      wcagCountsArray.push(wcagCounts[ii]);
+    }
+  }
+
+  /* Count the instances of each WCAG error in wcagIDsum and express that in wcagCounts which gets stored  */
+  wcagCountsArray.forEach(function (x) { wcagCountsArray[x] = (wcagCountsArray[x] || 0) + 1; });
+  var finalWCAGstring = '';
+  let ii = 0;
+  for (let i in wcagCountsArray) {
+    if (typeof wcagCountsArray[i] !== 'function') {
+    if (typeof wcagCountsArray[i] == "number") {
+      wcagCountsContent += "" + i + ": " + wcagCountsArray[i] + ", ";
+      ++ii
+      if (ii == 1) {
+        wcagCountsContent = "WCAG Errors - " + wcagCountsContent;
+      }
+    }
+    }
+  }
+  if (ii != 0) {
+    // wcagCountsContent += " </ul>";
+  }
+  wcagCountsContent.slice(0, -1);
 
   if (allissues.length > maxHTMLdisplay) allissues.length = maxHTMLdisplay;
 
@@ -289,7 +326,7 @@ const writeHTML = async (allissues, storagePath) => {
     }
 
   const finalResultsInJson = JSON.stringify(
-    { startTime: getCurrentTime(), count: id, htmlCount: allissues.length, domain: domainURL, countURLsCrawled, totalTime, criticalCount, seriousCount, moderateCount, minorCount, unknownCount, wcagCounts, grade, message, wappalyzer_string, allissues },
+    { startTime: getCurrentTime(), count: id, htmlCount: allissues.length, domain: domainURL, countURLsCrawled, totalTime, criticalCount, seriousCount, moderateCount, minorCount, unknownCount, wcagCounts, grade, message, wappalyzer_string, wcagCountsContent, allissues },
     null,
     4,
   );

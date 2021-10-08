@@ -179,7 +179,7 @@ if [ -d "results/$currentDate/$randomToken" ]; then
   domain=$(echo "$page" | awk -F/ '{print $3}')
 
   # Add simlinks for simpler access
-  ln -sfn "results/$currentDate/$randomToken" "last-test"
+  ln -sfn "results/$currentDate/$randomToken" "last-scan"
   cd results
   ln -sfn "$currentDate/$randomToken" "${domain}_last"
   cd "$currentDate"
@@ -187,29 +187,44 @@ if [ -d "results/$currentDate/$randomToken" ]; then
   cd ../..
 
   # Compress most files and delete originals.
-  tar -cjvf "last-test/all_issues.tar.bz2" "last-test/all_issues" 2>/dev/null
-  rm -fr "last-test/all_issues"
-  tar -cjvf "last-test/reports/compiledResults.json.tar.bz2" "last-test/reports/compiledResults.json" 2>/dev/null
-  rm "last-test/reports/compiledResults.json"
-  tar -cjvf "last-test/reports/report.html.tar.bz2" "last-test/reports/report.html" 2>/dev/null
-  tar -cjvf "last-test/reports/report.csv.bz2" "last-test/reports/report.csv" 2>/dev/null
-  ln  -sfn last-test/reports/report.html last-test/report.html
+  tar -cjvf "last-scan/all_issues.tar.bz2" "last-scan/all_issues" 2>/dev/null
+  rm -fr "last-scan/all_issues"
+  tar -cjvf "last-scan/reports/compiledResults.json.tar.bz2" "last-scan/reports/compiledResults.json" 2>/dev/null
+  rm "last-scan/reports/compiledResults.json"
+  tar -cjvf "last-scan/reports/report.html.tar.bz2" "last-scan/reports/report.html" 2>/dev/null
+  tar -cjvf "last-scan/reports/report.csv.bz2" "last-scan/reports/report.csv" 2>/dev/null
+  cd last-scan
+  ln  -sfn last-scan/reports/report.html report.html
+  ln  -sfn last-scan/reports/report.html "$domain-$currentDate-report.html"
+  ln  -sfn last-scan/reports/compiledResults.json.tar.bz2 "$domain-$currentDate-compiledResults.json.tar.bz2"
+  ln  -sfn last-scan/reports/report.html.tar.bz2 "$domain-$currentDate-report.html.tar.bz2"
+
+  cd ..
 
   # Make directory for domain and store prior scans
   cd results
   mkdir "${domain}_reports"
+  # cd "${domain}_reports"
   cd "${domain}_reports"
-  ln -sfn "$currentDate" "../$currentDate/$randomToken"
-  cd ../..
+  ln -sfn "../results/$currentDate/$randomToken" "$currentDate"
+  ln -sfn "../results/$currentDate/$randomToken" "last-scan"
+
+
+  # cd ../..
+
+
+# Not quite right
+
+
 
   # Test for the command before attempting to open the report
   if [[ "$OPENBROWSER" == 1 ]]; then
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
       echo "Open in Firefox"
-      firefox -url "last-test/reports/report.html"
+      firefox -url "last-scan/reports/report.html"
     elif [[ "$OSTYPE" == "darwin"* ]]; then
       echo "Open in default browser"
-      open "last-test/reports/report.html"
+      open "last-scan/reports/report.html"
     else
       echo "The scan has been completed."
       current_dir=$(pwd)
@@ -223,7 +238,7 @@ if [ -d "results/$currentDate/$randomToken" ]; then
   if command -v wkhtmltopdf &> /dev/null
   then
     # I should be able to use --print-media-type
-    wkhtmltopdf -q --enable-javascript --javascript-delay 10000 last-test/reports/report.html last-test/reports/report.pdf
+    wkhtmltopdf -q --enable-javascript --javascript-delay 10000 last-scan/reports/report.html last-scan/reports/report.pdf
   else
     echo "If you want a PDF export, then install wkhtmltopdf, i.e. brew install wkhtmltopdf";
   fi
