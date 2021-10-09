@@ -141,6 +141,11 @@ What would you like to scan today?
 Please enter URL of website: ttps://example.com/
 ```
 
+### 3. Command line scans
+
+Scripts can now be run from the command line with `bash ./run.sh -o 0 -w 1 -d https://example.com` and strung together for simple automation
+
+`bash ./run.sh -o 0 -w 1 -d https://example.com bash ./run.sh -o 0 -w 1 -d simple.example.com bash ./run.sh -o 0 -w 1 -d http://www.example.com bash ./run.sh -o 0 -w 0 -d https://code.example.com`
 
 
 
