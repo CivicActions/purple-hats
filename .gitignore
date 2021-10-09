@@ -8,9 +8,10 @@ logs
 wappalyzer
 errors.txt
 apify_storage
-last-test
+last-scan
 .DS_Store
 cron_scripts.sh
 *.bz2
 *.zip
 *.gzip
+old
