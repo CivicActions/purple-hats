@@ -10,6 +10,7 @@ exports.waitTime = 0;
 
 exports.maxConcurrency = 5;
 
+// CHECK - utils.js has very similar const invalidURLends.
 exports.pseudoUrls = host => [
   // eslint-disable-next-line no-useless-escape
   `[.*(?<!mailto.*)]${host}[(?!.*\.(gif|jpg|jpeg|png|webp|avif|pdf|epub|mobi|doc|docx|css|svg|js|ts|xml|csv|tgz|zip|xls|xlsx|ppt|pptx|ico|woff)).*]`,
@@ -36,10 +37,11 @@ exports.rootPath = __dirname;
 
 // others
 exports.impactOrder = {
-  minor: 0,
-  moderate: 1,
-  serious: 2,
-  critical: 3,
+  unknown: 0,
+  minor: 1,
+  moderate: 2,
+  serious: 3,
+  critical: 4,
 };
 
 exports.wcagWebPage = 'https://www.w3.org/TR/WCAG21/';
