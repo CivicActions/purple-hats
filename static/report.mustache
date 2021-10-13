@@ -55,6 +55,11 @@
                 <p>
                   {{ wcagCountsContent }}
                 </p>
+                <p>
+                  {{ sentenceCountMaxText }} <br />
+                  {{ fleschKincaidGradeMaxText }} <br />
+                  {{ difficultWordsMaxText }}
+               </p>
               </div>
             </div>
           </div>
@@ -222,7 +227,7 @@ class="{{impact}}-fill-icon"
               <thead>
                 <tr>
                   <th>Impact</th>
-                  <th class="dt-nowrap">Issue</th>
+                  <th class="dt-nowrap">A11y Issues / <em>Readability</em> </th>
                   <th class="">Page</th>
                   <th class="element">HTML Element <span>Hover to view full</span></th>
                   <th class="dt-nowrap text-center">Bug Id &nbsp; / &nbsp; Ext &nbsp; / &nbsp; Help URL</th>
@@ -242,7 +247,8 @@ class="{{impact}}-fill-icon"
                   <td class="issue">{{description}}<br>
                   {{#wcagLinks}}
                   <a class="wcag-clause" href="{{href}}" target="_blank">WCAG {{wcag}}</a>
-                  {{/wcagLinks}}
+                  {{/wcagLinks}} <br />
+                  <em>Page has {{sentenceCount}} sentences and {{difficultWords}} difficult words and gets a Flesch Kincaid Grade of {{fleschKincaidGrade}}.</em>
                   </td>
                   <td class="page"><a href="{{url}}" target="_blank">{{page}}</a></td>
                   <td class="element">{{htmlElement}}</td>

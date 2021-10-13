@@ -168,20 +168,47 @@ try {
 /* Write HTML from JSON to Mustache for whole page content */
 const writeHTML = async (allissues, storagePath) => {
 
-  /* Sort by impact order (critical, serious, moderate, minor)
-  TODO: Would be good to add to the sort order to rank based on errors per page errorCount as well as seriousness */
+  // Sort by impact order (critical, serious, moderate, minor, unknown)
   allissues.sort(function (a, b) {
     return b.order - a.order || b.errorCount - a.errorCount;
   });
 
-  /* Replace array of disabilities for string of disabilities for HTML */
+  // Replace array of disabilities for string of disabilities for HTML
+  var sentenceCountMax = fleschKincaidGradeMax = automatedReadabilityMax = difficultWordsMax = 0;
   for (let i in allissues) {
     if(allissues[i].disabilities != undefined) {
       allissues[i].disabilities = allissues[i].disabilities.toString().replace(/,/g, ' ').toLowerCase();
     } else {
       allissues[i].disabilities = "";
     }
+    if (sentenceCountMax == 0 || allissues[i].sentenceCount > sentenceCountMax ) {
+      sentenceCountMax = allissues[i].sentenceCount;
+      var sentenceCountMaxText = "Most sentences on page: " + allissues[i].sentenceCount + " - " + allissues[i].page;
+    }
+    if (fleschKincaidGradeMax == 0 || allissues[i].fleschKincaidGrade > fleschKincaidGradeMax ) {
+      fleschKincaidGradeMax = allissues[i].fleschKincaidGrade;
+      var fleschKincaidGradeMaxText = "Worst Flesch Kincaid score: " + allissues[i].fleschKincaidGrade + " - " + allissues[i].page;
+    }
+    /* Probably best to jsut stick to Flesch Kincaid
+    if (automatedReadabilityMax == 0 || allissues[i].automatedReadabilityIndex > automatedReadabilityMax ) {
+      automatedReadabilityMax = allissues[i].automatedReadabilityIndex;
+      automatedReadabilityMaxText = "Worst Automated Readability score: " + allissues[i].automatedReadabilityIndex + " - " + allissues[i].page;
+    }
+    */
+    if (difficultWordsMax == 0 || allissues[i].difficultWords > difficultWordsMax ) {
+      difficultWordsMax = allissues[i].difficultWords;
+      var difficultWordsMaxText = "Most difficult words: " + allissues[i].difficultWords + " - " + allissues[i].page;
+    }
   }
+
+/*
+  I should be able to do the average score, with seomething like:
+     var sentenceCountAverage = (sentenceCountTotal/countURLsCrawled);
+  However this function hits errors, not pages, so it would be inflated
+    var difficultWordsAverage = (difficultWordsTotal/countURLsCrawled);
+  The URLsCrawled may also be inflated as some pages may be skipped or duplicated.
+    var fleschKincaidGradeAverage = (fleschKincaidGradeTotal/countURLsCrawled);
+*/
 
   console.log("Writing HTML.");
 
@@ -260,6 +287,7 @@ const writeHTML = async (allissues, storagePath) => {
     message = "Not enough URLs to evaluate grade. Perhaps there was an error in the scan.";
   }
 
+  // TODO - Document what this is doing.
   // console.log(wcagCounts)
   var wcagCountsContent = '';
   var wcagCountsArray = [];
@@ -275,7 +303,7 @@ const writeHTML = async (allissues, storagePath) => {
     }
   }
 
-  /* Count the instances of each WCAG error in wcagIDsum and express that in wcagCounts which gets stored  */
+  // Count the instances of each WCAG error in wcagIDsum and express that in wcagCounts which gets stored
   wcagCountsArray.forEach(function (x) { wcagCountsArray[x] = (wcagCountsArray[x] || 0) + 1; });
   var finalWCAGstring = '';
   let ii = 0;
@@ -290,10 +318,6 @@ const writeHTML = async (allissues, storagePath) => {
     }
     }
   }
-  if (ii != 0) {
-    // wcagCountsContent += " </ul>";
-  }
-  wcagCountsContent.slice(0, -2); /* Remove the ", " from above.
 
   if (allissues.length > maxHTMLdisplay) allissues.length = maxHTMLdisplay;
 
@@ -326,7 +350,12 @@ const writeHTML = async (allissues, storagePath) => {
     }
 
   const finalResultsInJson = JSON.stringify(
-    { startTime: getCurrentTime(), count: id, htmlCount: allissues.length, domain: domainURL, countURLsCrawled, totalTime, criticalCount, seriousCount, moderateCount, minorCount, unknownCount, wcagCounts, grade, message, wappalyzer_string, wcagCountsContent, allissues },
+    { startTime: getCurrentTime(), count: id, htmlCount: allissues.length,
+      domain: domainURL, countURLsCrawled, totalTime, criticalCount, seriousCount,
+              moderateCount, minorCount, unknownCount, wcagCounts, grade, message,
+              wappalyzer_string, wcagCountsContent, sentenceCountMaxText,
+              fleschKincaidGradeMaxText, difficultWordsMaxText, allissues
+    },
     null,
     4,
   );
@@ -347,6 +376,15 @@ const writeHTML = async (allissues, storagePath) => {
 
 const flattenAxeResults = async rPath => {
   const parsedContent = await parseContentToJson(rPath);
+  // var sentenceCountTotal = difficultWordsTotal = fleschKincaidGradeTotal = 0;
+
+  if ( typeof parsedContent.readability !== 'undefined' && parsedContent.readability ) {
+    var sentenceCount = parsedContent.readability.sentenceCount;
+    var fleschKincaidGrade = parsedContent.readability.fleschKincaidGrade;
+    var automatedReadabilityIndex = parsedContent.readability.automatedReadabilityIndex;
+    var difficultWords = parsedContent.readability.difficultWords;
+  }
+
   const flattenedIssues = [];
   const { url, page, errors } = parsedContent;
   errors.forEach(error => {
@@ -359,6 +397,7 @@ const flattenAxeResults = async rPath => {
        fileExtension = fileExtension.substring(0, fileExtension.indexOf('#'));
        // fileExtension = limit(fileExtension, 6);
     }
+
     error.fixes.forEach(item => {
       const { id: errorId, impact, description, helpUrl } = error;
       const { disabilityIcons, disabilities, wcag } = axeIssuesList.find(obj => obj.id === errorId) || {};
@@ -400,6 +439,10 @@ const flattenAxeResults = async rPath => {
           id,
           url,
           page,
+          sentenceCount,
+          fleschKincaidGrade,
+          automatedReadabilityIndex,
+          difficultWords,
           fileExtension,
           description,
           impact,
