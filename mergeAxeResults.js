@@ -1,6 +1,8 @@
 /* eslint-disable no-console */
 const fs = require('fs-extra');
 const path = require('path');
+const { parse } = require('json2csv');
+// const ObjectsToCsv = require('objects-to-csv');
 const Mustache = require('mustache');
 const axeIssuesList = require('./constants/axeTypes.json');
 const wcagList = require('./constants/wcagLinks.json');
@@ -136,33 +138,14 @@ const writeCSV = async (allissues, storagePath) => {
     shortAllIssuesARRAY.push({id, url, page, fileExtension, description, htmlElement, helpUrl, wcagID, impact});
   }
 
-/*
-try {
-    console.log(require.resolve("json2csv"));
-
-const { parse } = require('json2csv');
-
-const fields = shortAllIssuesARRAY;
-const opts = { fields };
-
-try {
-  const csv = parse(shortAllIssuesARRAY, opts);
-  console.log(csv);
-} catch (err) {
-  console.error(err);
-}
-
-
-} catch(e) {
-    console.error("json2csv is not found");
-    process.exit(e.code);
-}
-*/
-
-  const fs = require('fs');
-  const writeStream = fs.createWriteStream(`${storagePath}/reports/compiledResults.csv`);
-  writeStream.write(`shortAllIssuesARRAY \n`);
-  writeStream.write('[ "' + shortAllIssuesARRAY.join('","') + '" ]\n');
+  try {
+    const fs = require('fs');
+    const writeStream = fs.createWriteStream(`${storagePath}/reports/compiledResults.csv`);
+    writeStream.write(`shortAllIssuesARRAY \n`);
+    writeStream.write('[ "' + shortAllIssuesARRAY.join('","') + '" ]\n');
+  } catch (e) {
+    console.log(createWriteStream);
+  }
 };
 
 /* Write HTML from JSON to Mustache for whole page content */
@@ -307,11 +290,16 @@ const writeHTML = async (allissues, storagePath) => {
   // Count the instances of each WCAG error in wcagIDsum and express that in wcagCounts which gets stored
   wcagCountsArray.forEach(function (x) { wcagCountsArray[x] = (wcagCountsArray[x] || 0) + 1; });
   var finalWCAGstring = '';
-  let ii = 0;
+  // var finalWCAGobj = [scanType: wcag, errors: {} ];
+  const finalWCAGarray = [];
+  let ii = wcagCountsTemp = 0;
   for (let i in wcagCountsArray) {
     if (typeof wcagCountsArray[i] !== 'function') {
     if (typeof wcagCountsArray[i] == "number") {
-      wcagCountsContent += "" + i + ": " + wcagCountsArray[i] + ", ";
+      wcagCountsTemp = wcagCountsArray[i];
+      wcagCountsContent += "" + i + ": " + wcagCountsTemp + ", ";
+      let finalWCAGarrayTemp = [i, wcagCountsTemp];
+      finalWCAGarray.push(finalWCAGarrayTemp);
       ++ii
       if (ii == 1) {
         wcagCountsContent = "WCAG Errors - " + wcagCountsContent;
@@ -319,6 +307,7 @@ const writeHTML = async (allissues, storagePath) => {
     }
     }
   }
+console.log(typeof finalWCAGarray + " " + finalWCAGarray)
 
   if (allissues.length > maxHTMLdisplay) allissues.length = maxHTMLdisplay;
 
