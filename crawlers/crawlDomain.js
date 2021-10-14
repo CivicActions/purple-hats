@@ -32,7 +32,7 @@ exports.crawlDomain = async (url, randomToken, host) => {
 
         // Check readability of the page
         getPage(currentUrl, function(err, article, meta, callback) {
-          if ( typeof article.textBody !== 'undefined' && article.textBody ) {
+          try { 
             pageText = article.textBody; // Note article.title is also available
             var sentenceCount = difficultWords = fleschKincaidGrade = 0;
             sentenceCount = rs.sentenceCount(pageText);
@@ -52,8 +52,9 @@ exports.crawlDomain = async (url, randomToken, host) => {
             // var textStandard = rs.textStandard(pageText);
 
             readability = {sentenceCount, fleschKincaidGrade, automatedReadabilityIndex, difficultWords};
-
             article.close();
+          } catch(e){
+             console.log("YO",e)
           }
         });
 

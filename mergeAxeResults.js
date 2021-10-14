@@ -219,6 +219,7 @@ const writeHTML = async (allissues, storagePath) => {
   console.log("score (minor) + moderate*1.5 + serious*2 + critical*3 / urls*5 = " + score);
 
   // Scoring for grade
+  // Score number = score (minor) + moderate*1.5 + serious*2 + critical*3 / urls*5
   // A+ = 0 ; A <= 0.1 ; A- <= 0.3 ; B+ <= 0.5 ; B <= 0.7 ; B- <= 0.9 ; C+ <= 2 ;
   // C <= 4 C- <= 6 ; D+ <= 8 ; D <= 10 ; D- <= 13 ; F+ <= 15 ; F <= 20 ; F- >= 20
   switch (true) {
