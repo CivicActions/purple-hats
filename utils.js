@@ -24,10 +24,6 @@ exports.getCurrentTime = () => {
   });
 };
 
-    '.xml',
-    '.pptx',
-    '.ico',
-    '.woff',
 const getStoragePath = randomToken => {
   const date = new Date();
   const currentDate = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
