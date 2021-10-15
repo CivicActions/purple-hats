@@ -2,7 +2,6 @@
 const fs = require('fs-extra');
 const path = require('path');
 const { parse } = require('json2csv');
-// const ObjectsToCsv = require('objects-to-csv');
 const Mustache = require('mustache');
 const axeIssuesList = require('./constants/axeTypes.json');
 const wcagList = require('./constants/wcagLinks.json');
@@ -193,13 +192,35 @@ const writeHTML = async (allissues, storagePath) => {
     var fleschKincaidGradeAverage = (fleschKincaidGradeTotal/countURLsCrawled);
 */
 
-  console.log("Writing HTML.");
+  console.log("Writing results to ./reports/allissues.csv");
+  const ObjectsToCsv_a = require('objects-to-csv');
+  (async () => {
+    const csv_a = new ObjectsToCsv_a(allissues);
+
+    // Save to file:
+    await csv_a.toDisk(storagePath + "/reports/allissues.csv");
+    // console.log(await csv_c.toString());
+  })();
+
+  console.log("Writing results to ./reports/count.csv");
+  const ObjectsToCsv_c = require('objects-to-csv');
+  (async () => {
+    let count_array = [{level: 'minor', count: minorCount }, {level: 'moderate', count: moderateCount }, {level: 'serious', count: seriousCount }, {level: 'critical', count: criticalCount }, {level: 'countURLs', count: countURLsCrawled }];
+    const csv_c = new ObjectsToCsv_c(count_array);
+
+    // Save to file:
+    await csv_c.toDisk(storagePath + "/reports/count.csv");
+    // console.log(await csv_c.toString());
+  })();
+
+  console.log("Writing HTML");
 
   /* Grading evaluations - */
   if (countURLsCrawled > 25) {
   var grade = message = "";
   var score = (minorCount + (moderateCount * 1.5) + (seriousCount * 2) + (criticalCount * 3)) / (countURLsCrawled * 5);
   console.log("score (minor) + moderate*1.5 + serious*2 + critical*3 / urls*5 = " + score);
+
 
   // Scoring for grade
   // Score number = score (minor) + moderate*1.5 + serious*2 + critical*3 / urls*5
@@ -298,7 +319,7 @@ const writeHTML = async (allissues, storagePath) => {
     if (typeof wcagCountsArray[i] == "number") {
       wcagCountsTemp = wcagCountsArray[i];
       wcagCountsContent += "" + i + ": " + wcagCountsTemp + ", ";
-      let finalWCAGarrayTemp = [i, wcagCountsTemp];
+      let finalWCAGarrayTemp = {wcag: i, count: wcagCountsTemp};
       finalWCAGarray.push(finalWCAGarrayTemp);
       ++ii
       if (ii == 1) {
@@ -307,7 +328,18 @@ const writeHTML = async (allissues, storagePath) => {
     }
     }
   }
-console.log(typeof finalWCAGarray + " " + finalWCAGarray)
+// console.log(wcagCountsContent);
+// console.log(typeof finalWCAGarray + " " + finalWCAGarray);
+
+console.log("Writing results to ./reports/wcagErrors.csv");
+const ObjectsToCsv_wc = require('objects-to-csv');
+(async () => {
+  // finalWCAGarray.unshift("WCAG Errors", "Count")
+  const csv_wc = new ObjectsToCsv_wc(finalWCAGarray);
+  // Save to file:
+  await csv_wc.toDisk(storagePath + "/reports/wcagErrors.csv");
+  // console.log(await csv_wc.toString());
+})();
 
   if (allissues.length > maxHTMLdisplay) allissues.length = maxHTMLdisplay;
 
@@ -337,6 +369,17 @@ console.log(typeof finalWCAGarray + " " + finalWCAGarray)
           x++
         }
       }
+
+      console.log("Writing results to ./reports/wappalyzer.csv");
+      const ObjectsToCsv_wa = require('objects-to-csv');
+      (async () => {
+        const csv_wa = new ObjectsToCsv_wa(wappalyzer_array['technologies']);
+
+        // Save to file:
+        await csv_wa.toDisk(storagePath + "/reports/wappalyzer.csv");
+        // console.log(await csv_wa.toString());
+      })();
+
     }
 
   const finalResultsInJson = JSON.stringify(
