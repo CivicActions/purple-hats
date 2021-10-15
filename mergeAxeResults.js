@@ -104,49 +104,6 @@ const writeResults = async (allissues, storagePath) => {
     .catch(writeResultsError => console.log('Error writing to file', writeResultsError));
 };
 
-/* Compile final JSON results
-NOT WORKING YET */
-const writeCSV = async (allissues, storagePath) => {
-
-  /* Copy without reference to allissues array */
-  var shortAllIssuesJSON = []
-  try {
-    JSON.parse(JSON.stringify(allissues));
-    shortAllIssuesJSON = JSON.parse(JSON.stringify(allissues));
-  } catch (e) {
-    console.log(allissues);
-  }
-
-  /* Delete SVG images in copy of allissues and flatten object to simple array */
-
-  // const issue = [];
-  let id = 0
-  let url = page = fileExtension = description  = htmlElement = helpUrl = wcagID = impact = ""
-  var shortAllIssuesARRAY = []
-  for (let i in shortAllIssuesJSON) {
-    // console.log(shortAllIssuesJSON[i]);
-    id = shortAllIssuesJSON[i].id;
-    url = shortAllIssuesJSON[i].url;
-    page = shortAllIssuesJSON[i].page;
-    fileExtension = shortAllIssuesJSON[i].fileExtension;
-    // description  = shortAllIssuesJSON[i].description;
-    // htmlElement = shortAllIssuesJSON[i].htmlElement;
-    // helpUrl = shortAllIssuesJSON[i].helpUrl;
-    wcagID = shortAllIssuesJSON[i].wcagID;
-    impact = shortAllIssuesJSON[i].impact;
-    shortAllIssuesARRAY.push({id, url, page, fileExtension, description, htmlElement, helpUrl, wcagID, impact});
-  }
-
-  try {
-    const fs = require('fs');
-    const writeStream = fs.createWriteStream(`${storagePath}/reports/compiledResults.csv`);
-    writeStream.write(`shortAllIssuesARRAY \n`);
-    writeStream.write('[ "' + shortAllIssuesARRAY.join('","') + '" ]\n');
-  } catch (e) {
-    console.log(createWriteStream);
-  }
-};
-
 /* Write HTML from JSON to Mustache for whole page content */
 const writeHTML = async (allissues, storagePath) => {
 
@@ -199,7 +156,7 @@ const writeHTML = async (allissues, storagePath) => {
 
     // Save to file:
     await csv_a.toDisk(storagePath + "/reports/allissues.csv");
-    // console.log(await csv_c.toString());
+    console.log(await csv_c.toString());
   })();
 
   console.log("Writing results to ./reports/count.csv");
@@ -520,7 +477,6 @@ exports.mergeFiles = async randomToken => {
   if(allFiles.length > 0) {
     console.log("Writing issues to JSON & HTML.")
     await writeResults(allIssues, storagePath);
-    // await writeCSV(allIssues, storagePath);
     await writeHTML(allIssues, storagePath);
   } else {
     console.log("No entities in allFiles.");

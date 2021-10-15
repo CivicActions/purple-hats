@@ -189,12 +189,16 @@ if [ -d "results/$currentDate/$randomToken" ]; then
 
   # Compress most files and delete originals.
   echo "compressing files"
-  tar -cjvf "last-scan/$domain-$currentDate-all_issues.tar.bz2" "last-scan/all_issues" 2>/dev/null
-  rm -fr "last-scan/all_issues"
-  tar -cjvf "last-scan/reports/$domain-$currentDate-compiledResults.json.tar.bz2" "last-scan/reports/compiledResults.json" 2>/dev/null
-  rm "last-scan/reports/compiledResults.json"
-  tar -cjvf "last-scan/reports/$domain-$currentDate-report.html.tar.bz2" "last-scan/reports/report.html" 2>/dev/null
-  tar -cjvf "last-scan/reports/$domain-$currentDate-report.csv.bz2" "last-scan/reports/report.csv" 2>/dev/null
+  cd last-scan
+  tar -cjvf "$domain-$currentDate-all_issues.tar.bz2" "all_issues" 2>/dev/null
+  rm -fr "all_issues"
+  cd reports
+  tar -cjvf "$domain-$currentDate-compiledResults.json.tar.bz2" "compiledResults.json" 2>/dev/null
+  rm "compiledResults.json"
+  tar -cjvf "$domain-$currentDate-report.html.tar.bz2" "report.html" 2>/dev/null
+  tar -cjvf "$domain-$currentDate-allissues.csv.bz2" "allissues.csv" 2>/dev/null
+  rm "allissues.csv"
+  cd ../..
 
   # Make directory for domain and store prior scans
   echo "adding domain tracking"
