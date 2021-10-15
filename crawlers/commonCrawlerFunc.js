@@ -52,6 +52,16 @@ exports.createApifySubFolders = async randomToken => {
 };
 
 exports.gotoFunction = async ({ request, page }) => {
+
+  // reduce duplication of redirects - https://github.com/puppeteer/puppeteer/issues/1132#issuecomment-393724933
+  await page.setRequestInterception(true);
+  page.on('request', request => {
+    if (request.isNavigationRequest() && request.redirectChain().length)
+      request.abort();
+    else
+      request.continue();
+  });
+
   return page.goto(request.url, { waitUntil: 'networkidle2' }, { timeout: 30000 });
 };
 
