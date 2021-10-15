@@ -1,5 +1,5 @@
 const fs = require('fs-extra');
-const { a11yDataStoragePath, allIssueFileName } = require('./constants/constants');
+const { a11yDataStoragePath, allIssueFileName, invalidURLends } = require('./constants/constants');
 
 exports.getHostnameFromRegex = url => {
   // run against regex
@@ -24,36 +24,10 @@ exports.getCurrentTime = () => {
   });
 };
 
-exports.validateUrl = url => {
-  const invalidURLends = [
-    '.gif',
-    '.jpg',
-    '.jpeg',
-    '.png',
-    '.pdf',
-    '.doc',
-    '.docx',
-    '.css',
-    '.svg',
-    '.js',
-    '.ts',
     '.xml',
-    '.csv',
-    '.tgz',
-    '.zip',
-    '.xls',
-    '.xlsx',
-    '.ppt',
     '.pptx',
     '.ico',
     '.woff',
-    '.webp',
-    '.avif',
-    '.epub',
-  ];
-  return !invalidURLends.some(urlEnd => url.includes(urlEnd));
-};
-
 const getStoragePath = randomToken => {
   const date = new Date();
   const currentDate = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;

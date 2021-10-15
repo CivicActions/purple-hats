@@ -10,11 +10,49 @@ exports.waitTime = 0;
 
 exports.maxConcurrency = 5;
 
-// CHECK - utils.js has very similar const invalidURLends.
+// Apify's pseudoUrls https://sdk.apify.com/docs/api/pseudo-url
 exports.pseudoUrls = host => [
   // eslint-disable-next-line no-useless-escape
-  `[.*(?<!mailto.*)]${host}[(?!.*\.(gif|jpg|jpeg|png|webp|avif|pdf|epub|mobi|doc|docx|css|svg|js|ts|xml|csv|tgz|zip|xls|xlsx|ppt|pptx|ico|woff)).*]`,
+  `[.*(?<!mailto.*)]${host}[(?!.*\.(example|extension)).*]`,
 ];
+
+exports.validateUrl = url => {
+  invalidURLends = [
+    '.jpg',
+    '.jpeg',
+    '.png',
+    '.webp',
+    '.avif',
+    '.svg',
+    '.pdf',
+    '.epub',
+    '.mobi',
+    '.doc',
+    '.docx',
+    '.css',
+    '.svg',
+    '.js',
+    '.ts',
+    '.xml',
+    '.csv',
+    '.txt',
+    '.tgz',
+    '.zip',
+    '.xls',
+    '.xlsx',
+    '.ppt',
+    '.pptx',
+    '.ico',
+    '.woff',
+    '.mp3',
+    '.mp4',
+    '.mov',
+    '.swf',
+    '.xml',
+    '.rss',
+  ];
+  return !invalidURLends.some(urlEnd => url.includes(urlEnd));
+};
 
 exports.urlsCrawledObj = {
   scanned: [],

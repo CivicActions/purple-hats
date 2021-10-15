@@ -5,8 +5,8 @@ const {
   runAxeScript,
   handleFailedRequestFunction,
 } = require('./commonCrawlerFunc');
-const { validateUrl } = require('../utils');
-const { maxRequestsPerCrawl, maxConcurrency, urlsCrawledObj } = require('../constants/constants');
+// const {  } = require('../utils');
+const { maxRequestsPerCrawl, maxConcurrency, urlsCrawledObj, validateUrl } = require('../constants/constants');
 
 exports.crawlSitemap = async (sitemapUrl, randomToken, host) => {
   const urlsCrawled = { ...urlsCrawledObj };
