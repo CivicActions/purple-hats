@@ -19,12 +19,13 @@ exports.combineRun = async details => {
       wappalyzer: process.env.WAPPALYZER,
       email: process.env.EMAIL,
       excludeExt: process.env.EXCLUDEEXT,
+      excludeMore: process.env.EXCLUDEMORE,
       number: process.env.NUMBER,
     };
 
   }
 
-  const { type, url, randomToken, wappalyzer, email, excludeExt, number } = envDetails;
+  const { type, url, randomToken, wappalyzer, email, excludeExt, excludeMore, number } = envDetails;
 
   const host = getHostnameFromRegex(url);
 
@@ -41,8 +42,10 @@ exports.combineRun = async details => {
   // global.maxRequestsPerCrawl = number; // Not getting passed along
 
   const excludeExtArr = excludeExt.substring(1).split('.');
-  global.excludeExtArr = excludeExtArr;
-
+  console.log("Exclude: ")
+  console.log(excludeExtArr);
+  const excludeMoreArr = excludeMore.substring(1).split('|');
+  console.log(excludeMoreArr);
 
 /* I couldn't override the constant.js and avoid a "ApifyClientError: Parameter "options.maxRequestsPerCrawl" of type Maybe Number" error
   var maxRequestsPerCrawl = 0;
@@ -57,11 +60,11 @@ exports.combineRun = async details => {
   let urlsCrawled;
   switch (type) {
     case 'crawlSitemap':
-      urlsCrawled = await crawlSitemap(url, randomToken, host);
+      urlsCrawled = await crawlSitemap(url, randomToken, host, excludeExtArr, excludeMoreArr);
       break;
 
     case 'crawlDomain':
-      urlsCrawled = await crawlDomain(url, randomToken, host);
+      urlsCrawled = await crawlDomain(url, randomToken, host, excludeExtArr, excludeMoreArr);
       break;
 
     default:

@@ -20,9 +20,10 @@ echo "Welcome to CivicActions' Purple Hats Accessibility Testing Tool!"
 DOMAINNAME=""                             # https://www.example.com
 SCANTYPE=""                               # domain or sitemap
 EMAIL=""                                  # Send HTML email to on completion
-EXCLUDEEXT=""                             # Exclude extensions
-NUMBER=2000               # NOT WORKING WITH Apify - Maximum number of pages to crawl
 WAPPALYZER=0                              # Set to 1 to enable wappalyzer
+EXCLUDEEXT=""                             # Exclude by file extension
+EXCLUDEMORE=""                            # Exclude by string separated by "|"
+NUMBER=2000               # NOT WORKING WITH Apify - Maximum number of pages to crawl
 OPENBROWSER=1                             # By default open a browser after the script is run
 
 # usage() {                                 # Function: Print a help message.
@@ -32,7 +33,7 @@ OPENBROWSER=1                             # By default open a browser after the 
 #  usage
 #  exit 1
 #}
-while getopts ":d:s:t:e:o:x:w:n:" options; do         # Loop: Get the next option;
+while getopts ":d:s:t:e:o:w:x:y:n:" options; do         # Loop: Get the next option;
                                           # use silent error checking;
                                           # options n and t take arguments.
   case "${options}" in                    #
@@ -40,22 +41,25 @@ while getopts ":d:s:t:e:o:x:w:n:" options; do         # Loop: Get the next optio
       DOMAINNAME=${OPTARG}                      # Set $DOMAINNAME to specified value.
       ;;
     s)
-      SCANTYPE=${OPTARG}                      # Set $SCANTYPE to specified value.
+      SCANTYPE=${OPTARG}                        # Set $SCANTYPE to specified value.
       ;;
     t)
-      TIME2WAIT=${OPTARG}                   # Set $TIME2WAIT between crawls: 0
+      TIME2WAIT=${OPTARG}                       # Set $TIME2WAIT between crawls: 0
       ;;
     e)
-      EMAIL=${OPTARG}                      # Set $EMAIL to specified value.
+      EMAIL=${OPTARG}                           # Set $EMAIL to specified value.
       ;;
     o)
-      OPENBROWSER=${OPTARG}                      # Disable launching browser: 0
+      OPENBROWSER=${OPTARG}                     # Disable launching browser: 0
+      ;;
+    w)
+      WAPPALYZER=${OPTARG}                      # Enable wappalyzer: 1
       ;;
     x)
       EXCLUDEEXT=${OPTARG}                      # Set $EXCLUDEEXT to specified value.
       ;;
-    w)
-      WAPPALYZER=${OPTARG}                      # Enable wappalyzer: 1
+    y)
+      EXCLUDEMORE=${OPTARG}                     # Set $EXCLUDEMORE to specified string.
       ;;
     n)                                    # If the option is n,
       NUMBER=${OPTARG}                     # Set $NUMBER to specified value.
@@ -172,7 +176,7 @@ if [[ $WAPPALYZER == 1 ]] ; then
   fi
 fi
 
-URL="$page" LOGINID="$login_id" LOGINPWD="$login_pwd" IDSEL="$id_selector" PWDSEL="$pwd_selector" SUBMIT="$btn_selector" RANDOMTOKEN="$randomToken" TYPE="$crawler" TIME2WAIT="$TIME2WAIT" WAPPALYZER="$wappalyzer" NUMBER="$NUMBER" EMAIL="$EMAIL" EXCLUDEEXT="$EXCLUDEEXT"  node -e 'require("./combine").combineRun()' | tee errors.txt
+URL="$page" LOGINID="$login_id" LOGINPWD="$login_pwd" IDSEL="$id_selector" PWDSEL="$pwd_selector" SUBMIT="$btn_selector" RANDOMTOKEN="$randomToken" TYPE="$crawler" TIME2WAIT="$TIME2WAIT" WAPPALYZER="$wappalyzer" NUMBER="$NUMBER" EMAIL="$EMAIL" EXCLUDEEXT="$EXCLUDEEXT" EXCLUDEMORE="$EXCLUDEMORE" node -e 'require("./combine").combineRun()' | tee errors.txt
 
 # Verify that the newly generated directory exists
 if [ -d "results/$currentDate/$randomToken" ]; then

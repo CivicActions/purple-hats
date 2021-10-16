@@ -394,9 +394,6 @@ const flattenAxeResults = async rPath => {
 
       ++id;
 
-      // If an array needs to be excluded, skip to the next one.
-      if (!fileExtension || !excludeExtArr.includes(fileExtension)) {
-
         /* Get string from wcagID */
         var wcagID = '';
         try {
@@ -444,7 +441,6 @@ const flattenAxeResults = async rPath => {
           disabilities,
           disabilityIcons,
         });
-      }
     });
   });
 

@@ -50,6 +50,7 @@ exports.validateUrl = url => {
     '.swf',
     '.xml',
     '.rss',
+    '.atom',
   ];
   return !invalidURLends.some(urlEnd => url.includes(urlEnd));
 };

@@ -15,7 +15,7 @@ const {
   validateUrl,
 } = require('../constants/constants');
 
-exports.crawlDomain = async (url, randomToken, host) => {
+exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreArr) => {
   const urlsCrawled = { ...urlsCrawledObj };
 
   const { dataset, requestQueue } = await createApifySubFolders(randomToken);
@@ -31,8 +31,17 @@ exports.crawlDomain = async (url, randomToken, host) => {
       if (location.host.includes(host)) {
 
         if (validateUrl(currentUrl)) {
-          const results = await runAxeScript(page, host);
 
+/*
+          // If an array needs to be excluded, skip to the next one.
+          if (excludeExtArr.includes(fileExtension)) {
+            console.log("Excluded extension " + page);
+          } else if (excludeMoreArr.includes(page)) {
+            console.log("Excluded string " + page);
+          } else {
+*/
+
+          const results = await runAxeScript(page, host);
                   // Check readability of the page
                   getPage(currentUrl, function(err, article, meta, callback) {
                     try {
@@ -82,6 +91,7 @@ exports.crawlDomain = async (url, randomToken, host) => {
           }
           urlsCrawled.invalid.push(currentUrl);
         }
+
 
         await Apify.utils.enqueueLinks({
           page,
