@@ -183,59 +183,68 @@ if [ -d "results/$currentDate/$randomToken" ]; then
   domain=$(echo "$page" | awk -F/ '{print $3}')
 
   # Add simlinks for simpler access
-  echo "adding sybolic links"
+  echo "adding symbolic link to last scan $domain"
   ln -sfn "results/$currentDate/$randomToken" "last-scan"
   cd results
-  ln -sfn "$currentDate/$randomToken" "${domain}_last"
-  cd "$currentDate"
-  ln -sfn "$randomToken" "$domain"
-  cd ../..
 
-  # Compress most files and delete originals.
-  echo "compressing files"
-  cd last-scan
-  tar -cjvf "$domain-$currentDate-all_issues.tar.bz2" "all_issues" 2>/dev/null
-  rm -fr "all_issues"
-  cd reports
-  tar -cjvf "$domain-$currentDate-compiledResults.json.tar.bz2" "compiledResults.json" 2>/dev/null
-  rm "compiledResults.json"
-  tar -cjvf "$domain-$currentDate-report.html.tar.bz2" "report.html" 2>/dev/null
-  tar -cjvf "$domain-$currentDate-allissues.csv.bz2" "allissues.csv" 2>/dev/null
-  rm "allissues.csv"
-  cd ../..
+  # Copy over other links only if the .html report is successfully written
+  if ls "$currentDate/$randomToken/reports/report.html" >> /dev/null 2>&1
+    then
+    echo "adding more symbolic links"
+    ln -sfn "$currentDate/$randomToken"
+    cd "$currentDate"
+    ln -sfn "$randomToken" "$domain"
+    cd ../..
 
-  # Make directory for domain and store prior scans
-  echo "adding domain tracking"
-  cd results
-  ln -sfn "$currentDate/$randomToken" "last-scan"
-  mkdir "${domain}_reports"
-  cd "${domain}_reports"
-  ln -sfn "../$currentDate/$randomToken" "$currentDate"
+    # Compress most files and delete originals.
+    echo "compressing files"
+    cd last-scan
+    tar -cjvf "$domain-$currentDate-all_issues.tar.bz2" "all_issues" 2>/dev/null
+    rm -fr "all_issues"
+    cd reports
+    tar -cjvf "$domain-$currentDate-compiledResults.json.tar.bz2" "compiledResults.json" 2>/dev/null
+    rm "compiledResults.json"
+    tar -cjvf "$domain-$currentDate-report.html.tar.bz2" "report.html" 2>/dev/null
+    tar -cjvf "$domain-$currentDate-allissues.csv.bz2" "allissues.csv" 2>/dev/null
+    rm "allissues.csv"
+    cd ../..
 
-  # Add links to make it easier to access reports from last-scan directory
-  echo "renaming reports"
-  cd ../last-scan/reports
-  mv report.html "$domain-$currentDate-report.html"
-  ln  -sfn "$domain-$currentDate-report.html" report.html
-  cd ..
-  ln  -sfn "reports/$domain-$currentDate-report.html" report.html
-  cd ../..
+    # Make directory for domain and store prior scans
+    echo "adding domain tracking - $domain"
+    cd results
+    ln -sfn "$currentDate/$randomToken" "last-scan"
+    mkdir "${domain}_reports"
+    cd "${domain}_reports"
+    ln -sfn "../$currentDate/$randomToken" "$currentDate"
 
-  # Test for the command before attempting to open the report
-  if [[ "$OPENBROWSER" == 1 ]]; then
-    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-      echo "Open in Firefox"
-      firefox -url "last-scan/report.html"
-    elif [[ "$OSTYPE" == "darwin"* ]]; then
-      echo "Open in default browser"
-      open "last-scan/report.html"
+    # Add links to make it easier to access reports from last-scan directory
+    echo "renaming reports"
+    cd ../last-scan/reports
+    mv report.html "$domain-$currentDate-report.html"
+    ln  -sfn "$domain-$currentDate-report.html" report.html
+    cd ..
+    ln  -sfn "reports/$domain-$currentDate-report.html" report.html
+    cd ../..
+
+    # Test for the command before attempting to open the report
+    if [[ "$OPENBROWSER" == 1 ]]; then
+      if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        echo "Open in Firefox"
+        firefox -url "last-scan/report.html"
+      elif [[ "$OSTYPE" == "darwin"* ]]; then
+        echo "Open in default browser"
+        open "last-scan/report.html"
     else
-      echo "The scan has been completed."
-      current_dir=$(pwd)
-      reportPath="$current_dir/results/$currentDate/$randomToken/reports/report.html"
-      echo "You can find the report in $reportPath"
-    fi
+        echo "The scan has been completed."
+        current_dir=$(pwd)
+        reportPath="$current_dir/results/$currentDate/$randomToken/reports/report.html"
+        echo "You can find the report in $reportPath"
+    fi # End [[ "$OPENBROWSER" == 1 ]]; then
+fi
+  else
+    echo "No report.html file for $domain"
   fi
+
 
   # Provide PDF version if available
   # NOTE: This should just be done with puppeteer which is already required - https://github.com/puppeteer/puppeteer/
@@ -245,7 +254,7 @@ if [ -d "results/$currentDate/$randomToken" ]; then
     wkhtmltopdf -q --enable-javascript --javascript-delay 10000 "last-scan/reports/report.html" "last-scan/reports/$domain-$currentDate-report.pdf"
   else
     echo "If you want a PDF export, then install wkhtmltopdf, i.e. brew install wkhtmltopdf";
-  fi
+  fi # End command -v wkhtmltopdf
 
 else
     echo "WARNING: An unexpected error has occurred. Please try again later."

@@ -42,7 +42,7 @@ exports.combineRun = async details => {
   // global.maxRequestsPerCrawl = number; // Not getting passed along
 
   const excludeExtArr = excludeExt.substring(1).split('.');
-  console.log("Exclude: ")
+  console.log("Exclude: ");
   console.log(excludeExtArr);
   const excludeMoreArr = excludeMore.substring(1).split('|');
   console.log(excludeMoreArr);
