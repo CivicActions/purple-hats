@@ -56,9 +56,9 @@
                   {{ wcagCountsContent }}
                 </p>
                 <p>
-                  {{ sentenceCountMaxText }} <br />
-                  {{ fleschKincaidGradeMaxText }} <br />
-                  {{ difficultWordsMaxText }}
+                  {{{ sentenceCountMaxText }}} <br />
+                  {{{ fleschKincaidGradeMaxText }}} <br />
+                  {{{ difficultWordsMaxText }}}
                </p>
               </div>
             </div>
@@ -247,8 +247,8 @@ class="{{impact}}-fill-icon"
                   <td class="issue">{{description}}<br>
                   {{#wcagLinks}}
                   <a class="wcag-clause" href="{{href}}" target="_blank">WCAG {{wcag}}</a>
-                  {{/wcagLinks}} <br />
-                  <em>Page has {{sentenceCount}} sentences and {{difficultWords}} difficult words and gets a Flesch Kincaid Grade of {{fleschKincaidGrade}}.</em>
+                  {{/wcagLinks}}<br>
+                  {{{languageSummary}}}
                   </td>
                   <td class="page"><a href="{{url}}" target="_blank">{{page}}</a></td>
                   <td class="element">{{htmlElement}}</td>

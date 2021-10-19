@@ -120,25 +120,26 @@ const writeHTML = async (allissues, storagePath) => {
     } else {
       allissues[i].disabilities = "";
     }
+
     if (sentenceCountMax == 0 || allissues[i].sentenceCount > sentenceCountMax ) {
-      sentenceCountMax = allissues[i].sentenceCount;
-      var sentenceCountMaxText = "Most sentences on page: " + allissues[i].sentenceCount + " - " + allissues[i].page;
+      if (!((allissues[i].sentenceCount == null) || (allissues[i].sentenceCount == undefined) || (typeof allissues[i].sentenceCount !== 'number'))) {
+        sentenceCountMax = allissues[i].sentenceCount;
+      }
+      var sentenceCountMaxText = "Most sentences on page: " + sentenceCountMax + " - <a href='" + domainURL + allissues[i].page + "'>" + allissues[i].page + "</a>";
     }
     if (fleschKincaidGradeMax == 0 || allissues[i].fleschKincaidGrade > fleschKincaidGradeMax ) {
-      fleschKincaidGradeMax = allissues[i].fleschKincaidGrade;
-      var fleschKincaidGradeMaxText = "Worst Flesch Kincaid score: " + allissues[i].fleschKincaidGrade + " - " + allissues[i].page;
+      if (!((allissues[i].fleschKincaidGrade == null) || (allissues[i].fleschKincaidGrade == undefined) || (typeof allissues[i].fleschKincaidGrade !== 'number'))) {
+        fleschKincaidGradeMax = allissues[i].fleschKincaidGrade;
+      }
+      var fleschKincaidGradeMaxText = "Worst Flesch Kincaid score: " + fleschKincaidGradeMax + " - <a href='" + domainURL + allissues[i].page + "'>" + allissues[i].page + "</a>";
     }
-    /* Probably best to jsut stick to Flesch Kincaid
-    if (automatedReadabilityMax == 0 || allissues[i].automatedReadabilityIndex > automatedReadabilityMax ) {
-      automatedReadabilityMax = allissues[i].automatedReadabilityIndex;
-      automatedReadabilityMaxText = "Worst Automated Readability score: " + allissues[i].automatedReadabilityIndex + " - " + allissues[i].page;
+    if ((difficultWordsMax == 0) || (allissues[i].difficultWords > difficultWordsMax) ) {
+      if (!((allissues[i].difficultWords == null) || (allissues[i].difficultWords == undefined) || (typeof allissues[i].difficultWords !== 'number'))) {
+        difficultWordsMax = allissues[i].difficultWords;
+      }
+      var difficultWordsMaxText = "Most difficult words: " + difficultWordsMax + " - <a href='" + domainURL + allissues[i].page + "'>" + allissues[i].page + "</a>";
     }
-    */
-    if (difficultWordsMax == 0 || allissues[i].difficultWords > difficultWordsMax ) {
-      difficultWordsMax = allissues[i].difficultWords;
-      var difficultWordsMaxText = "Most difficult words: " + allissues[i].difficultWords + " - " + allissues[i].page;
-    }
-  }
+  } // END for (let i in allissues)
 
 /*
   I should be able to do the average score, with seomething like:
@@ -156,7 +157,7 @@ const writeHTML = async (allissues, storagePath) => {
 
     // Save to file:
     await csv_a.toDisk(storagePath + "/reports/allissues.csv");
-    console.log(await csv_c.toString());
+    // console.log(await csv_a.toString());
   })();
 
   console.log("Writing results to ./reports/count.csv");
@@ -371,7 +372,6 @@ const flattenAxeResults = async rPath => {
   if ( typeof parsedContent.readability !== 'undefined' && parsedContent.readability ) {
     var sentenceCount = parsedContent.readability.sentenceCount;
     var fleschKincaidGrade = parsedContent.readability.fleschKincaidGrade;
-    var automatedReadabilityIndex = parsedContent.readability.automatedReadabilityIndex;
     var difficultWords = parsedContent.readability.difficultWords;
   }
 
@@ -396,12 +396,14 @@ const flattenAxeResults = async rPath => {
 
         /* Get string from wcagID */
         var wcagID = '';
-        try {
-          JSON.parse(JSON.stringify(wcag).toString());
-          wcagID = JSON.parse(JSON.stringify(wcag)).toString();
-        } catch (e) {
-          console.log("Issue loading wcag JSON string in " + id + " when looking up wcag value " + wcag + " on " + page);
-          console.log(wcag);
+        if (wcag !== undefined) {
+          try {
+            JSON.parse(JSON.stringify(wcag).toString());
+            wcagID = JSON.parse(JSON.stringify(wcag)).toString();
+          } catch (e) {
+            console.log("Issue loading wcag JSON string in " + id + " when looking up wcag value " + wcag + " on " + page);
+            console.log(wcag);
+          }
         }
 
         /* Get links to WCAG */
@@ -421,15 +423,26 @@ const flattenAxeResults = async rPath => {
           wcagCounts.push(wcagID);
         }
 
+        var languageSummary = '';
+        if (!((sentenceCount == null) || (sentenceCount == 'undefined') || (typeof sentenceCount !== 'number'))) {
+          languageSummary += sentenceCount + " sentences; ";
+        }
+        if (!((difficultWords == null) || (difficultWords == 'undefined') || (typeof difficultWords !== 'number'))) {
+          languageSummary += difficultWords + " difficult words; ";
+        }
+        if (!((fleschKincaidGrade == null) || (fleschKincaidGrade == 'undefined') || (typeof fleschKincaidGrade !== 'number'))) {
+          languageSummary += fleschKincaidGrade + " Flesch Kincaid Grade ";
+        }
+
         /* Build array with all of the issues */
         flattenedIssues.push({
           id,
           url,
           page,
+          languageSummary,
           sentenceCount,
-          fleschKincaidGrade,
-          automatedReadabilityIndex,
           difficultWords,
+          fleschKincaidGrade,
           fileExtension,
           description,
           impact,
