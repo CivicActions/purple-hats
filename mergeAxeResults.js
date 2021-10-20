@@ -429,19 +429,7 @@ const flattenAxeResults = async (rPath, storagePath) => {
           wcagCounts.push(wcagID);
         }
 
-        var languageSummary = '';
-        if (!((sentenceCount == null) || (sentenceCount == 'undefined') || (typeof sentenceCount !== 'number'))) {
-          languageSummary += sentenceCount + " sentences; ";
-        }
-        if (!((difficultWords == null) || (difficultWords == 'undefined') || (typeof difficultWords !== 'number'))) {
-          languageSummary += difficultWords + " difficult words; ";
-        }
-        if (!((fleschKincaidGrade == null) || (fleschKincaidGrade == 'undefined') || (typeof fleschKincaidGrade !== 'number'))) {
-          languageSummary += fleschKincaidGrade + " Flesch Kincaid Grade ";
-        }
-
         // Aggregate plain language issues
-
         if ((page != pageNew)) {
           // console.log(pageNew + " new and " + page + "page ");
           pageNew = page;
@@ -456,8 +444,22 @@ const flattenAxeResults = async (rPath, storagePath) => {
             await csv_d.toDisk(storagePath + "/reports/plainLanguage.csv", { append: true });
             // console.log(await csv_d.toString());
           })();
+
         }
 
+        // Count difficult works for eacy page and add to error link
+        var languageSummary = '';
+        console.log(page + " page " + fleschKincaidGrade + " fk " + difficultWords  + " dw " + sentenceCount);
+        if (!((sentenceCount == null) || (sentenceCount == 'undefined') || (typeof sentenceCount !== 'number') || (sentenceCount <= 2))) {
+          languageSummary += sentenceCount + " sentences; ";
+        }
+        if (!((difficultWords == null) || (difficultWords == 'undefined') || (typeof difficultWords !== 'number') || (sentenceCount <= 2))) {
+          languageSummary += difficultWords + " difficult words; ";
+        }
+        if (!((fleschKincaidGrade == null) || (fleschKincaidGrade == 'undefined') || (typeof fleschKincaidGrade !== 'number') || (fleschKincaidGrade < 0) || (sentenceCount <= 2))) {
+          languageSummary += fleschKincaidGrade + " Flesch Kincaid Grade ";
+        }
+        console.log(id + " id " + page + " page & language summary " +  languageSummary);
 
         /* Build array with all of the issues */
         flattenedIssues.push({
@@ -516,5 +518,25 @@ exports.mergeFiles = async randomToken => {
   } else {
     console.log("No entities in allFiles.");
   }
+
+/*
+console.log(domainURL);
+      const fs = require("fs")
+      fs.readdir("./results/${domainURL}_reports/", (err, files) => { console.log(files) })
+      var dateFolders = fs.readdirSync("./results/${domainURL}_reports/")
+
+      var date = "";
+      for (let i in dateFolders) {
+        console.log(dateFolders[i]);
+        date = dateFolders[i];
+// storagePath + "/reports/report.html"
+//   const currentDate = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+
+const fs2 = require("fs")
+fs2.readdir("./results/${domainURL}_reports/${date}/reports/", (err, files) => { console.log(files) })
+var dateFolders = f2s.readdirSync("./results/${domainURL}_reports/${date}/reports/")
+*/
+
+  //    }
 
 };
