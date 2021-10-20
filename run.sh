@@ -207,6 +207,8 @@ if [ -d "results/$currentDate/$randomToken" ]; then
     tar -cjvf "$domain-$currentDate-report.html.tar.bz2" "report.html" 2>/dev/null
     tar -cjvf "$domain-$currentDate-allissues.csv.bz2" "allissues.csv" 2>/dev/null
     rm "allissues.csv"
+    tar -cjvf "$domain-$currentDate-plainLanguage.csv.bz2" "plainLanguage.csv" 2>/dev/null
+    rm "plainLanguage.csv"
     cd ../..
 
     # Make directory for domain and store prior scans

@@ -121,24 +121,30 @@ const writeHTML = async (allissues, storagePath) => {
       allissues[i].disabilities = "";
     }
 
+    var sentenceCount = fleschKincaidGrade = difficultWordsMax = 0;
+    var page = allissues[i].page
     if (sentenceCountMax == 0 || allissues[i].sentenceCount > sentenceCountMax ) {
       if (!((allissues[i].sentenceCount == null) || (allissues[i].sentenceCount == undefined) || (typeof allissues[i].sentenceCount !== 'number'))) {
-        sentenceCountMax = allissues[i].sentenceCount;
+        sentenceCount = allissues[i].sentenceCount;
+        sentenceCountMax = sentenceCount;
       }
-      var sentenceCountMaxText = "Most sentences on page: " + sentenceCountMax + " - <a href='" + domainURL + allissues[i].page + "'>" + allissues[i].page + "</a>";
+      var sentenceCountMaxText = "Most sentences on page: " + sentenceCountMax + " - <a href='" + domainURL + page + "'>" + page + "</a>";
     }
     if (fleschKincaidGradeMax == 0 || allissues[i].fleschKincaidGrade > fleschKincaidGradeMax ) {
       if (!((allissues[i].fleschKincaidGrade == null) || (allissues[i].fleschKincaidGrade == undefined) || (typeof allissues[i].fleschKincaidGrade !== 'number'))) {
-        fleschKincaidGradeMax = allissues[i].fleschKincaidGrade;
+        fleschKincaidGrade = allissues[i].fleschKincaidGrade;
+        fleschKincaidGradeMax = fleschKincaidGrade;
       }
-      var fleschKincaidGradeMaxText = "Worst Flesch Kincaid score: " + fleschKincaidGradeMax + " - <a href='" + domainURL + allissues[i].page + "'>" + allissues[i].page + "</a>";
+      var fleschKincaidGradeMaxText = "Worst Flesch Kincaid score: " + fleschKincaidGradeMax + " - <a href='" + domainURL + page + "'>" + page + "</a>";
     }
     if ((difficultWordsMax == 0) || (allissues[i].difficultWords > difficultWordsMax) ) {
       if (!((allissues[i].difficultWords == null) || (allissues[i].difficultWords == undefined) || (typeof allissues[i].difficultWords !== 'number'))) {
+        difficultWords = allissues[i].difficultWords;
         difficultWordsMax = allissues[i].difficultWords;
       }
-      var difficultWordsMaxText = "Most difficult words: " + difficultWordsMax + " - <a href='" + domainURL + allissues[i].page + "'>" + allissues[i].page + "</a>";
+      var difficultWordsMaxText = "Most difficult words: " + difficultWordsMax + " - <a href='" + domainURL + page + "'>" + page + "</a>";
     }
+
   } // END for (let i in allissues)
 
 /*
@@ -365,9 +371,8 @@ const ObjectsToCsv_wc = require('objects-to-csv');
   await fs.writeFile(reportPath, output);
 };
 
-const flattenAxeResults = async rPath => {
+const flattenAxeResults = async (rPath, storagePath) => {
   const parsedContent = await parseContentToJson(rPath);
-  // var sentenceCountTotal = difficultWordsTotal = fleschKincaidGradeTotal = 0;
 
   if ( typeof parsedContent.readability !== 'undefined' && parsedContent.readability ) {
     var sentenceCount = parsedContent.readability.sentenceCount;
@@ -377,10 +382,11 @@ const flattenAxeResults = async rPath => {
 
   const flattenedIssues = [];
   const { url, page, errors } = parsedContent;
+  var plainLanguageIssues = [];
+  var fileExtension = pageNew = '';
   errors.forEach(error => {
 
     /* pull out file extension from path */
-    var fileExtension = '';
     if (page.includes(".") && !page.includes("@")) {
        fileExtension = page.split('.').pop();
        fileExtension = fileExtension.substring(0, fileExtension.indexOf('?'));
@@ -434,6 +440,25 @@ const flattenAxeResults = async rPath => {
           languageSummary += fleschKincaidGrade + " Flesch Kincaid Grade ";
         }
 
+        // Aggregate plain language issues
+
+        if ((page != pageNew)) {
+          // console.log(pageNew + " new and " + page + "page ");
+          pageNew = page;
+
+          plainLanguageIssues.push([url, page, sentenceCount, difficultWords, fleschKincaidGrade]);
+
+          const ObjectsToCsv_d = require('objects-to-csv');
+          (async () => {
+            const csv_d = new ObjectsToCsv_d(plainLanguageIssues);
+
+            // Save to file:
+            await csv_d.toDisk(storagePath + "/reports/plainLanguage.csv", { append: true });
+            // console.log(await csv_d.toString());
+          })();
+        }
+
+
         /* Build array with all of the issues */
         flattenedIssues.push({
           id,
@@ -454,8 +479,9 @@ const flattenAxeResults = async rPath => {
           disabilities,
           disabilityIcons,
         });
-    });
-  });
+
+    }); // End error.fixes.forEach
+  }); // errors.forEach(error
 
   return Promise.all(
     flattenedIssues.map(async issue => {
@@ -475,7 +501,7 @@ exports.mergeFiles = async randomToken => {
   await Promise.all(
     allFiles.map(async file => {
       const rPath = `${directory}/${file}`;
-      const flattenedIssues = await flattenAxeResults(rPath);
+      const flattenedIssues = await flattenAxeResults(rPath, storagePath);
 
       allIssues = allIssues.concat(flattenedIssues);
 
