@@ -1,15 +1,28 @@
-const { crawlSitemap } = require('./crawlers/crawlSitemap');
-const { crawlDomain } = require('./crawlers/crawlDomain');
+const {
+  crawlSitemap
+} = require('./crawlers/crawlSitemap');
+const {
+  crawlDomain
+} = require('./crawlers/crawlDomain');
 
-const { mergeFiles } = require('./mergeAxeResults');
-const { getHostnameFromRegex, createAndUpdateFolders } = require('./utils');
-const { a11yStorage } = require('./constants/constants');
+const {
+  mergeFiles
+} = require('./mergeAxeResults');
+const {
+  getHostnameFromRegex,
+  createAndUpdateFolders
+} = require('./utils');
+const {
+  a11yStorage
+} = require('./constants/constants');
 
 process.env.APIFY_LOCAL_STORAGE_DIR = a11yStorage;
 process.env.APIFY_HEADLESS = 1;
 
 exports.combineRun = async details => {
-  let envDetails = { ...details };
+  let envDetails = {
+    ...details
+  };
 
   if (typeof details === 'undefined') {
     envDetails = {
@@ -25,7 +38,16 @@ exports.combineRun = async details => {
 
   }
 
-  const { type, url, randomToken, wappalyzer, email, excludeExt, excludeMore, number } = envDetails;
+  const {
+    type,
+    url,
+    randomToken,
+    wappalyzer,
+    email,
+    excludeExt,
+    excludeMore,
+    number
+  } = envDetails;
 
   const host = getHostnameFromRegex(url);
 
@@ -47,34 +69,34 @@ exports.combineRun = async details => {
   const excludeMoreArr = excludeMore.substring(1).split('|');
   console.log(excludeMoreArr);
 
-/* I couldn't override the constant.js and avoid a "ApifyClientError: Parameter "options.maxRequestsPerCrawl" of type Maybe Number" error
-  var maxRequestsPerCrawl = 0;
-  if (number > absoluteMaxRequestsPerCrawl ) {
-    maxRequestsPerCrawl=absoluteMaxRequestsPerCrawl;
-  } else {
-    maxRequestsPerCrawl=number;
-  }
-  exports.maxRequestsPerCrawl;
-*/
+  /* I couldn't override the constant.js and avoid a "ApifyClientError: Parameter "options.maxRequestsPerCrawl" of type Maybe Number" error
+    var maxRequestsPerCrawl = 0;
+    if (number > absoluteMaxRequestsPerCrawl ) {
+      maxRequestsPerCrawl=absoluteMaxRequestsPerCrawl;
+    } else {
+      maxRequestsPerCrawl=number;
+    }
+    exports.maxRequestsPerCrawl;
+  */
 
   let urlsCrawled;
   switch (type) {
-    case 'crawlSitemap':
-      urlsCrawled = await crawlSitemap(url, randomToken, host, excludeExtArr, excludeMoreArr);
-      break;
+  case 'crawlSitemap':
+    urlsCrawled = await crawlSitemap(url, randomToken, host, excludeExtArr, excludeMoreArr);
+    break;
 
-    case 'crawlDomain':
-      urlsCrawled = await crawlDomain(url, randomToken, host, excludeExtArr, excludeMoreArr);
-      break;
+  case 'crawlDomain':
+    urlsCrawled = await crawlDomain(url, randomToken, host, excludeExtArr, excludeMoreArr);
+    break;
 
-    default:
-      break;
+  default:
+    break;
   }
 
   scanDetails.endTime = new Date().getTime();
   scanDetails.urlsCrawled = urlsCrawled;
   global.endTime = scanDetails.endTime;
-  var totalTimeSeconds = Math.round((endTime - startTime)/1000);
+  var totalTimeSeconds = Math.round((endTime - startTime) / 1000);
   var hours = (totalTimeSeconds / 3600);
   var rhours = Math.floor(hours);
   var minutes = (hours - rhours) * 60;

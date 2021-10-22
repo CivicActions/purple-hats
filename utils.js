@@ -1,5 +1,9 @@
 const fs = require('fs-extra');
-const { a11yDataStoragePath, allIssueFileName, invalidURLends } = require('./constants/constants');
+const {
+  a11yDataStoragePath,
+  allIssueFileName,
+  invalidURLends
+} = require('./constants/constants');
 
 exports.getHostnameFromRegex = url => {
   // run against regex

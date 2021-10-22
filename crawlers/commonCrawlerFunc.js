@@ -1,13 +1,25 @@
 const Apify = require('apify');
 const axe = require('axe-core');
-const { axeScript } = require('../constants/constants');
+const {
+  axeScript
+} = require('../constants/constants');
 
 const filterAxeResults = (results, host) => {
-  const { violations, url } = results;
+  const {
+    violations,
+    url
+  } = results;
   const page = url.split(host)[1];
 
   const errors = violations.map(violation => {
-    const { id, nodes, help, impact, helpUrl, errorCount } = violation;
+    const {
+      id,
+      nodes,
+      help,
+      impact,
+      helpUrl,
+      errorCount
+    } = violation;
     const fixes = nodes.map(node => {
       return {
         htmlElement: node.html,
@@ -48,10 +60,16 @@ exports.runAxeScript = async (page, host) => {
 exports.createApifySubFolders = async randomToken => {
   const dataset = await Apify.openDataset(randomToken);
   const requestQueue = await Apify.openRequestQueue(randomToken);
-  return { dataset, requestQueue };
+  return {
+    dataset,
+    requestQueue
+  };
 };
 
-exports.gotoFunction = async ({ request, page }) => {
+exports.gotoFunction = async ({
+  request,
+  page
+}) => {
 
   // reduce duplication of redirects - https://github.com/puppeteer/puppeteer/issues/1132#issuecomment-393724933
   await page.setRequestInterception(true);
@@ -62,9 +80,15 @@ exports.gotoFunction = async ({ request, page }) => {
       request.continue();
   });
 
-  return page.goto(request.url, { waitUntil: 'networkidle2' }, { timeout: 30000 });
+  return page.goto(request.url, {
+    waitUntil: 'networkidle2'
+  }, {
+    timeout: 30000
+  });
 };
 
-exports.handleFailedRequestFunction = async ({ request }) => {
+exports.handleFailedRequestFunction = async ({
+  request
+}) => {
   Apify.utils.log.error(`Failed Request - ${request.url}: ${request.errorMessages}`);
 };

@@ -1,7 +1,7 @@
 // for crawlers
 exports.axeScript = 'node_modules/axe-core/axe.min.js';
 
-exports.maxRequestsPerCrawl = 500;
+exports.maxRequestsPerCrawl = 10;
 // exports.absoluteMaxRequestsPerCrawl = 5000; // I'd like to be able to override this at the command line.
 
 exports.maxHTMLdisplay = 250;
