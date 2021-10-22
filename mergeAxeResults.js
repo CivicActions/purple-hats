@@ -2,6 +2,7 @@
 const fs = require('fs-extra');
 const path = require('path');
 const { parse } = require('json2csv');
+const csv = require('csv-parser');
 const Mustache = require('mustache');
 const axeIssuesList = require('./constants/axeTypes.json');
 const wcagList = require('./constants/wcagLinks.json');
@@ -166,10 +167,17 @@ const writeHTML = async (allissues, storagePath) => {
     // console.log(await csv_a.toString());
   })();
 
+  /* Grading evaluations - */
+  if (countURLsCrawled > 25) {
+  var grade = message = "";
+  var score = (minorCount + (moderateCount * 1.5) + (seriousCount * 2) + (criticalCount * 3)) / (countURLsCrawled * 5);
+  console.log("score (minor) + moderate*1.5 + serious*2 + critical*3 / urls*5 = " + score);
+
+
   console.log("Writing results to ./reports/count.csv");
   const ObjectsToCsv_c = require('objects-to-csv');
   (async () => {
-    let count_array = [{level: 'minor', count: minorCount }, {level: 'moderate', count: moderateCount }, {level: 'serious', count: seriousCount }, {level: 'critical', count: criticalCount }, {level: 'countURLs', count: countURLsCrawled }];
+    let count_array = [{level: 'minor', count: minorCount }, {level: 'moderate', count: moderateCount }, {level: 'serious', count: seriousCount }, {level: 'critical', count: criticalCount }, {level: 'countURLs', count: countURLsCrawled }, {level: 'score', count: score }];
     const csv_c = new ObjectsToCsv_c(count_array);
 
     // Save to file:
@@ -178,13 +186,6 @@ const writeHTML = async (allissues, storagePath) => {
   })();
 
   console.log("Writing HTML");
-
-  /* Grading evaluations - */
-  if (countURLsCrawled > 25) {
-  var grade = message = "";
-  var score = (minorCount + (moderateCount * 1.5) + (seriousCount * 2) + (criticalCount * 3)) / (countURLsCrawled * 5);
-  console.log("score (minor) + moderate*1.5 + serious*2 + critical*3 / urls*5 = " + score);
-
 
   // Scoring for grade
   // Score number = score (minor) + moderate*1.5 + serious*2 + critical*3 / urls*5
@@ -449,7 +450,7 @@ const flattenAxeResults = async (rPath, storagePath) => {
 
         // Count difficult works for eacy page and add to error link
         var languageSummary = '';
-        console.log(page + " page " + fleschKincaidGrade + " fk " + difficultWords  + " dw " + sentenceCount);
+        // console.log(page + " page " + fleschKincaidGrade + " fk " + difficultWords  + " dw " + sentenceCount);
         if (!((sentenceCount == null) || (sentenceCount == 'undefined') || (typeof sentenceCount !== 'number') || (sentenceCount <= 2))) {
           languageSummary += sentenceCount + " sentences; ";
         }
@@ -459,7 +460,7 @@ const flattenAxeResults = async (rPath, storagePath) => {
         if (!((fleschKincaidGrade == null) || (fleschKincaidGrade == 'undefined') || (typeof fleschKincaidGrade !== 'number') || (fleschKincaidGrade < 0) || (sentenceCount <= 2))) {
           languageSummary += fleschKincaidGrade + " Flesch Kincaid Grade ";
         }
-        console.log(id + " id " + page + " page & language summary " +  languageSummary);
+        // console.log(id + " id " + page + " page & language summary " +  languageSummary);
 
         /* Build array with all of the issues */
         flattenedIssues.push({
@@ -495,6 +496,7 @@ const flattenAxeResults = async (rPath, storagePath) => {
 };
 
 exports.mergeFiles = async randomToken => {
+  const { getCurrentTime, getHostnameFromRegex } = require('./utils');
   const storagePath = getStoragePath(randomToken);
   const directory = `${storagePath}/${allIssueFileName}`;
   let allIssues = [];
@@ -520,23 +522,83 @@ exports.mergeFiles = async randomToken => {
   }
 
 /*
-console.log(domainURL);
-      const fs = require("fs")
-      fs.readdir("./results/${domainURL}_reports/", (err, files) => { console.log(files) })
-      var dateFolders = fs.readdirSync("./results/${domainURL}_reports/")
+  const host = getHostnameFromRegex(domainURL);
+  // console.log(host);
 
-      var date = "";
-      for (let i in dateFolders) {
-        console.log(dateFolders[i]);
-        date = dateFolders[i];
-// storagePath + "/reports/report.html"
+  // console.log(domainURL);
+  // const fs = require("fs")
+  var rootDomainPath = "./results/" + host + "_reports/";
+  // console.log(rootDomainPath + " 1!");
+  // console.log(domainURL.replace('/', ''));
+  // console.log(domainURL.substring(6));
+  fs.readdir(rootDomainPath, (err, files) => { console.log(files) })
+  var dateFolders = fs.readdirSync(rootDomainPath)
+
+  // console.log("## " + dateFolders + " 1.5!")
+  var date = "";
+  const fs2 = require("fs")
+  for (let i in dateFolders) {
+    // console.log(" ## " + i + " " + dateFolders[i] + " 2!");
+    date = dateFolders[i];
+//    console.log(" ## " + i + " " + date + " 2.5!")
 //   const currentDate = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+    var rootDomainPathAndDate = rootDomainPath + "/" + date + "/reports";
+    // console.log(" ## " + i + " " + rootDomainPathAndDate + " 3!");
+    fs2.readdir(rootDomainPathAndDate, (err, files) => { console.log(files) })
+    var dateFiles = fs2.readdirSync(rootDomainPathAndDate)
+    // console.log(" ## " + i + " " + dateFiles + " 4!");
+    // console.log(typeof dateFiles)
 
-const fs2 = require("fs")
-fs2.readdir("./results/${domainURL}_reports/${date}/reports/", (err, files) => { console.log(files) })
-var dateFolders = f2s.readdirSync("./results/${domainURL}_reports/${date}/reports/")
+    for (let ii in dateFiles) {
+      var element = {};
+      var countArray = [];
+      if (dateFiles[ii] == "count.csv") {
+        console.log("We can get the number of axe errors");
+
+        const fs3 = require('fs');
+        var countCSV = rootDomainPathAndDate + "/count.csv";
+        fs3.createReadStream(countCSV)
+          .pipe(csv())
+          .on('data', (row) => {
+
+// element.date = date;
+// element.count = row;
+// dailyCount.push(element);
+            // console.log(row);
+            countArray.push(row);
+            console.log(countArray);
+
+            // countArray.date = row;
+            // console.log(countArray);
+          })
+          .on('end', () => {
+            console.log('CSV file successfully processed');
+          });
+
+      }
+      if (dateFiles[ii] == "wcagErrors.csv") {
+        console.log("We can get the number of WCAG errors");
+      }
+
+      element[ date ] = countArray;
+      console.log(element);
+      console.log(countArray + " count array !!");
+
+console.log("not the very end")
+
+
+
+    } // for (let ii in dateFiles)
+
+
+    element[ date ] = countArray;
+    console.log(element);
+    console.log(countArray + " count array !!");
+
+    console.log("very end")
+
+  }
+
 */
-
-  //    }
 
 };

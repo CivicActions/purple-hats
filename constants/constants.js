@@ -18,6 +18,7 @@ exports.pseudoUrls = host => [
 
 exports.validateUrl = url => {
   invalidURLends = [
+    '.gif',
     '.jpg',
     '.jpeg',
     '.png',
