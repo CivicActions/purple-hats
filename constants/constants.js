@@ -1,14 +1,16 @@
 // for crawlers
 exports.axeScript = 'node_modules/axe-core/axe.min.js';
 
-exports.maxRequestsPerCrawl = 10;
+exports.maxRequestsPerCrawl = 1000;
 // exports.absoluteMaxRequestsPerCrawl = 5000; // I'd like to be able to override this at the command line.
 
 exports.maxHTMLdisplay = 250;
 
-exports.waitTime = 0;
+// Not successfully adding time in crawlDomain.js
+exports.waitTime = 0; // in seconds
 
-exports.maxConcurrency = 5;
+// Only set higher with permission of site owner
+exports.maxConcurrency = 1;
 
 // Apify's pseudoUrls https://sdk.apify.com/docs/api/pseudo-url
 exports.pseudoUrls = host => [

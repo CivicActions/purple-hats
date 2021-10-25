@@ -1,3 +1,4 @@
+const csv = require('csv-parser');
 const {
   crawlSitemap
 } = require('./crawlers/crawlSitemap');
@@ -6,11 +7,12 @@ const {
 } = require('./crawlers/crawlDomain');
 
 const {
-  mergeFiles
+  mergeFiles,
+  storagePath
 } = require('./mergeAxeResults');
 const {
   getHostnameFromRegex,
-  createAndUpdateFolders
+  createAndUpdateFolders,
 } = require('./utils');
 const {
   a11yStorage
@@ -19,7 +21,7 @@ const {
 process.env.APIFY_LOCAL_STORAGE_DIR = a11yStorage;
 process.env.APIFY_HEADLESS = 1;
 
-exports.combineRun = async details => {
+exports.combineRun = async (details, storagePath) => {
   let envDetails = {
     ...details
   };
@@ -63,11 +65,12 @@ exports.combineRun = async details => {
   global.email = email;
   // global.maxRequestsPerCrawl = number; // Not getting passed along
 
+  // Highlight if strings or extensions are being excluded
   const excludeExtArr = excludeExt.substring(1).split('.');
-  console.log("Exclude: ");
-  console.log(excludeExtArr);
   const excludeMoreArr = excludeMore.substring(1).split('|');
-  console.log(excludeMoreArr);
+  if (excludeExtArr.length > 1 || excludeMoreArr.length > 1) console.log("Exclude: ");
+  if (excludeExtArr.length > 1) console.log(excludeExtArr);
+  if (excludeMoreArr.length > 1) console.log(excludeMoreArr);
 
   /* I couldn't override the constant.js and avoid a "ApifyClientError: Parameter "options.maxRequestsPerCrawl" of type Maybe Number" error
     var maxRequestsPerCrawl = 0;

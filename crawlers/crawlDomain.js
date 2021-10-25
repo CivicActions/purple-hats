@@ -13,6 +13,7 @@ const {
   pseudoUrls,
   urlsCrawledObj,
   validateUrl,
+  waitTime,
 } = require('../constants/constants');
 
 exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreArr) => {
@@ -92,6 +93,14 @@ exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreA
             });
           }
 
+          if (waitTime > 0) {
+            const timer = ms => new Promise( res => setTimeout(res, ms));
+            (async function(){
+             await timer(waitTime * 1000);
+             console.log("Waiting " + waitTime + " seconds.");
+           })()
+          }
+
           // Provide output to console for progress
           ++i;
           console.log("id: " + i + ", Errors: " + results.errors.length + ", URL: " + currentUrl);
@@ -108,7 +117,6 @@ exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreA
           }
           urlsCrawled.invalid.push(currentUrl);
         }
-
 
         await Apify.utils.enqueueLinks({
           page,

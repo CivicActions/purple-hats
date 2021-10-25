@@ -41,8 +41,18 @@ exports.createAndUpdateFolders = async (scanDetails, randomToken) => {
   const logPath = `logs/${randomToken}`;
 
   await fs.ensureDir(`${storagePath}/reports`);
+  console.log("Write details.json file.")
   await fs.writeFile(`${storagePath}/details.json`, JSON.stringify(scanDetails, 0, 2));
   await fs.copy(`${a11yDataStoragePath}/${randomToken}`, `${storagePath}/${allIssueFileName}`);
+
+  console.log("Writing urls crawled to ./reports/urls.csv");
+  var scannedURLs = scanDetails.urlsCrawled.scanned.join();
+  // const fs = require('fs');
+  console.log(scannedURLs);
+  // await fs.writeFile(`${storagePath}/scannedURLs.csv`, scanDetails.urlsCrawled.scanned);
+  const writeStream = fs.createWriteStream(`${storagePath}/reports/scannedURLs.csv`);
+  writeStream.write(`urls \n`);
+  writeStream.write( scannedURLs.replace(/,/g, '\n') );
 
   // update logs
   await fs.ensureDir(logPath);
