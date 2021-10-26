@@ -33,7 +33,7 @@
 2.1.2, No keyboard trap (A), design
 2.1.4, Character Key Shortcuts (A), design
 2.2.1, Timing adjustable (A), design
-2.2.2, Pause, stop, hide (A), design
+2.2.2," Pause, stop, hide (A)", design
 2.3.1, Three flashes or below (A), design
 2.4.1, Bypass blocks (A), design
 2.4.3, Focus order (A), design
@@ -69,7 +69,7 @@
 2.1.2, No keyboard trap (A), code
 2.1.4, Character Key Shortcuts (A), code
 2.2.1, Timing adjustable (A), code
-2.2.2, Pause, stop, hide (A), code
+2.2.2," Pause, stop, hide (A)", code
 2.4.1, Bypass blocks (A), code
 2.4.2, Page title (A), code
 2.4.3, Focus order (A), code
@@ -89,5 +89,5 @@
 3.3.3, Error suggestion (AA), code
 3.3.4, Error prevention (legal/financial/data) (AA), code
 4.1.1, Parsing (A), code
-4.1.2, Name, role, value (A), code
+4.1.2," Name, value (A)",code
 4.1.3, Status Messages (AA), code

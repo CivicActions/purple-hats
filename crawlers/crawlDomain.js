@@ -1,6 +1,24 @@
 const Apify = require('apify');
 const getPage = require('node-readability'); // https://www.npmjs.com/package/node-readability
 const rs = require('text-readability'); // https://www.npmjs.com/package/text-readability
+
+// const rs = require('retext-readability'); // https://www.npmjs.com/package/retext-readabilit
+// https://www.npmjs.com/package/retext-simplify
+// https://www.npmjs.com/package/retext-profanities
+// https://www.npmjs.com/package/retext-sentence-spacing
+// https://www.npmjs.com/package/etext-contractions
+// https://www.npmjs.com/package/retext-diacritics
+// https://www.npmjs.com/package/retext-passive
+// https://www.npmjs.com/package/retext-readability
+// https://www.npmjs.com/package/retext-intensify
+// https://www.npmjs.com/package/retext-repeated-words
+// https://www.npmjs.com/package/retext-indefinite-article
+// https://www.npmjs.com/package/retext-equality
+// https://www.npmjs.com/package/retext-keywords
+// https://www.npmjs.com/package/retext-passive
+// https://www.npmjs.com/package/retext-spell
+
+
 const {
   createApifySubFolders,
   gotoFunction,

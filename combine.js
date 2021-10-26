@@ -96,8 +96,8 @@ exports.combineRun = async (details, storagePath) => {
     break;
   }
 
-  scanDetails.endTime = new Date().getTime();
   scanDetails.urlsCrawled = urlsCrawled;
+  scanDetails.endTime = new Date().getTime();
   global.endTime = scanDetails.endTime;
   var totalTimeSeconds = Math.round((endTime - startTime) / 1000);
   var hours = (totalTimeSeconds / 3600);
@@ -106,7 +106,8 @@ exports.combineRun = async (details, storagePath) => {
   var rminutes = Math.round(minutes);
   var seconds = (minutes - rminutes) * 60;
   var rseconds = Math.abs(Math.round(seconds));
-
+  var speedExact = (urlsCrawled.scanned.length / totalTimeSeconds);
+  global.speed = speedExact.toPrecision(2);
   global.totalTime = rhours + "h " + rminutes + "m " + rseconds + "s ";
   global.countURLsCrawled = urlsCrawled['scanned'].length;
   await createAndUpdateFolders(scanDetails, randomToken);

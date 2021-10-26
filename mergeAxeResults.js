@@ -112,6 +112,7 @@ const writeResults = async (allissues, storagePath) => {
       domain: domainURL,
       countURLsCrawled,
       totalTime,
+      speed,
       orderCount,
       wcagCounts,
       wappalyzer_short,
@@ -163,7 +164,9 @@ const writeHTML = async (allissues, storagePath) => {
         difficultWords = allissues[i].difficultWords;
         difficultWordsMax = allissues[i].difficultWords;
       }
-      var difficultWordsMaxText = "Most difficult words: " + difficultWordsMax + " - <a href='" + domainURL + page + "'>" + page + "</a>";
+      if (allissues[i].difficultWords != 0) {
+        var difficultWordsMaxText = "Most difficult words: " + difficultWordsMax + " - <a href='" + domainURL + page + "'>" + page + "</a>";
+      }
     }
 
   } // END for (let i in allissues)
@@ -191,7 +194,7 @@ const writeHTML = async (allissues, storagePath) => {
   if (countURLsCrawled > 25) {
     var grade = message = "";
     var score = (minorCount + (moderateCount * 1.5) + (seriousCount * 2) + (criticalCount * 3)) / (countURLsCrawled * 5);
-    console.log("score (minor) + moderate*1.5 + serious*2 + critical*3 / urls*5 = " + score);
+    console.log("score (minor) + moderate*1.5 + serious*2 + critical*3 / urls*5 = " + Math.round(score));
 
 
     console.log("Writing results to ./reports/count.csv");
@@ -297,7 +300,7 @@ const writeHTML = async (allissues, storagePath) => {
 
   // TODO - Document what this is doing.
   // console.log(wcagCounts)
-  var wcagCountsContent = '';
+  var wcagCountsContent = '<ul>';
   var wcagCountsArray = [];
   var wcagCountsArray2 = [];
   for (let ii in wcagCounts) {
@@ -311,19 +314,62 @@ const writeHTML = async (allissues, storagePath) => {
     }
   }
 
+  var wcagLinks = require('./constants/wcagLinks.json');
+  var wcagsc2role = require('./constants/wcagsc2role.json');
+
+
   // Count the instances of each WCAG error in wcagIDsum and express that in wcagCounts which gets stored
   wcagCountsArray.forEach(function (x) {
     wcagCountsArray[x] = (wcagCountsArray[x] || 0) + 1;
   });
   var finalWCAGstring = '';
-  // var finalWCAGobj = [scanType: wcag, errors: {} ];
   const finalWCAGarray = [];
   let ii = wcagCountsTemp = 0;
   for (let i in wcagCountsArray) {
     if (typeof wcagCountsArray[i] !== 'function') {
       if (typeof wcagCountsArray[i] == "number") {
         wcagCountsTemp = wcagCountsArray[i];
-        wcagCountsContent += "" + i + ": " + wcagCountsTemp + ", ";
+
+
+// NOT TESTED ON AIRPLANE - https://www.freecodecamp.org/news/javascript-array-of-objects-tutorial-how-to-create-update-and-loop-through-objects-using-js-array-methods/
+// let car = cars.find(car => car.color === "red");
+// console.log(car);
+// let wcag_id = cars.find(car => wcag_id.wcag === i);
+// console.log(wcag_id);
+
+/*
+        var link = '';
+        for(let j in wcagLinks) {
+          if (wcagLinks[j].wcag == i) {
+            link = wcagLinks[j].href;
+          }
+        }
+        var name = '';
+        console.log(typeof wcagsc2role);
+        for(let k in wcagsc2role) {
+          if (wcagsc2role[k] == i) {
+            name = wcagsc2role[k];
+          }
+          // console.log(wcagsc2role.i);
+          // console.log(name);
+          // console.log(wcagsc2role.indexOf(k) + " indexOf");
+        }
+        // console.log(link + " plus " + name)
+*/
+// console.log(wcagLinks.indexOf(i) + " indexOf");
+// console.log(wcagLinks.includes(i));
+// var names = obj.wcagLinks.map(function (wcagLink) {
+//  return wcagLink.wcag + ' ' + wcagLink.href;
+// });
+// console.log(names);
+
+        if (wcagLinks.includes(i)) {
+console.log("includes i " + i);
+        }
+
+        // console.log(wcagLinks.slice(i) + " slice")
+
+        wcagCountsContent += "<li><b>" + i + ":</b> " + wcagCountsTemp + " "  + '</li>'; // + link
         let finalWCAGarrayTemp = {
           wcag: i,
           count: wcagCountsTemp
@@ -331,13 +377,12 @@ const writeHTML = async (allissues, storagePath) => {
         finalWCAGarray.push(finalWCAGarrayTemp);
         ++ii
         if (ii == 1) {
-          wcagCountsContent = "WCAG Errors - " + wcagCountsContent;
+          wcagCountsContent = "WCAG Errors: " + wcagCountsContent;
         }
       }
     }
   }
-  // console.log(wcagCountsContent);
-  // console.log(typeof finalWCAGarray + " " + finalWCAGarray);
+  wcagCountsContent += "</ul>";
 
   console.log("Writing results to ./reports/wcagErrors.csv");
   const ObjectsToCsv_wc = require('objects-to-csv');
@@ -390,6 +435,12 @@ const writeHTML = async (allissues, storagePath) => {
 
   }
 
+  var axeCountsContent = "<b>Critical: " + criticalCount + ", Serious: " + seriousCount + "</b>, Moderate: " + moderateCount + ", Minor: " + minorCount + "";
+
+  if (unknownCount > 0) {
+    axeCountsContent += "<i>Unknown: " + unknownCount + "</i>";
+  }
+
   const finalResultsInJson = JSON.stringify({
       startTime: getCurrentTime(),
       count: id,
@@ -397,11 +448,8 @@ const writeHTML = async (allissues, storagePath) => {
       domain: domainURL,
       countURLsCrawled,
       totalTime,
-      criticalCount,
-      seriousCount,
-      moderateCount,
-      minorCount,
-      unknownCount,
+      speed,
+      axeCountsContent,
       wcagCounts,
       grade,
       message,
