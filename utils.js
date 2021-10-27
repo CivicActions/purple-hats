@@ -48,11 +48,38 @@ exports.createAndUpdateFolders = async (scanDetails, randomToken) => {
   console.log("Writing urls crawled to ./reports/urls.csv");
   var scannedURLs = scanDetails.urlsCrawled.scanned.join();
   // const fs = require('fs');
-  console.log(scannedURLs);
+  // console.log(scannedURLs);
   // await fs.writeFile(`${storagePath}/scannedURLs.csv`, scanDetails.urlsCrawled.scanned);
-  const writeStream = fs.createWriteStream(`${storagePath}/reports/scannedURLs.csv`);
-  writeStream.write(`urls \n`);
-  writeStream.write( scannedURLs.replace(/,/g, '\n') );
+
+  // const writeStream = fs.createWriteStream(`${storagePath}/reports/scannedURLs.csv`);
+  // writeStream.write(`urls \n`);
+  // writeStream.write( scannedURLs.replace(/,/g, '\n') );
+
+  // From https://stackoverflow.com/questions/64904803/how-to-wait-for-loop-of-stream-write-to-end
+  var scannedPath = storagePath + "/reports/scannedURLs.csv";
+  var scannedData = scannedURLs.replace(/,/g, '\n');
+  async function writeFile(scannedPath, scannedData) {
+    try {
+        const writeStream = fs.createWriteStream(path, {
+            flags: "w"
+        });
+
+        const promisify = util.promisify(writeStream.write);
+
+        for (const file of data) {
+            await promisify(`${file.name}\n`);
+        }
+
+        writeStream.end();
+        writeStream.on("finish", () => {
+            console.log("All files were written.");
+        });
+
+    } catch (error) {
+        console.log('error',error);
+        throw (error);
+    }
+  }
 
   // update logs
   await fs.ensureDir(logPath);

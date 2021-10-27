@@ -1,8 +1,8 @@
 {
   "name": "purple-hats",
   "version": "1.0.2",
-  "description": "Purple Hats CivicActions - Accessibility Checker",
-  "author": "Mike Gifford <mike.gifford@civicactions.com>",
+  "description": "",
+  "author": "",
   "main": "server.js",
   "dependencies": {
     "apify": "^0.19.1",
@@ -13,6 +13,7 @@
     "mustache": "^4.0.1",
     "node-readability": "^3.0.0",
     "objects-to-csv": "^1.3.6",
+    "retext": "^8.1.0",
     "retext-english": "^4.1.0",
     "retext-equality": "^6.4.0",
     "retext-indefinite-article": "^3.1.0",
@@ -37,7 +38,5 @@
   "scripts": {
     "test": "jest --watchAll"
   },
-  "author": "",
-  "license": "ISC",
-  "description": ""
+  "license": "ISC"
 }

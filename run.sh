@@ -56,10 +56,10 @@ while getopts ":d:s:t:e:o:w:x:y:n:" options; do         # Loop: Get the next opt
       WAPPALYZER=${OPTARG}                      # Enable wappalyzer: 1
       ;;
     x)
-      EXCLUDEEXT=${OPTARG}                      # Set $EXCLUDEEXT to specified value.
+      EXCLUDEEXT=${OPTARG}                      # Set $EXCLUDEEXT to specified file extension.
       ;;
     y)
-      EXCLUDEMORE=${OPTARG}                     # Set $EXCLUDEMORE to specified string.
+      EXCLUDEMORE=${OPTARG}                     # Set $EXCLUDEMORE to string in the URL.
       ;;
     n)                                    # If the option is n,
       NUMBER=${OPTARG}                     # Set $NUMBER to specified value.

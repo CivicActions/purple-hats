@@ -37,7 +37,6 @@ exports.combineRun = async (details, storagePath) => {
       excludeMore: process.env.EXCLUDEMORE,
       number: process.env.NUMBER,
     };
-
   }
 
   const {
@@ -67,7 +66,7 @@ exports.combineRun = async (details, storagePath) => {
 
   // Highlight if strings or extensions are being excluded
   const excludeExtArr = excludeExt.substring(1).split('.');
-  const excludeMoreArr = excludeMore.substring(1).split('|');
+  const excludeMoreArr = excludeMore.split(',');
   if (excludeExtArr.length > 1 || excludeMoreArr.length > 1) console.log("Exclude: ");
   if (excludeExtArr.length > 1) console.log(excludeExtArr);
   if (excludeMoreArr.length > 1) console.log(excludeMoreArr);

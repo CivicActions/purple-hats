@@ -425,15 +425,20 @@ console.log("includes i " + i);
 
     console.log("Writing results to ./reports/wappalyzer.csv");
     const ObjectsToCsv_wa = require('objects-to-csv');
-    (async () => {
-      const csv_wa = new ObjectsToCsv_wa(wappalyzer_array['technologies']);
+    // Add if statement to avoid this error
+    // node_modules/objects-to-csv/index.js:16
+    //   throw new Error('The input to objects-to-csv must be an array of objects.');
+    if ((typeof wappalyzer_array['technologies'] == 'array') && (wappalyzer_array['technologies'].length > 0)) {
+      (async () => {
+        const csv_wa = new ObjectsToCsv_wa(wappalyzer_array['technologies']);
 
-      // Save to file:
-      await csv_wa.toDisk(storagePath + "/reports/wappalyzer.csv");
-      // console.log(await csv_wa.toString());
-    })();
-
+        // Save to file:
+        await csv_wa.toDisk(storagePath + "/reports/wappalyzer.csv");
+        // console.log(await csv_wa.toString());
+      })();
+    }
   }
+
 
   var axeCountsContent = "<b>Critical: " + criticalCount + ", Serious: " + seriousCount + "</b>, Moderate: " + moderateCount + ", Minor: " + minorCount + "";
 

@@ -1,8 +1,19 @@
 const Apify = require('apify');
+const path = require('path');
 const getPage = require('node-readability'); // https://www.npmjs.com/package/node-readability
 const rs = require('text-readability'); // https://www.npmjs.com/package/text-readability
 
-// const rs = require('retext-readability'); // https://www.npmjs.com/package/retext-readabilit
+// How do we optinally include these other readability tools?
+// The approach below didn't work and there aren't any clear nodeJS examples
+// const rs = require('retext-readability');
+
+// Maybe from:
+// https://github.com/retextjs/retext-keywords/issues/13#issue-265258949
+// var retext = require('retext');
+// var keywords = require('retext-keywords');
+
+// https://www.npmjs.com/package/retext
+// https://www.npmjs.com/package/retext-readability
 // https://www.npmjs.com/package/retext-simplify
 // https://www.npmjs.com/package/retext-profanities
 // https://www.npmjs.com/package/retext-sentence-spacing
@@ -17,7 +28,6 @@ const rs = require('text-readability'); // https://www.npmjs.com/package/text-re
 // https://www.npmjs.com/package/retext-keywords
 // https://www.npmjs.com/package/retext-passive
 // https://www.npmjs.com/package/retext-spell
-
 
 const {
   createApifySubFolders,
@@ -47,7 +57,9 @@ exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreA
   await requestQueue.addRequest({
     url
   });
+
   var i = ii = iii = 0;
+  var pdfs = [];
   const crawler = new Apify.PuppeteerCrawler({
     requestQueue,
     gotoFunction,
@@ -59,18 +71,27 @@ exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreA
       const location = await page.evaluate('location');
       if (location.host.includes(host)) {
 
-        if (validateUrl(currentUrl)) {
+        // Skip elements defined in CLI
+        var skip = excludeExtArr.includes(path.extname(currentUrl).substring(1));
+        if (skip) {
+          console.log("Blocked " + path.extname(currentUrl)); // + skip + " " + currentUrl);
+        } else { // Test for excludeMoreArr
+          var skipElement = '';
+          excludeMoreArr.forEach(function(element) {
+            if (!skip) {
+              skip = currentUrl.includes(element);
+              skipElement = element;
+            }
+          });
+          if (skip) {
+            console.log("Blocked " + skipElement;
+          }
+        }
 
-          /*
-                    // If an array needs to be excluded, skip to the next one.
-                    if (excludeExtArr.includes(fileExtension)) {
-                      console.log("Excluded extension " + page);
-                    } else if (excludeMoreArr.includes(page)) {
-                      console.log("Excluded string " + page);
-                    } else {
-          */
+        if (validateUrl(currentUrl) && !skip) {
 
           const results = await runAxeScript(page, host);
+
           // Check readability of the page
           getPage(currentUrl, function (err, article, meta, callback) {
             try {
@@ -111,6 +132,7 @@ exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreA
             });
           }
 
+          // I'm not sure this is working but it should
           if (waitTime > 0) {
             const timer = ms => new Promise( res => setTimeout(res, ms));
             (async function(){
@@ -132,6 +154,7 @@ exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreA
           if (currentUrl.includes(".pdf")) {
             ++iii;
             console.log("Number of PDFs: " + iii);
+            pdfs[iii] = currentUrl;
           }
           urlsCrawled.invalid.push(currentUrl);
         }
@@ -150,6 +173,9 @@ exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreA
     maxRequestsPerCrawl,
     maxConcurrency,
   });
+
+  // How to best return this value?
+  console.log(pdfs);
 
   await crawler.run();
   return urlsCrawled;
