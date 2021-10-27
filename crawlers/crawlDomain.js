@@ -1,5 +1,6 @@
 const Apify = require('apify');
 const path = require('path');
+// const url = require('url');
 const getPage = require('node-readability'); // https://www.npmjs.com/package/node-readability
 const rs = require('text-readability'); // https://www.npmjs.com/package/text-readability
 
@@ -72,6 +73,7 @@ exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreA
       if (location.host.includes(host)) {
 
         // Skip elements defined in CLI
+        // Presently not catching .asp#video or .asp?dnum=3&isFlash=0
         var skip = excludeExtArr.includes(path.extname(currentUrl).substring(1));
         if (skip) {
           console.log("Blocked " + path.extname(currentUrl)); // + skip + " " + currentUrl);
@@ -84,7 +86,35 @@ exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreA
             }
           });
           if (skip) {
-            console.log("Blocked " + skipElement;
+            console.log("Blocked " + skipElement);
+          } else {
+
+            // Check for missing extensions, ie: .asp#video or .asp?dnum=3&isFlash=0
+            excludeExtArr.forEach(function(element) {
+              if (!skip) {
+                skip = currentUrl.includes(element);
+                skipElement = element;
+              }
+            });
+            if (skip) {
+              console.log("Blocked " + skipElement);
+            } else {
+
+              // This should be enabled from the CLI and not hard coded.
+              if (typeof currentUrl == 'string') {
+                let url_parts = require('url').parse(currentUrl, true);
+                let query = JSON.stringify(url_parts.query);
+
+                if (query !== '{}') {
+                  skip = 1;
+                  console.log("");
+                  console.log("");
+                  console.log("Blocked " + query);
+                  console.log("");
+                  console.log("");
+                }
+              }
+            }
           }
         }
 
