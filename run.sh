@@ -23,7 +23,7 @@ EMAIL=""                                  # Send HTML email to on completion
 WAPPALYZER=0                              # Set to 1 to enable wappalyzer
 EXCLUDEEXT=""                             # Exclude by file extension (include .)
 EXCLUDEMORE=""                            # Exclude by string separated by ","
-EXCLUDEQUERY=""                           # Exclude by string separated by ","
+EXCLUDEQUERY=0                            # Set to 1 to exclude URLs with queries
 
 NUMBER=2000               # NOT WORKING WITH Apify - Maximum number of pages to crawl
 OPENBROWSER=1                             # By default open a browser after the script is run
@@ -35,7 +35,7 @@ OPENBROWSER=1                             # By default open a browser after the 
 #  usage
 #  exit 1
 #}
-while getopts ":d:s:t:e:o:w:x:y:n:" options; do         # Loop: Get the next option;
+while getopts ":d:s:t:e:o:w:x:y:z:n:" options; do         # Loop: Get the next option;
                                           # use silent error checking;
                                           # options n and t take arguments.
   case "${options}" in                    #
@@ -64,7 +64,7 @@ while getopts ":d:s:t:e:o:w:x:y:n:" options; do         # Loop: Get the next opt
       EXCLUDEMORE=${OPTARG}                     # Set $EXCLUDEMORE to string in the URL.
       ;;
     z)
-      EXCLUDEQUERY=${OPTARG}                    # Set $EXCLUDEQUERY to string in the URL.
+      EXCLUDEQUERY=${OPTARG}                    # Exclude queries (like ?q=40) with: 1
       ;;
 
     n)                                    # If the option is n,

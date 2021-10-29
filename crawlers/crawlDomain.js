@@ -110,7 +110,7 @@ exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreA
             } else {
 
               // This should be enabled from the CLI and not hard coded.
-              if (typeof currentUrl == 'string' && excludeQuery) {
+              if ((typeof currentUrl == 'string') && (excludeQuery ==1)) {
 
                 let url_parts = require('url').parse(currentUrl, true);
                 let query = JSON.stringify(url_parts.query);
@@ -118,7 +118,7 @@ exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreA
                 if (query !== '{}') {
                   skip = true;
                   console.log("");
-                  console.log("Block query strings - ? & # ? " + query);
+                  console.log("Block query strings - ? & # ");
                   console.log("");
                 }
               }

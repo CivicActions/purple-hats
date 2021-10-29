@@ -69,10 +69,10 @@ exports.combineRun = async (details, storagePath) => {
   // Highlight if strings or extensions are being excluded
   const excludeExtArr = excludeExt.substring(1).split('.');
   const excludeMoreArr = excludeMore.split(',');
-  if ((excludeExtArr[0] !== '') || (excludeMoreArr[0] !== '') || (excludeQuery && !excludeQuery.length)) console.log("Exclude: ");
+  if ((excludeExtArr[0] !== '') || (excludeMoreArr[0] !== '') || (excludeQuery == 1)) console.log("Exclude: ");
   if (excludeExtArr[0] !== '') console.log(excludeExtArr);
   if (excludeMoreArr[0] !== '') console.log(excludeMoreArr);
-  if (excludeQuery && !excludeQuery.length) console.log(excludeQuery);
+  if (excludeQuery == 1) console.log("Exclude queries ");
 
   /* I couldn't override the constant.js and avoid a "ApifyClientError: Parameter "options.maxRequestsPerCrawl" of type Maybe Number" error
     var maxRequestsPerCrawl = 0;
