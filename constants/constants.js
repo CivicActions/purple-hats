@@ -55,7 +55,16 @@ exports.validateUrl = url => {
     '.rss',
     '.atom',
   ];
-  return !invalidURLends.some(urlEnd => url.includes(urlEnd));
+  // This change fixes confusion between .js and .jsp pages.
+  // let skip = invalidURLends.some(urlEnd => url.includes(urlEnd));
+  if ((url.indexOf('?') > -1)) {
+    url = url.substring(0, url.indexOf('?'));
+  }
+  if ((url.indexOf('#') > -1)) {
+    url = url.substring(0, url.indexOf('#'));
+  }
+  let skip = invalidURLends.some(urlEnd => url.endsWith(urlEnd));
+  return !skip;
 };
 
 exports.urlsCrawledObj = {

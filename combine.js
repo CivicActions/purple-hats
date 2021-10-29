@@ -35,6 +35,7 @@ exports.combineRun = async (details, storagePath) => {
       email: process.env.EMAIL,
       excludeExt: process.env.EXCLUDEEXT,
       excludeMore: process.env.EXCLUDEMORE,
+      excludeQuery: process.env.EXCLUDEQUERY,
       number: process.env.NUMBER,
     };
   }
@@ -47,6 +48,7 @@ exports.combineRun = async (details, storagePath) => {
     email,
     excludeExt,
     excludeMore,
+    excludeQuery,
     number
   } = envDetails;
 
@@ -67,9 +69,10 @@ exports.combineRun = async (details, storagePath) => {
   // Highlight if strings or extensions are being excluded
   const excludeExtArr = excludeExt.substring(1).split('.');
   const excludeMoreArr = excludeMore.split(',');
-  if (excludeExtArr.length > 0 || excludeMoreArr.length > 0) console.log("Exclude: ");
-  if (excludeExtArr.length > 0) console.log(excludeExtArr);
-  if (excludeMoreArr.length > 0) console.log(excludeMoreArr);
+  if ((excludeExtArr[0] !== '') || (excludeMoreArr[0] !== '') || (excludeQuery && !excludeQuery.length)) console.log("Exclude: ");
+  if (excludeExtArr[0] !== '') console.log(excludeExtArr);
+  if (excludeMoreArr[0] !== '') console.log(excludeMoreArr);
+  if (excludeQuery && !excludeQuery.length) console.log(excludeQuery);
 
   /* I couldn't override the constant.js and avoid a "ApifyClientError: Parameter "options.maxRequestsPerCrawl" of type Maybe Number" error
     var maxRequestsPerCrawl = 0;
@@ -84,11 +87,11 @@ exports.combineRun = async (details, storagePath) => {
   let urlsCrawled;
   switch (type) {
   case 'crawlSitemap':
-    urlsCrawled = await crawlSitemap(url, randomToken, host, excludeExtArr, excludeMoreArr);
+    urlsCrawled = await crawlSitemap(url, randomToken, host, excludeExtArr, excludeMoreArr, excludeQuery);
     break;
 
   case 'crawlDomain':
-    urlsCrawled = await crawlDomain(url, randomToken, host, excludeExtArr, excludeMoreArr);
+    urlsCrawled = await crawlDomain(url, randomToken, host, excludeExtArr, excludeMoreArr, excludeQuery);
     break;
 
   default:
