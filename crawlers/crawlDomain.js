@@ -45,7 +45,7 @@ const {
   waitTime,
 } = require('../constants/constants');
 
-exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreArr) => {
+exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreArr, excludeQuery) => {
   const urlsCrawled = {
     ...urlsCrawledObj
   };
@@ -74,43 +74,51 @@ exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreA
 
         // Skip elements defined in CLI
         // Presently not catching .asp#video or .asp?dnum=3&isFlash=0
-        var skip = excludeExtArr.includes(path.extname(currentUrl).substring(1));
+        var skip = false;
+        if(excludeExtArr[0] !== '') {
+          skip = excludeExtArr.includes(path.extname(currentUrl).substring(1));
+        }
         if (skip) {
-          console.log("Blocked " + path.extname(currentUrl)); // + skip + " " + currentUrl);
+          console.log("Blocked (excludeExtArr) " + path.extname(currentUrl)); // + skip + " " + currentUrl);
+          console.log(excludeExtArr);
         } else { // Test for excludeMoreArr
-          var skipElement = '';
-          excludeMoreArr.forEach(function(element) {
-            if (!skip) {
-              skip = currentUrl.includes(element);
-              skipElement = element;
-            }
-          });
-          if (skip) {
-            console.log("Blocked " + skipElement);
-          } else {
-
-            // Check for missing extensions, ie: .asp#video or .asp?dnum=3&isFlash=0
-            excludeExtArr.forEach(function(element) {
+          if (excludeExtArr[0] !== '') {
+            var skipElement = '';
+            excludeMoreArr.forEach(function(element) {
               if (!skip) {
                 skip = currentUrl.includes(element);
                 skipElement = element;
               }
             });
+          }
+          if (skip) {
+            console.log("Blocked (excludeMoreArr) " + skipElement);
+            console.log(excludeMoreArr);
+          } else {
+
+            // Check for missing extensions, ie: .asp#video or .asp?dnum=3&isFlash=0
+            if(excludeExtArr[0] !== '') {
+              excludeExtArr.forEach(function(element) {
+                if (!skip) {
+                  skip = currentUrl.includes(element);
+                  skipElement = element;
+                }
+              });
+            }
             if (skip) {
-              console.log("Blocked " + skipElement);
+              console.log("Blocked (excludeExtArr - plus) " + skipElement);
             } else {
 
               // This should be enabled from the CLI and not hard coded.
-              if (typeof currentUrl == 'string') {
+              if ((typeof currentUrl == 'string') && (excludeQuery ==1)) {
+
                 let url_parts = require('url').parse(currentUrl, true);
                 let query = JSON.stringify(url_parts.query);
 
                 if (query !== '{}') {
-                  skip = 1;
+                  skip = true;
                   console.log("");
-                  console.log("");
-                  console.log("Blocked " + query);
-                  console.log("");
+                  console.log("Block query strings - ? & # ");
                   console.log("");
                 }
               }
@@ -181,6 +189,8 @@ exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreA
         } else {
           ++ii;
           console.log("Skipped id: " + ii + ", URL: " + currentUrl);
+console.log("valid url " + validateUrl(currentUrl));
+console.log("skip url " + skip);
           if (currentUrl.includes(".pdf")) {
             ++iii;
             console.log("Number of PDFs: " + iii);
