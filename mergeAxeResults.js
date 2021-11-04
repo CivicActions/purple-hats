@@ -460,13 +460,10 @@ console.log("includes i " + i);
     null,
     4,
   );
-  console.log(typeof axeCountContentArr);
-  console.log(axeCountContentArr);
   const mustacheWCAGbarchart = await fs
     .readFile(path.join(__dirname, '/static/WCAGbarchart.mustache'))
     .catch(templateError => console.log('Error fetching template', templateError));
   const axeCountsContent = Mustache.render(mustacheWCAGbarchart.toString(), JSON.parse(axeCountContentArr));
-  console.log(axeCountsContent);
 
   const finalResultsInJson = JSON.stringify({
       startTime: getCurrentTime(),
@@ -490,7 +487,6 @@ console.log("includes i " + i);
     null,
     4,
   );
-  console.log(typeof finalResultsInJson);
 
   const musTemp = await fs
     .readFile(path.join(__dirname, '/static/report.mustache'))
