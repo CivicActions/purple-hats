@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+    /* eslint-disable no-console */
 const fs = require('fs-extra');
 const path = require('path');
 const {
@@ -440,25 +440,33 @@ console.log("includes i " + i);
   }
 
 
-  var axeCountsContent = "<b>Critical: " + criticalCount + ", Serious: " + seriousCount + "</b>, Moderate: " + moderateCount + ", Minor: " + minorCount + "";
+  var axeCountsDescription = "<b>Critical: " + criticalCount + ", Serious: " + seriousCount + "</b>, Moderate: " + moderateCount + ", Minor: " + minorCount + "";
   if (unknownCount > 0) {
-    axeCountsContent += "<i>Unknown: " + unknownCount + "</i>";
+    axeCountsDescription += "<i>Unknown: " + unknownCount + "</i>";
   }
-  console.log(axeCountsContent);
+  console.log(axeCountsDescription);
+  var someOfErrors = criticalCount + seriousCount + moderateCount + minorCount;
+  const axeCountContentArr = JSON.stringify({
+      "criticalCount": criticalCount,
+      "seriousCount": seriousCount,
+      "moderateCount": moderateCount,
+      "minorCount": minorCount,
+      "criticalCountPercent": Math.round((criticalCount/someOfErrors)*100),
+      "seriousCountPercent": Math.round((seriousCount/someOfErrors)*100),
+      "moderateCountPercent": Math.round((moderateCount/someOfErrors)*100),
+      "minorCountPercent": Math.round((minorCount/someOfErrors)*100),
+      "axeCountsDescription": axeCountsDescription,
+    },
+    null,
+    4,
+  );
+  console.log(typeof axeCountContentArr);
+  console.log(axeCountContentArr);
   const mustacheWCAGbarchart = await fs
     .readFile(path.join(__dirname, '/static/WCAGbarchart.mustache'))
     .catch(templateError => console.log('Error fetching template', templateError));
-  axeCountsContent = Mustache.render(mustacheWCAGbarchart.toString(), JSON.parse(
-    {
-    "criticalCount": criticalCount,
-    "seriousCount": seriousCount,
-    "moderateCount": moderateCount,
-    "minorCount": minorCount,
-    "criticalCountPercent": (htmlCount/criticalCount)*100,
-    "seriousCountPercent": (htmlCount/seriousCount)*100,
-    "moderateCountPercent": (htmlCount/moderateCount)*100,
-    "minorCountPercent": (htmlCount/minorCount)*100,
-    }));
+  const axeCountsContent = Mustache.render(mustacheWCAGbarchart.toString(), JSON.parse(axeCountContentArr));
+  console.log(axeCountsContent);
 
   const finalResultsInJson = JSON.stringify({
       startTime: getCurrentTime(),
@@ -482,6 +490,8 @@ console.log("includes i " + i);
     null,
     4,
   );
+  console.log(typeof finalResultsInJson);
+
   const musTemp = await fs
     .readFile(path.join(__dirname, '/static/report.mustache'))
     .catch(templateError => console.log('Error fetching template', templateError));
