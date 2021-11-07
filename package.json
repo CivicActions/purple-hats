@@ -6,7 +6,7 @@
   "main": "server.js",
   "dependencies": {
     "apify": "^0.19.1",
-    "axe-core": "^4.3.3",
+    "axe-core": "^4.3.5",
     "csv-parser": "^3.0.0",
     "fs-extra": "^8.1.0",
     "json2csv": "^5.0.6",
