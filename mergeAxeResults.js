@@ -57,7 +57,7 @@ const fetchIcons = async (disabilities, impact) => {
 };
 
 /* Compile final JSON results */
-const writeResults = async (allissues, storagePath) => {
+const writeResults = async (allissues, storagePath, htmlElementArray) => {
 
   /* Copy without reference to allissues array */
   var shortAllIssuesJSON = []
@@ -70,9 +70,28 @@ const writeResults = async (allissues, storagePath) => {
 
   console.log("Writing JSON countURLsCrawled " + countURLsCrawled + " and " + allissues.length + " errors found.");
 
-  /* Delete SVG images in copy of allissues */
+  /* Delete SVG images in copy of allissues and count instances of html errors. */
+  let ii = iii = 0;
   for (let i in shortAllIssuesJSON) {
     delete shortAllIssuesJSON[i].disabilityIcons;
+
+    // Count same errors
+    var value = shortAllIssuesJSON[i].htmlElement;
+    function exists(arr, search) {
+      return arr.some(row => row.includes(search));
+    }
+    if (exists(htmlElementArray, value)) {
+      index = htmlElementArray.map(function(x) {
+        // return x[1];
+        return x[0];
+      }).indexOf(value);
+      // ++htmlElementArray[index][2];
+      ++htmlElementArray[index][1];
+    } else {
+      // ++iii;
+      // htmlElementArray.push([iii, value, 1]);
+      htmlElementArray.push([value, 1]);
+    }
   }
 
   /* Store the information about issue order totals (critical, serious, ...) */
@@ -116,7 +135,8 @@ const writeResults = async (allissues, storagePath) => {
       orderCount,
       wcagCounts,
       wappalyzer_short,
-      shortAllIssuesJSON
+      shortAllIssuesJSON,
+      htmlElementArray
     },
     null,
     4,
@@ -127,7 +147,7 @@ const writeResults = async (allissues, storagePath) => {
 };
 
 /* Write HTML from JSON to Mustache for whole page content */
-const writeHTML = async (allissues, storagePath) => {
+const writeHTML = async (allissues, storagePath, htmlElementArray) => {
 
   // Sort by impact order (critical, serious, moderate, minor, unknown)
   allissues.sort(function (a, b) {
@@ -169,6 +189,14 @@ const writeHTML = async (allissues, storagePath) => {
       }
     }
 
+    // Find the number of instances for a given HTML error.
+    let htmlElement = allissues[i].htmlElement;
+    for (let n in htmlElementArray) {
+      if (htmlElementArray[n][0] == htmlElement) {
+        if (htmlElementArray[n][1] > 1)
+          allissues[i].htmlElementCount = "<p><b>" + htmlElementArray[n][1] + " duplicate axe errors. </b></p>";
+      }
+    }
   } // END for (let i in allissues)
 
   /*
@@ -363,9 +391,9 @@ const writeHTML = async (allissues, storagePath) => {
 // });
 // console.log(names);
 
-        if (wcagLinks.includes(i)) {
-console.log("includes i " + i);
-        }
+      //  if (wcagLinks.includes(i)) {
+      //    console.log("includes i " + i);
+      //  }
 
         // console.log(wcagLinks.slice(i) + " slice")
 
@@ -607,13 +635,19 @@ const flattenAxeResults = async (rPath, storagePath) => {
       var languageSummary = '';
       // console.log(page + " page " + fleschKincaidGrade + " fk " + difficultWords  + " dw " + sentenceCount);
       if (!((sentenceCount == null) || (sentenceCount == 'undefined') || (typeof sentenceCount !== 'number') || (sentenceCount <= 2))) {
-        languageSummary += sentenceCount + " sentences; ";
+        languageSummary += sentenceCount + " sentences evaluated. ";
       }
       if (!((difficultWords == null) || (difficultWords == 'undefined') || (typeof difficultWords !== 'number') || (sentenceCount <= 2))) {
-        languageSummary += difficultWords + " difficult words; ";
+        if ((difficultWords /sentenceCount) > 3) {
+          languageSummary += "There a lot of difficult words in this page. ";
+        }
+        // languageSummary += difficultWords + " difficult words; ";
       }
       if (!((fleschKincaidGrade == null) || (fleschKincaidGrade == 'undefined') || (typeof fleschKincaidGrade !== 'number') || (fleschKincaidGrade < 0) || (sentenceCount <= 2))) {
-        languageSummary += fleschKincaidGrade + " Flesch Kincaid Grade ";
+        if (fleschKincaidGrade > 10) {
+          languageSummary += "Please <a href='https://hemingwayapp.com/''>review</a> this page for <a href='https://www.plainlanguage.gov/'>plain language</a>. "
+        }
+        // languageSummary += fleschKincaidGrade + " Flesch Kincaid Grade ";
       }
       // console.log(id + " id " + page + " page & language summary " +  languageSummary);
 
@@ -683,8 +717,9 @@ exports.mergeFiles = async randomToken => {
   /* Write the JSON then the HTML - Order Matters */
   if (allFiles.length > 0) {
     console.log("Writing issues to JSON & HTML.")
-    await writeResults(allIssues, storagePath);
-    await writeHTML(allIssues, storagePath);
+    var htmlElementArray = [];
+    await writeResults(allIssues, storagePath, htmlElementArray);
+    await writeHTML(allIssues, storagePath, htmlElementArray);
   } else {
     console.log("No entities in allFiles.");
   }

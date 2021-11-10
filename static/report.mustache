@@ -273,9 +273,12 @@ class="{{impact}}-fill-icon"
                   <a class="wcag-clause" href="{{href}}" target="_blank">WCAG {{wcag}}</a>
                   {{/wcagLinks}}<br>
                   {{{languageSummary}}}
+                  {{{htmlElementCount}}}
                   </td>
                   <td class="page"><a href="{{url}}" target="_blank">{{page}}</a></td>
-                  <td class="element">{{htmlElement}}</td>
+                  <td class="element">
+                    {{htmlElement}}
+                  </td>
                   <td class="text-center dt-nowrap {{fileExtension}}">{{id}} &nbsp; / &nbsp; {{fileExtension}} &nbsp; <a href="{{helpUrl}}" target="_blank">
                     <svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1">
                       <use xlink:href="#help-url-svg"></use>
