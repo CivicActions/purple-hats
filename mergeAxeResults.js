@@ -545,6 +545,9 @@ const flattenAxeResults = async (rPath, storagePath) => {
   } = parsedContent;
   var plainLanguageIssues = [];
   var fileExtension = pageNew = '';
+
+  errorsPerURL = errors.length;
+
   errors.forEach(error => {
 
     /* pull out file extension from path */
@@ -667,6 +670,7 @@ const flattenAxeResults = async (rPath, storagePath) => {
         wcagLinks,
         disabilities,
         disabilityIcons,
+        errorsPerURL
       });
 
     }); // End error.fixes.forEach

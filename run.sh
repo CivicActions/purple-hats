@@ -89,6 +89,8 @@ while getopts ":d:s:t:e:o:w:x:y:z:n:" options; do         # Loop: Get the next o
   esac
 done
 
+echo "$DOMAINNAME was submitted."
+
 if [ -n "$DOMAINNAME" ]; then
 
   page=$DOMAINNAME
@@ -166,7 +168,7 @@ done
 randomToken=$(date +%s)$(openssl rand -hex 5)
 currentDate=$(date '+%Y-%-m-%-d')
 
-echo "Scanning website..."
+echo "Scanning website $page ... "
 
 if [[ $WAPPALYZER == 1 ]]; then
     # optional ability to gather information about the frameworks involved
@@ -211,6 +213,7 @@ if [ -d "results/$currentDate/$randomToken" ]; then
     rm "compiledResults.json"
     tar -cjvf "$domain-$currentDate-report.html.tar.bz2" "report.html" 2>/dev/null
     tar -cjvf "$domain-$currentDate-allissues.csv.bz2" "allissues.csv" 2>/dev/null
+    zip "$domain-$currentDate-allissues.csv.zip" "allissues.csv" 2>/dev/null
     rm "allissues.csv"
     tar -cjvf "$domain-$currentDate-plainLanguage.csv.bz2" "plainLanguage.csv" 2>/dev/null
     rm "plainLanguage.csv"
