@@ -147,7 +147,47 @@ const writeResults = async (allissues, storagePath, htmlElementArray) => {
 };
 
 /* Write HTML from JSON to Mustache for whole page content */
-const writeHTML = async (allissues, storagePath, htmlElementArray) => {
+const writeHTML = async (allissues, storagePath, htmlElementArray, domain) => {
+
+  // Cycle through WCAG CSV and put together master list.
+  // TODO: WCAG 2.1 & 2.2 should be added here. These should be highlighted.
+  var wcagLinks = require('./constants/wcagLinks.json');
+  var wcagUKlinks = require('./constants/wcagUKlinks.json');
+  var wcag21extras = require('./constants/wcag21extras.json');
+
+  // Pull in WCAG name and W3C links
+  let wcagIDval = "";
+  for (let a in wcagLinks) {
+    wcagIDval = wcagLinks[a].wcag;
+
+    wcagLinks[a].wcag21 = 0;
+    for (let c in wcag21extras) {
+      if (wcag21extras[c][0] == wcagIDval) {
+        console.log("WCAG 2.1")
+        wcagLinks[a].wcag21 = 1;
+      }
+    }
+    // Add UK link & role information
+    for (let b in wcagUKlinks) {
+      if (wcagUKlinks[b][0] == wcagIDval) {
+        let desc = "";
+        if (wcagUKlinks[b][2] == 'A') {
+          desc = wcagUKlinks[b][1] + " (<b>" + wcagUKlinks[b][2] + "</b>";
+        } else {
+          desc = wcagUKlinks[b][1] + " (" + wcagUKlinks[b][2];
+        }
+        if (wcagLinks[a].wcag21) {
+          desc += " - 2.1"
+        }
+        wcagLinks[a].desc = desc  + ") ";
+        if (wcagLinks[a].role) {
+          wcagLinks[a].role += ", " + '<a href="' + wcagUKlinks[b][3] + '" target="_blank">' + wcagUKlinks[b][4] + "</a>";
+        } else {
+          wcagLinks[a].role = '<a href="' + wcagUKlinks[b][3] + '" target="_blank">' + wcagUKlinks[b][4] + "</a>";
+        }
+      }
+    }
+  }
 
   // Sort by impact order (critical, serious, moderate, minor, unknown)
   allissues.sort(function (a, b) {
@@ -198,15 +238,6 @@ const writeHTML = async (allissues, storagePath, htmlElementArray) => {
       }
     }
   } // END for (let i in allissues)
-
-  /*
-    I should be able to do the average score, with seomething like:
-       var sentenceCountAverage = (sentenceCountTotal/countURLsCrawled);
-    However this function hits errors, not pages, so it would be inflated
-      var difficultWordsAverage = (difficultWordsTotal/countURLsCrawled);
-    The URLsCrawled may also be inflated as some pages may be skipped or duplicated.
-      var fleschKincaidGradeAverage = (fleschKincaidGradeTotal/countURLsCrawled);
-  */
 
   console.log("Writing results to ./reports/allissues.csv");
   const ObjectsToCsv_a = require('objects-to-csv');
@@ -322,8 +353,9 @@ const writeHTML = async (allissues, storagePath, htmlElementArray) => {
       message = "More work to eliminate automated testing errors. Don't forget manual testing."
     }
   } else {
-    grade = "?";
-    message = "Not enough URLs to evaluate grade. Perhaps there was an error in the scan.";
+    grade = message = "";
+    // grade = "?";
+    // message = "Not enough URLs to evaluate grade. Perhaps there was an error in the scan.";
   }
 
   // TODO - Document what this is doing.
@@ -342,10 +374,6 @@ const writeHTML = async (allissues, storagePath, htmlElementArray) => {
     }
   }
 
-  var wcagLinks = require('./constants/wcagLinks.json');
-  var wcagsc2role = require('./constants/wcagsc2role.json');
-
-
   // Count the instances of each WCAG error in wcagIDsum and express that in wcagCounts which gets stored
   wcagCountsArray.forEach(function (x) {
     wcagCountsArray[x] = (wcagCountsArray[x] || 0) + 1;
@@ -358,46 +386,15 @@ const writeHTML = async (allissues, storagePath, htmlElementArray) => {
       if (typeof wcagCountsArray[i] == "number") {
         wcagCountsTemp = wcagCountsArray[i];
 
-
-// NOT TESTED ON AIRPLANE - https://www.freecodecamp.org/news/javascript-array-of-objects-tutorial-how-to-create-update-and-loop-through-objects-using-js-array-methods/
-// let car = cars.find(car => car.color === "red");
-// console.log(car);
-// let wcag_id = cars.find(car => wcag_id.wcag === i);
-// console.log(wcag_id);
-
-/*
-        var link = '';
-        for(let j in wcagLinks) {
-          if (wcagLinks[j].wcag == i) {
-            link = wcagLinks[j].href;
+        // Loop through WCAG errors to provide links & context.
+        for (let c in wcagLinks) {
+          if (wcagLinks[c].wcag == i) {
+            var displayWCAGlink = "<a href ='" + wcagLinks[c].href + "' target='_blank'><b>" + i + ":</b> " + wcagLinks[c].desc + " [" + wcagLinks[c].role + "]</a> - <b>" + wcagCountsTemp + "</b>";
+            // console.log(displayWCAGlink);
           }
         }
-        var name = '';
-        console.log(typeof wcagsc2role);
-        for(let k in wcagsc2role) {
-          if (wcagsc2role[k] == i) {
-            name = wcagsc2role[k];
-          }
-          // console.log(wcagsc2role.i);
-          // console.log(name);
-          // console.log(wcagsc2role.indexOf(k) + " indexOf");
-        }
-        // console.log(link + " plus " + name)
-*/
-// console.log(wcagLinks.indexOf(i) + " indexOf");
-// console.log(wcagLinks.includes(i));
-// var names = obj.wcagLinks.map(function (wcagLink) {
-//  return wcagLink.wcag + ' ' + wcagLink.href;
-// });
-// console.log(names);
+        wcagCountsContent += "<li>" + displayWCAGlink  + '</li>';
 
-      //  if (wcagLinks.includes(i)) {
-      //    console.log("includes i " + i);
-      //  }
-
-        // console.log(wcagLinks.slice(i) + " slice")
-
-        wcagCountsContent += "<li><b>" + i + ":</b> " + wcagCountsTemp + " "  + '</li>'; // + link
         let finalWCAGarrayTemp = {
           wcag: i,
           count: wcagCountsTemp
@@ -405,7 +402,7 @@ const writeHTML = async (allissues, storagePath, htmlElementArray) => {
         finalWCAGarray.push(finalWCAGarrayTemp);
         ++ii
         if (ii == 1) {
-          wcagCountsContent = "WCAG Errors: " + wcagCountsContent;
+          wcagCountsContent = "<h2>WCAG Errors</h2> " + wcagCountsContent;
         }
       }
     }
@@ -497,7 +494,7 @@ const writeHTML = async (allissues, storagePath, htmlElementArray) => {
       startTime: getCurrentTime(),
       count: id,
       htmlCount: allissues.length,
-      domain: domainURL,
+      domain,
       countURLsCrawled,
       totalTime,
       speed,
@@ -719,7 +716,7 @@ exports.mergeFiles = async randomToken => {
     console.log("Writing issues to JSON & HTML.")
     var htmlElementArray = [];
     await writeResults(allIssues, storagePath, htmlElementArray);
-    await writeHTML(allIssues, storagePath, htmlElementArray);
+    await writeHTML(allIssues, storagePath, htmlElementArray, getHostnameFromRegex(domainURL));
   } else {
     console.log("No entities in allFiles.");
   }
