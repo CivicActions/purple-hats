@@ -70,7 +70,7 @@ while getopts ":d:s:t:e:o:w:x:y:z:n:" options; do         # Loop: Get the next o
     n)                                    # If the option is n,
       NUMBER=${OPTARG}                     # Set $NUMBER to specified value.
       re_isanum='^[0-9]+$'                # Regex: match whole numbers only
-      if ! [[ $NUMBER =~ $re_isanum ]] ; then   # if $TIMES not whole:
+      if ! [[ $NUMBER =~ $re_isanum ]]; then   # if $TIMES not whole:
         echo "Error: NUMBER must be a positive, whole number."
         exit_abnormal
         exit 1
@@ -89,11 +89,11 @@ while getopts ":d:s:t:e:o:w:x:y:z:n:" options; do         # Loop: Get the next o
   esac
 done
 
-if [ -n "$DOMAINNAME" ] ; then
+if [ -n "$DOMAINNAME" ]; then
 
   page=$DOMAINNAME
 
-  if [ "$SCANTYPE" = "sitemap" ] ; then
+  if [ "$SCANTYPE" = "sitemap" ]; then
     scanType="sitemap"
     crawler="crawlSitemap"
   else
@@ -168,7 +168,7 @@ currentDate=$(date '+%Y-%-m-%-d')
 
 echo "Scanning website..."
 
-if [[ $WAPPALYZER == 1 ]] ; then
+if [[ $WAPPALYZER == 1 ]]; then
     # optional ability to gather information about the frameworks involved
     echo "Wappalyzer enabled"
     if [ -f "wappalyzer/src/drivers/npm/cli.js" ]; then
@@ -178,7 +178,7 @@ if [[ $WAPPALYZER == 1 ]] ; then
     wappalyzer=$( node "src/drivers/npm/cli.js" "$page")
     cd ..
   else
-    echo "Wappalyzer not installed in ./wappalyzer folder"
+    echo "Wappalyzer not installed in ./wappalyzer folder."
   fi
 fi
 
@@ -189,21 +189,20 @@ if [ -d "results/$currentDate/$randomToken" ]; then
   domain=$(echo "$page" | awk -F/ '{print $3}')
 
   # Add simlinks for simpler access
-  echo "adding symbolic link to last scan $domain"
+  echo "adding symbolic link to last scan $domain."
   ln -sfn "results/$currentDate/$randomToken" "last-scan"
   cd results
 
   # Copy over other links only if the .html report is successfully written
-  if ls "$currentDate/$randomToken/reports/report.html" >> /dev/null 2>&1
-    then
-    echo "adding more symbolic links"
+  if ls "$currentDate/$randomToken/reports/report.html" >> /dev/null 2>&1; then
+    echo "Adding symbolic links for date and domain."
     ln -sfn "$currentDate/$randomToken"
     cd "$currentDate"
     ln -sfn "$randomToken" "$domain"
     cd ../..
 
     # Compress most files and delete originals.
-    echo "compressing files"
+    echo "Compressing files."
     cd last-scan
     tar -cjvf "$domain-$currentDate-all_issues.tar.bz2" "all_issues" 2>/dev/null
     rm -fr "all_issues"
@@ -218,15 +217,21 @@ if [ -d "results/$currentDate/$randomToken" ]; then
     cd ../..
 
     # Make directory for domain and store prior scans
-    echo "adding domain tracking - $domain"
+    echo "adding domain tracking - $domain."
     cd results
     ln -sfn "$currentDate/$randomToken" "last-scan"
-    mkdir "${domain}_reports"
+
+    if [ -d "${domain}_reports" ]; then
+      echo "Using existing ${domain}_reports directory."
+    else
+      echo "Making ${domain}_reports directory."
+      mkdir "${domain}_reports"
+    fi
+
     cd "${domain}_reports"
     ln -sfn "../$currentDate/$randomToken" "$currentDate"
 
-    # Add links to make it easier to access reports from last-scan directory
-    echo "renaming reports"
+    echo "Renaming reports to make it easier to access from last-scan."
     cd ../last-scan/reports
     mv report.html "$domain-$currentDate-report.html"
     ln  -sfn "$domain-$currentDate-report.html" report.html
@@ -237,31 +242,30 @@ if [ -d "results/$currentDate/$randomToken" ]; then
     # Test for the command before attempting to open the report
     if [[ "$OPENBROWSER" == 1 ]]; then
       if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        echo "Open in Firefox"
+        echo "Open report in Firefox."
         firefox -url "last-scan/report.html"
       elif [[ "$OSTYPE" == "darwin"* ]]; then
-        echo "Open in default browser"
+        echo "Open report in default browser"
         open "last-scan/report.html"
     else
         echo "The scan has been completed."
         current_dir=$(pwd)
         reportPath="$current_dir/results/$currentDate/$randomToken/reports/report.html"
-        echo "You can find the report in $reportPath"
+        echo "You can find the report in $reportPath."
     fi # End [[ "$OPENBROWSER" == 1 ]]; then
 fi
   else
-    echo "No report.html file for $domain"
+    echo "No report.html file for $domain."
   fi
 
 
   # Provide PDF version if available
   # NOTE: This should just be done with puppeteer which is already required - https://github.com/puppeteer/puppeteer/
-  if command -v wkhtmltopdf &> /dev/null
-  then
+  if command -v wkhtmltopdf &> /dev/null; then
     # I should be able to use --print-media-type
     wkhtmltopdf -q --enable-javascript --javascript-delay 10000 "last-scan/reports/report.html" "last-scan/reports/$domain-$currentDate-report.pdf"
   else
-    echo "If you want a PDF export, then install wkhtmltopdf, i.e. brew install wkhtmltopdf";
+    echo "If you want a PDF export, then install wkhtmltopdf (i.e. brew install wkhtmltopdf).";
   fi # End command -v wkhtmltopdf
 
 else

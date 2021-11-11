@@ -94,16 +94,15 @@
                 </figure>
                   {{{wcagCountsContent}}}
               <h2>Language evaluation</h2>
-                  {{{ sentenceCountMaxText }}} <br />
-                  {{{ fleschKincaidGradeMaxText }}} <br />
-                  {{{ difficultWordsMaxText }}}
+              <ul>
+                  <li>{{{ sentenceCountMaxText }}} </li>
+                  <li>{{{ fleschKincaidGradeMaxText }}} </li>
+                  <li>{{{ difficultWordsMaxText }}} </li>
+              </ul>
               </div>
             </div>
           </div>
           <div class="col-md-4 col-12 header-meta">
-              <div style="text-align: left;">
-                  <div style="text-align:center;"><span class="sr-only">Grade: </span><span class="color-{{ grade }}" style="font-weight: bold; margin: auto; padding: 10px; font-size: 120px; text-align: center; width: 100%; justify-content: center; margin: auto; ">{{ grade }}</span></div><br><div style="font-weight: bold; font-size: 15px; text-align: left;">{{ message }}</div><br>
-              </div>
             <div class="toggleWrapper">
               <input type="checkbox" class="dm" id="dm"/>
               <label for="dm" class="toggle">
@@ -119,6 +118,9 @@
                 <span class="star star--5"></span>
                 <span class="star star--6"></span>
               </label>
+            </div>
+            <div style="text-align: left;">
+                <div style="text-align:center;"><span class="sr-only">Grade: </span><span class="color-{{ grade }}" style="font-weight: bold; margin: auto; padding: 10px; font-size: 120px; text-align: center; width: 100%; justify-content: center; margin: auto; ">{{ grade }}</span></div><br><div style="font-weight: bold; font-size: 15px; text-align: left;">{{ message }}</div><br>
             </div>
           </div>
         </div>

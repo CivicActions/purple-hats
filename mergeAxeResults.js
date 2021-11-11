@@ -210,22 +210,22 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domain) => {
         sentenceCount = allissues[i].sentenceCount;
         sentenceCountMax = sentenceCount;
       }
-      var sentenceCountMaxText = "Most sentences on page: " + sentenceCountMax + " - <a href='" + domainURL + page + "'>" + page + "</a>";
+      var sentenceCountMaxText = "Most sentences on page: <a href='" + domainURL + page + "' target='_blank'>" + sentenceCountMax + "</a>";
     }
     if (fleschKincaidGradeMax == 0 || allissues[i].fleschKincaidGrade > fleschKincaidGradeMax) {
       if (!((allissues[i].fleschKincaidGrade == null) || (allissues[i].fleschKincaidGrade == undefined) || (typeof allissues[i].fleschKincaidGrade !== 'number'))) {
         fleschKincaidGrade = allissues[i].fleschKincaidGrade;
         fleschKincaidGradeMax = fleschKincaidGrade;
       }
-      var fleschKincaidGradeMaxText = "Worst Flesch Kincaid score: " + fleschKincaidGradeMax + " - <a href='" + domainURL + page + "'>" + page + "</a>";
+      var fleschKincaidGradeMaxText = "Page with worst Flesch Kincaid score: <a href='" + domainURL + page + "' target='_blank'>" + fleschKincaidGradeMax + "</a>";
     }
     if ((difficultWordsMax == 0) || (allissues[i].difficultWords > difficultWordsMax)) {
       if (!((allissues[i].difficultWords == null) || (allissues[i].difficultWords == undefined) || (typeof allissues[i].difficultWords !== 'number'))) {
         difficultWords = allissues[i].difficultWords;
         difficultWordsMax = allissues[i].difficultWords;
       }
-      if (allissues[i].difficultWords != 0) {
-        var difficultWordsMaxText = "Most difficult words: " + difficultWordsMax + " - <a href='" + domainURL + page + "'>" + page + "</a>";
+      if (allissues[i].difficultWords !== 0) {
+        var difficultWordsMaxText = "Most difficult words on a page: <a href='" + domainURL + page + "' target='_blank'>" + difficultWordsMax + "</a>";
       }
     }
 
