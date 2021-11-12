@@ -45,7 +45,7 @@ const {
   waitTime,
 } = require('../constants/constants');
 
-exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreArr, excludeQuery) => {
+exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreArr, excludeQuery, storagePath) => {
   const urlsCrawled = {
     ...urlsCrawledObj
   };
@@ -189,8 +189,8 @@ exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreA
         } else {
           ++ii;
           console.log("Skipped id: " + ii + ", URL: " + currentUrl);
-console.log("valid url " + validateUrl(currentUrl));
-console.log("skip url " + skip);
+console.log("Valid url? " + validateUrl(currentUrl));
+console.log("Skip url? " + skip);
           if (currentUrl.includes(".pdf")) {
             ++iii;
             console.log("Number of PDFs: " + iii);
@@ -215,7 +215,23 @@ console.log("skip url " + skip);
   });
 
   // How to best return this value?
-  console.log(pdfs);
+  if (pdfs.length > 0) {
+    console.log("We should be saving this list of PDFs.")
+    console.log(pdfs);
+  }
+
+  /*
+  This isn't right. It should be appending like - https://attacomsian.com/blog/nodejs-append-data-to-file
+  console.log("Writing list of PDFs to" + storagePath + "/reports/pdf.csv");
+  const ObjectsToCsv_p = require('objects-to-csv');
+  (async () => {
+    const csv_p = new ObjectsToCsv_p(pdfs);
+
+    // Save to file:
+    await csv_p.toDisk(storagePath + "/reports/pdf.csv");
+    // console.log(await csv_a.toString());
+  })();
+  */
 
   await crawler.run();
   return urlsCrawled;

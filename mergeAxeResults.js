@@ -59,6 +59,8 @@ const fetchIcons = async (disabilities, impact) => {
 /* Compile final JSON results */
 const writeResults = async (allissues, storagePath, htmlElementArray) => {
 
+  console.log("Running writeResults to generate JSON - URLs " + countURLsCrawled + " & " + allissues.length + " errors found.");
+
   /* Copy without reference to allissues array */
   var shortAllIssuesJSON = []
   try {
@@ -67,8 +69,6 @@ const writeResults = async (allissues, storagePath, htmlElementArray) => {
   } catch (e) {
     console.log(allissues);
   }
-
-  console.log("Writing JSON countURLsCrawled " + countURLsCrawled + " and " + allissues.length + " errors found.");
 
   /* Delete SVG images in copy of allissues and count instances of html errors. */
   let ii = iii = 0;
@@ -157,6 +157,7 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domain) => {
 
   // Pull in WCAG name and W3C links
   let wcagIDval = "";
+  var totalSentenceCount = totalFleschKincaidGrade = totalDifficultWords = 0;
   for (let a in wcagLinks) {
     wcagIDval = wcagLinks[a].wcag;
 
@@ -203,29 +204,32 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domain) => {
       allissues[i].disabilities = "";
     }
 
-    var sentenceCount = fleschKincaidGrade = difficultWordsMax = 0;
+    var sentenceCount = fleschKincaidGrade = difficultWords = 0;
     var page = allissues[i].page
+    totalSentenceCount += allissues[i].sentenceCount;
     if (sentenceCountMax == 0 || allissues[i].sentenceCount > sentenceCountMax) {
       if (!((allissues[i].sentenceCount == null) || (allissues[i].sentenceCount == undefined) || (typeof allissues[i].sentenceCount !== 'number'))) {
         sentenceCount = allissues[i].sentenceCount;
         sentenceCountMax = sentenceCount;
+        // console.log("Current max sentence count: " + sentenceCountMax);
       }
-      var sentenceCountMaxText = "Most sentences on page: <a href='" + domainURL + page + "' target='_blank'>" + sentenceCountMax + "</a>";
     }
+
+    totalFleschKincaidGrade += allissues[i].fleschKincaidGrade;
     if (fleschKincaidGradeMax == 0 || allissues[i].fleschKincaidGrade > fleschKincaidGradeMax) {
       if (!((allissues[i].fleschKincaidGrade == null) || (allissues[i].fleschKincaidGrade == undefined) || (typeof allissues[i].fleschKincaidGrade !== 'number'))) {
         fleschKincaidGrade = allissues[i].fleschKincaidGrade;
         fleschKincaidGradeMax = fleschKincaidGrade;
+        // console.log("Current max Flesch-Kincai: " + fleschKincaidGradeMax);
       }
-      var fleschKincaidGradeMaxText = "Page with worst Flesch Kincaid score: <a href='" + domainURL + page + "' target='_blank'>" + fleschKincaidGradeMax + "</a>";
     }
-    if ((difficultWordsMax == 0) || (allissues[i].difficultWords > difficultWordsMax)) {
-      if (!((allissues[i].difficultWords == null) || (allissues[i].difficultWords == undefined) || (typeof allissues[i].difficultWords !== 'number'))) {
+
+    if (!((allissues[i].difficultWords == null) || (allissues[i].difficultWords == undefined) || (typeof allissues[i].difficultWords !== 'number'))) {
+      totalDifficultWords += allissues[i].difficultWords;
+      if (allissues[i].difficultWords > difficultWordsMax) {
         difficultWords = allissues[i].difficultWords;
         difficultWordsMax = allissues[i].difficultWords;
-      }
-      if (allissues[i].difficultWords !== 0) {
-        var difficultWordsMaxText = "Most difficult words on a page: <a href='" + domainURL + page + "' target='_blank'>" + difficultWordsMax + "</a>";
+        // console.log("Current most number of difficult words: " + difficultWordsMaxText);
       }
     }
 
@@ -238,6 +242,10 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domain) => {
       }
     }
   } // END for (let i in allissues)
+
+  var sentenceCountMaxText = "Average sentences per page: " + Math.round((totalSentenceCount / allissues.length)) + " <b>Most sentences on page: <a href='" + domainURL + page + "' target='_blank'>" + sentenceCountMax + "</a></b>";
+  var fleschKincaidGradeMaxText = "Average Flesch–Kincaid grade: " + Math.round((totalFleschKincaidGrade / allissues.length)) + " <b>Page with worst Flesch–Kincaid grade: <a href='" + domainURL + page + "' target='_blank'>" + Math.round(fleschKincaidGradeMax) + "</a></b>";
+  var difficultWordsMaxText = "Average difficult words per page: " + Math.round(totalDifficultWords / allissues.length) + " <b>Most difficult words on a page: <a href='" + domainURL + page + "' target='_blank'>" + difficultWordsMax + "</a></b>";
 
   console.log("Writing results to ./reports/allissues.csv");
   const ObjectsToCsv_a = require('objects-to-csv');
@@ -253,7 +261,7 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domain) => {
   if (countURLsCrawled > 25) {
     var grade = message = "";
     var score = (minorCount + (moderateCount * 1.5) + (seriousCount * 2) + (criticalCount * 3)) / (countURLsCrawled * 5);
-    console.log("score (minor) + moderate*1.5 + serious*2 + critical*3 / urls*5 = " + Math.round(score));
+    console.log("Score (minor) + moderate*1.5 + serious*2 + critical*3 / urls*5 = " + Math.round(score));
 
 
     console.log("Writing results to ./reports/count.csv");
@@ -285,7 +293,7 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domain) => {
       // console.log(await csv_c.toString());
     })();
 
-    console.log("Writing HTML");
+    console.log("Writing HTML report for " + domain);
 
     // Scoring for grade
     // Score number = score (minor) + moderate*1.5 + serious*2 + critical*3 / urls*5
@@ -409,7 +417,7 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domain) => {
   }
   wcagCountsContent += "</ul>";
 
-  console.log("Writing results to ./reports/wcagErrors.csv");
+  console.log("Writing " + domain + " results to ./reports/wcagErrors.csv");
   const ObjectsToCsv_wc = require('objects-to-csv');
   (async () => {
     // finalWCAGarray.unshift("WCAG Errors", "Count")
@@ -448,7 +456,7 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domain) => {
       }
     }
 
-    console.log("Writing results to ./reports/wappalyzer.csv");
+    console.log("Writing " + domain + " results to ./reports/wappalyzer.csv");
     const ObjectsToCsv_wa = require('objects-to-csv');
     // Add if statement to avoid this error
     // node_modules/objects-to-csv/index.js:16
@@ -465,11 +473,14 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domain) => {
   }
 
 
-  var axeCountsDescription = "<b>Critical: " + criticalCount + ", Serious: " + seriousCount + "</b>, Moderate: " + moderateCount + ", Minor: " + minorCount + "";
+  let axeCounts1 = "Critical: " + criticalCount + ", Serious: " + seriousCount;
+  let axeCounts2 = "Moderate: " + moderateCount + ", Minor: " + minorCount;
+  let axeCounts3 = "";
   if (unknownCount > 0) {
-    axeCountsDescription += "<i>Unknown: " + unknownCount + "</i>";
+    axeCounts3 = ", Unknown: " + unknownCount;
   }
-  console.log(axeCountsDescription);
+  axeCountsDescription = "<b>" + axeCounts1 + "</b>, " + axeCounts2 + "<i>" + axeCounts3 + "</i>";
+  console.log(axeCounts1 + ", " + axeCounts2 + axeCounts3);
   var someOfErrors = criticalCount + seriousCount + moderateCount + minorCount;
   const axeCountContentArr = JSON.stringify({
       "criticalCount": criticalCount,
@@ -717,7 +728,7 @@ exports.mergeFiles = async randomToken => {
 
   /* Write the JSON then the HTML - Order Matters */
   if (allFiles.length > 0) {
-    console.log("Writing issues to JSON & HTML.")
+    console.log("Writing issues to JSON & HTML for: " + domainURL)
     var htmlElementArray = [];
     await writeResults(allIssues, storagePath, htmlElementArray);
     await writeHTML(allIssues, storagePath, htmlElementArray, getHostnameFromRegex(domainURL));

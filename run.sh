@@ -191,7 +191,7 @@ if [ -d "results/$currentDate/$randomToken" ]; then
   domain=$(echo "$page" | awk -F/ '{print $3}')
 
   # Add simlinks for simpler access
-  echo "adding symbolic link to last scan $domain."
+  echo "Adding symbolic link to last scan of $domain."
   ln -sfn "results/$currentDate/$randomToken" "last-scan"
   cd results
 
