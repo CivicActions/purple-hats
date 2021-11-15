@@ -251,8 +251,8 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domain) => {
           allissues[i].htmlElementCount = "<p><b>" + htmlElementArray[n][1] + " duplicate axe errors. </b>" + "</p>";
       }
     }
-    console.log("Can we provide a list of up to 10 links with the same error? ");
-    console.log(htmlElementArray);
+    // console.log("Can we provide a list of up to 10 links with the same error? ");
+    // console.log(htmlElementArray);
   } // END for (let i in allissues)
 
   // Create text for HTML report.
@@ -274,7 +274,7 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domain) => {
   if (countURLsCrawled > 25) {
     var grade = message = "";
     var score = (minorCount + (moderateCount * 1.5) + (seriousCount * 2) + (criticalCount * 3)) / (countURLsCrawled * 5);
-    console.log("Score (minor) + moderate*1.5 + serious*2 + critical*3 / urls*5 = " + Math.round(score));
+    console.log("Score (minor) + moderate*1.5 + serious*2 + critical*3 / urls*5 = " + Math.round(score * 100)/100);
 
 
     console.log("Writing results to ./reports/count.csv");
@@ -493,7 +493,10 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domain) => {
     axeCounts3 = ", Unknown: " + unknownCount;
   }
   axeCountsDescription = "<b>" + axeCounts1 + "</b>, " + axeCounts2 + "<i>" + axeCounts3 + "</i>";
-  console.log(axeCounts1 + ", " + axeCounts2 + axeCounts3);
+
+  // score is repeated above but I'm not getting the value without redevinging it.
+  var score = (minorCount + (moderateCount * 1.5) + (seriousCount * 2) + (criticalCount * 3)) / (countURLsCrawled * 5);
+  console.log(axeCounts1 + ", " + axeCounts2 + axeCounts3 + " Score: " + Math.round(score * 100)/100);
   var someOfErrors = criticalCount + seriousCount + moderateCount + minorCount;
   const axeCountContentArr = JSON.stringify({
       "criticalCount": criticalCount,
@@ -782,7 +785,7 @@ exports.mergeFiles = async randomToken => {
             var lastRow = data[data.length-1];
             var score = lastRow[lastRow.length-1];
             totalArrayAxe.push(dateFolders[i], data);
-            console.log("Date: " + dateFolders[i] + " Score: " +  score);
+            console.log("Date: " + dateFolders[i] + " Score: " +  Math.round(score * 100)/100);
 
 /*
             // Writing aggregated value to disk
