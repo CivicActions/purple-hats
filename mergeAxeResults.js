@@ -1,4 +1,4 @@
-    /* eslint-disable no-console */
+/* eslint-disable no-console */
 const fs = require('fs-extra');
 const path = require('path');
 const {
@@ -77,6 +77,7 @@ const writeResults = async (allissues, storagePath, htmlElementArray) => {
 
     // Count same errors
     var value = shortAllIssuesJSON[i].htmlElement;
+
     function exists(arr, search) {
       return arr.some(row => row.includes(search));
     }
@@ -180,7 +181,7 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domain) => {
         if (wcagLinks[a].wcag21) {
           desc += " - 2.1"
         }
-        wcagLinks[a].desc = desc  + ") ";
+        wcagLinks[a].desc = desc + ") ";
         if (wcagLinks[a].role) {
           wcagLinks[a].role += ", " + '<a href="' + wcagUKlinks[b][3] + '" target="_blank">' + wcagUKlinks[b][4] + "</a>";
         } else {
@@ -191,7 +192,7 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domain) => {
   }
 
   // Sort by impact order (critical, serious, moderate, minor, unknown)
-  allissues.sort(function (a, b) {
+  allissues.sort(function(a, b) {
     return b.order - a.order || b.errorCount - a.errorCount;
   });
 
@@ -206,24 +207,32 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domain) => {
 
     var sentenceCount = fleschKincaidGrade = difficultWords = 0;
     var page = allissues[i].page
-    totalSentenceCount += allissues[i].sentenceCount;
-    if (sentenceCountMax == 0 || allissues[i].sentenceCount > sentenceCountMax) {
-      if (!((allissues[i].sentenceCount == null) || (allissues[i].sentenceCount == undefined) || (typeof allissues[i].sentenceCount !== 'number'))) {
-        sentenceCount = allissues[i].sentenceCount;
-        sentenceCountMax = sentenceCount;
-        // console.log("Current max sentence count: " + sentenceCountMax);
+
+    // Find longest sentences per page.
+    if (!((allissues[i].sentenceCount == null) || (allissues[i].sentenceCount == undefined) || (typeof allissues[i].sentenceCount !== 'number'))) {
+      totalSentenceCount += allissues[i].sentenceCount;
+      if (sentenceCountMax == 0 || allissues[i].sentenceCount > sentenceCountMax) {
+        if (!((allissues[i].sentenceCount == null) || (allissues[i].sentenceCount == undefined) || (typeof allissues[i].sentenceCount !== 'number'))) {
+          sentenceCount = allissues[i].sentenceCount;
+          sentenceCountMax = sentenceCount;
+          // console.log("Current max sentence count: " + sentenceCountMax);
+        }
       }
     }
 
-    totalFleschKincaidGrade += allissues[i].fleschKincaidGrade;
-    if (fleschKincaidGradeMax == 0 || allissues[i].fleschKincaidGrade > fleschKincaidGradeMax) {
-      if (!((allissues[i].fleschKincaidGrade == null) || (allissues[i].fleschKincaidGrade == undefined) || (typeof allissues[i].fleschKincaidGrade !== 'number'))) {
-        fleschKincaidGrade = allissues[i].fleschKincaidGrade;
-        fleschKincaidGradeMax = fleschKincaidGrade;
-        // console.log("Current max Flesch-Kincai: " + fleschKincaidGradeMax);
+    // Find most complicated page.
+    if (!((allissues[i].fleschKincaidGrade == null) || (allissues[i].fleschKincaidGrade == undefined) || (typeof allissues[i].fleschKincaidGrade !== 'number'))) {
+      totalFleschKincaidGrade += allissues[i].fleschKincaidGrade;
+      if (fleschKincaidGradeMax == 0 || allissues[i].fleschKincaidGrade > fleschKincaidGradeMax) {
+        if (!((allissues[i].fleschKincaidGrade == null) || (allissues[i].fleschKincaidGrade == undefined) || (typeof allissues[i].fleschKincaidGrade !== 'number'))) {
+          fleschKincaidGrade = allissues[i].fleschKincaidGrade;
+          fleschKincaidGradeMax = fleschKincaidGrade;
+          // console.log("Current max Flesch-Kincai: " + fleschKincaidGradeMax);
+        }
       }
     }
 
+    // Find page with most difficult words.
     if (!((allissues[i].difficultWords == null) || (allissues[i].difficultWords == undefined) || (typeof allissues[i].difficultWords !== 'number'))) {
       totalDifficultWords += allissues[i].difficultWords;
       if (allissues[i].difficultWords > difficultWordsMax) {
@@ -233,16 +242,20 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domain) => {
       }
     }
 
-    // Find the number of instances for a given HTML error.
+    // Find the number of instances for a given HTML error on a page.
+    // TODO: Find page with the most axe errors.
     let htmlElement = allissues[i].htmlElement;
     for (let n in htmlElementArray) {
       if (htmlElementArray[n][0] == htmlElement) {
         if (htmlElementArray[n][1] > 1)
-          allissues[i].htmlElementCount = "<p><b>" + htmlElementArray[n][1] + " duplicate axe errors. </b></p>";
+          allissues[i].htmlElementCount = "<p><b>" + htmlElementArray[n][1] + " duplicate axe errors. </b>" + "</p>";
       }
     }
+    console.log("Can we provide a list of up to 10 links with the same error? ");
+    console.log(htmlElementArray);
   } // END for (let i in allissues)
 
+  // Create text for HTML report.
   var sentenceCountMaxText = "Average sentences per page: " + Math.round((totalSentenceCount / allissues.length)) + " <b>Most sentences on page: <a href='" + domainURL + page + "' target='_blank'>" + sentenceCountMax + "</a></b>";
   var fleschKincaidGradeMaxText = "Average Flesch–Kincaid grade: " + Math.round((totalFleschKincaidGrade / allissues.length)) + " <b>Page with worst Flesch–Kincaid grade: <a href='" + domainURL + page + "' target='_blank'>" + Math.round(fleschKincaidGradeMax) + "</a></b>";
   var difficultWordsMaxText = "Average difficult words per page: " + Math.round(totalDifficultWords / allissues.length) + " <b>Most difficult words on a page: <a href='" + domainURL + page + "' target='_blank'>" + difficultWordsMax + "</a></b>";
@@ -300,65 +313,65 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domain) => {
     // A+ = 0 ; A <= 0.1 ; A- <= 0.3 ; B+ <= 0.5 ; B <= 0.7 ; B- <= 0.9 ; C+ <= 2 ;
     // C <= 4 C- <= 6 ; D+ <= 8 ; D <= 10 ; D- <= 13 ; F+ <= 15 ; F <= 20 ; F- >= 20
     switch (true) {
-    case score == 0:
-      grade = "A+";
-      message = "No axe errors, great! Don't forget manual testing."
-      break;
-    case score <= 0.1:
-      grade = "A";
-      message = "Very few axe errors left! Don't forget manual testing."
-      break;
-    case score <= 0.3:
-      grade = "A-";
-      message = "So close to getting the automated errors! Don't forget manual testing."
-      break;
-    case score <= 0.5:
-      grade = "B+";
-      message = "More work to eliminate automated testing errors. Don't forget manual testing."
-      break;
-    case score <= 0.7:
-      grade = "B";
-      message = "More work to eliminate automated testing errors. Don't forget manual testing."
-      break;
-    case score <= 0.9:
-      grade = "B-";
-      message = "More work to eliminate automated testing errors. Don't forget manual testing."
-      break;
-    case score <= 2:
-      grade = "C+";
-      message = "More work to eliminate automated testing errors. Don't forget manual testing."
-      break;
-    case score <= 4:
-      grade = "C";
-      message = "More work to eliminate automated testing errors. Don't forget manual testing."
-      break;
-    case score <= 6:
-      grade = "C-";
-      message = "More work to eliminate automated testing errors. Don't forget manual testing."
-      break;
-    case score <= 8:
-      grade = "D+";
-      message = "More work to eliminate automated testing errors. Don't forget manual testing."
-      break;
-    case score <= 10:
-      grade = "D";
-      message = "More work to eliminate automated testing errors. Don't forget manual testing."
-      break;
-    case score <= 13:
-      grade = "D-";
-      message = "More work to eliminate automated testing errors. Don't forget manual testing."
-      break;
-    case score <= 15:
-      grade = "F+";
-      message = "More work to eliminate automated testing errors. Don't forget manual testing."
-      break;
-    case score <= 20:
-      grade = "F";
-      message = "More work to eliminate automated testing errors. Don't forget manual testing."
-      break;
-    default:
-      grade = "F-";
-      message = "More work to eliminate automated testing errors. Don't forget manual testing."
+      case score == 0:
+        grade = "A+";
+        message = "No axe errors, great! Don't forget manual testing."
+        break;
+      case score <= 0.1:
+        grade = "A";
+        message = "Very few axe errors left! Don't forget manual testing."
+        break;
+      case score <= 0.3:
+        grade = "A-";
+        message = "So close to getting the automated errors! Don't forget manual testing."
+        break;
+      case score <= 0.5:
+        grade = "B+";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+      case score <= 0.7:
+        grade = "B";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+      case score <= 0.9:
+        grade = "B-";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+      case score <= 2:
+        grade = "C+";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+      case score <= 4:
+        grade = "C";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+      case score <= 6:
+        grade = "C-";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+      case score <= 8:
+        grade = "D+";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+      case score <= 10:
+        grade = "D";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+      case score <= 13:
+        grade = "D-";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+      case score <= 15:
+        grade = "F+";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+      case score <= 20:
+        grade = "F";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+      default:
+        grade = "F-";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
     }
   } else {
     grade = message = "";
@@ -383,7 +396,7 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domain) => {
   }
 
   // Count the instances of each WCAG error in wcagIDsum and express that in wcagCounts which gets stored
-  wcagCountsArray.forEach(function (x) {
+  wcagCountsArray.forEach(function(x) {
     wcagCountsArray[x] = (wcagCountsArray[x] || 0) + 1;
   });
   var finalWCAGstring = '';
@@ -401,7 +414,7 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domain) => {
             // console.log(displayWCAGlink);
           }
         }
-        wcagCountsContent += "<li>" + displayWCAGlink  + '</li>';
+        wcagCountsContent += "<li>" + displayWCAGlink + '</li>';
 
         let finalWCAGarrayTemp = {
           wcag: i,
@@ -487,10 +500,10 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domain) => {
       "seriousCount": seriousCount,
       "moderateCount": moderateCount,
       "minorCount": minorCount,
-      "criticalCountPercent": Math.round((criticalCount/someOfErrors)*100),
-      "seriousCountPercent": Math.round((seriousCount/someOfErrors)*100),
-      "moderateCountPercent": Math.round((moderateCount/someOfErrors)*100),
-      "minorCountPercent": Math.round((minorCount/someOfErrors)*100),
+      "criticalCountPercent": Math.round((criticalCount / someOfErrors) * 100),
+      "seriousCountPercent": Math.round((seriousCount / someOfErrors) * 100),
+      "moderateCountPercent": Math.round((moderateCount / someOfErrors) * 100),
+      "minorCountPercent": Math.round((minorCount / someOfErrors) * 100),
       "axeCountsDescription": axeCountsDescription,
     },
     null,
@@ -649,7 +662,7 @@ const flattenAxeResults = async (rPath, storagePath) => {
         languageSummary += sentenceCount + " sentences evaluated. ";
       }
       if (!((difficultWords == null) || (difficultWords == 'undefined') || (typeof difficultWords !== 'number') || (sentenceCount <= 2))) {
-        if ((difficultWords /sentenceCount) > 3) {
+        if ((difficultWords / sentenceCount) > 3) {
           languageSummary += "There a lot of difficult words in this page. ";
         }
         // languageSummary += difficultWords + " difficult words; ";
@@ -736,84 +749,96 @@ exports.mergeFiles = async randomToken => {
     console.log("No entities in allFiles.");
   }
 
-  /*
-    const host = getHostnameFromRegex(domainURL);
-    // console.log(host);
+  // Get historical scans for the domain if available.
+  const host = getHostnameFromRegex(domainURL);
+  var rootDomainPath = "./results/" + host + "_reports/";
 
-    // console.log(domainURL);
-    // const fs = require("fs")
-    var rootDomainPath = "./results/" + host + "_reports/";
-    // console.log(rootDomainPath + " 1!");
-    // console.log(domainURL.replace('/', ''));
-    // console.log(domainURL.substring(6));
-    fs.readdir(rootDomainPath, (err, files) => { console.log(files) })
-    var dateFolders = fs.readdirSync(rootDomainPath)
+  fs.readdir(rootDomainPath, (err, files) => {
+    // console.log("Display files in each directory.");
+    // console.log(files)
+  })
+  var dateFolders = fs.readdirSync(rootDomainPath)
 
-    // console.log("## " + dateFolders + " 1.5!")
-    var date = "";
-    const fs2 = require("fs")
-    for (let i in dateFolders) {
-      // console.log(" ## " + i + " " + dateFolders[i] + " 2!");
-      date = dateFolders[i];
-  //    console.log(" ## " + i + " " + date + " 2.5!")
-  //   const currentDate = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-      var rootDomainPathAndDate = rootDomainPath + "/" + date + "/reports";
-      // console.log(" ## " + i + " " + rootDomainPathAndDate + " 3!");
-      fs2.readdir(rootDomainPathAndDate, (err, files) => { console.log(files) })
-      var dateFiles = fs2.readdirSync(rootDomainPathAndDate)
-      // console.log(" ## " + i + " " + dateFiles + " 4!");
-      // console.log(typeof dateFiles)
+  console.log("Search for prior axe scans. ");
+  var date = "";
+  const countArray = wcagArray = dateScore = totalArrayAxe2 = totalArrayWCAG2 = [];
+  const totalArrayAxe = totalArrayWCAG = [];
+  const fs2 = require("fs")
+  for (let i in dateFolders) {
+    date = dateFolders[i];  // Note thate date isn't updating
+    var rootDomainPathAndDate = rootDomainPath + "/" + date + "/reports";
+    fs2.readdir(rootDomainPathAndDate, (err, files) => {
+      // console.log(err + " " + files);
+    });
+    var dateFiles = fs2.readdirSync(rootDomainPathAndDate);
+    for (let ii in dateFiles) {
 
-      for (let ii in dateFiles) {
-        var element = {};
-        var countArray = [];
-        if (dateFiles[ii] == "count.csv") {
-          console.log("We can get the number of axe errors");
+      // Load prior axe errors.
+      if (dateFiles[ii] == "count.csv") {
+        var countCSV = rootDomainPathAndDate + "/count.csv";
+        var fs3 = require('fs');
+        var csv3 = require('csv');
+        var parser3 = csv3.parse({delimiter: ','}, function(err, data){
+            var lastRow = data[data.length-1];
+            var score = lastRow[lastRow.length-1];
+            totalArrayAxe.push(dateFolders[i], data);
+            console.log("Date: " + dateFolders[i] + " Score: " +  score);
 
-          const fs3 = require('fs');
-          var countCSV = rootDomainPathAndDate + "/count.csv";
-          fs3.createReadStream(countCSV)
-            .pipe(csv())
-            .on('data', (row) => {
+/*
+            // Writing aggregated value to disk
+            console.log("Writing history results to ./reports/axeHistoricalErrors.csv");
+            const ObjectsToCsv_aH = require('objects-to-csv');
+            (async () => {
+              // finalWCAGarray.unshift("WCAG Errors", "Count")
+              const csv_aH = new ObjectsToCsv_aH(totalArrayAxe);
+              // Save to file:
+              await csv_aH.toDisk(storagePath + "/reports/axeHistoricalErrors.csv");
+              // console.log(await csv_wc.toString());
+            })();
+*/
 
-  // element.date = date;
-  // element.count = row;
-  // dailyCount.push(element);
-              // console.log(row);
-              countArray.push(row);
-              console.log(countArray);
+        });
+        fs3.createReadStream(countCSV).pipe(parser3);
+      }
+      // console.log(totalArrayAxe);
 
-              // countArray.date = row;
-              // console.log(countArray);
-            })
-            .on('end', () => {
-              console.log('CSV file successfully processed');
-            });
+      // Load prior WCAG errors.
+      if (dateFiles[ii] == "wcagErrors.csv") {
+        var wcagCSV = rootDomainPathAndDate + "/wcagErrors.csv";
+        var fs4 = require('fs');
+        var csv4 = require('csv');
+        var parser4 = csv4.parse({delimiter: ','}, function(err, data){
+            var lastRow = data[data.length-1];
+            var score = lastRow[lastRow.length-1];
+            totalArrayWCAG.push(dateFolders[i], data);
 
-        }
-        if (dateFiles[ii] == "wcagErrors.csv") {
-          console.log("We can get the number of WCAG errors");
-        }
+/*
+            // Writing aggregated value to disk
+            console.log("Writing history results to ./reports/wcagHistoricalErrors.csv");
+            const ObjectsToCsv_wcH = require('objects-to-csv');
+            (async () => {
+              // finalWCAGarray.unshift("WCAG Errors", "Count")
+              const csv_wcH = new ObjectsToCsv_wcH(totalArrayWCAG);
+              // Save to file:
+              await csv_wcH.toDisk(storagePath + "/reports/wcagHistoricalErrors.csv");
+              // console.log(await csv_wc.toString());
+            })();
+*/
 
-        element[ date ] = countArray;
-        console.log(element);
-        console.log(countArray + " count array !!");
+        });
+        fs4.createReadStream(wcagCSV).pipe(parser4);
+      }
 
-  console.log("not the very end")
+    } // for (let ii in dateFiles)
 
+    // console.log(totalArrayWCAG2);
+    // console.log(totalArrayAxe2);
 
+  } // end of - for (let i in dateFolders)
 
-      } // for (let ii in dateFiles)
+  if (date === "") {
+    console.log("No prior scans found.")
+  }
 
-
-      element[ date ] = countArray;
-      console.log(element);
-      console.log(countArray + " count array !!");
-
-      console.log("very end")
-
-    }
-
-  */
-
-};
+  console.log("Number of prior folders: " + dateFolders.length);
+}

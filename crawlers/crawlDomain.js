@@ -71,6 +71,7 @@ exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreA
       const currentUrl = request.url;
       const location = await page.evaluate('location');
       if (location.host.includes(host)) {
+        var start = Date.now();
 
         // Skip elements defined in CLI
         // Presently not catching .asp#video or .asp?dnum=3&isFlash=0
@@ -162,13 +163,17 @@ exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreA
               console.log("YO", e)
             }
           });
+          var stop = Date.now()
 
           // Add readability values to results object
           if (typeof readability !== 'undefined' && readability) {
             let newResults = Object.assign(results, {
-              readability: readability
+              readability: readability,
+              time: (stop - start)/1000
             });
           }
+
+
 
           // I'm not sure this is working but it should
           if (waitTime > 0) {
@@ -181,7 +186,7 @@ exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreA
 
           // Provide output to console for progress
           ++i;
-          console.log("id: " + i + ", Errors: " + results.errors.length + ", URL: " + currentUrl);
+          console.log("id: " + i + ", Errors: " + results.errors.length + ", URL: " + currentUrl + ` Time to load: ${(stop - start)/1000} seconds`);
 
           await dataset.pushData(results);
           urlsCrawled.scanned.push(currentUrl);

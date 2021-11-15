@@ -220,7 +220,7 @@ if [ -d "results/$currentDate/$randomToken" ]; then
     cd ../..
 
     # Make directory for domain and store prior scans
-    echo "adding domain tracking - $domain."
+    echo "Adding domain tracking - $domain."
     cd results
     ln -sfn "$currentDate/$randomToken" "last-scan"
 
