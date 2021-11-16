@@ -1,5 +1,9 @@
 const fs = require('fs-extra');
-const { a11yDataStoragePath, allIssueFileName } = require('./constants/constants');
+const {
+  a11yDataStoragePath,
+  allIssueFileName,
+  invalidURLends
+} = require('./constants/constants');
 
 exports.getHostnameFromRegex = url => {
   // run against regex
@@ -13,28 +17,15 @@ exports.getCurrentDate = () => {
   return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 };
 
-exports.validateUrl = url => {
-  const invalidURLends = [
-    '.gif',
-    '.jpg',
-    '.jpeg',
-    '.png',
-    '.pdf',
-    '.doc',
-    '.css',
-    '.svg',
-    '.js',
-    '.ts',
-    '.xml',
-    '.csv',
-    '.tgz',
-    '.zip',
-    '.xls',
-    '.ppt',
-    '.ico',
-    '.woff',
-  ];
-  return !invalidURLends.some(urlEnd => url.includes(urlEnd));
+exports.getCurrentTime = () => {
+  return new Date().toLocaleTimeString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour12: true,
+    hour: 'numeric',
+    minute: '2-digit',
+  });
 };
 
 const getStoragePath = randomToken => {
@@ -50,8 +41,45 @@ exports.createAndUpdateFolders = async (scanDetails, randomToken) => {
   const logPath = `logs/${randomToken}`;
 
   await fs.ensureDir(`${storagePath}/reports`);
+  console.log("Write details.json file.")
   await fs.writeFile(`${storagePath}/details.json`, JSON.stringify(scanDetails, 0, 2));
   await fs.copy(`${a11yDataStoragePath}/${randomToken}`, `${storagePath}/${allIssueFileName}`);
+
+  console.log("Writing urls crawled to ./reports/urls.csv");
+  var scannedURLs = scanDetails.urlsCrawled.scanned.join();
+  // const fs = require('fs');
+  // console.log(scannedURLs);
+  // await fs.writeFile(`${storagePath}/scannedURLs.csv`, scanDetails.urlsCrawled.scanned);
+
+  // const writeStream = fs.createWriteStream(`${storagePath}/reports/scannedURLs.csv`);
+  // writeStream.write(`urls \n`);
+  // writeStream.write( scannedURLs.replace(/,/g, '\n') );
+
+  // From https://stackoverflow.com/questions/64904803/how-to-wait-for-loop-of-stream-write-to-end
+  var scannedPath = storagePath + "/reports/scannedURLs.csv";
+  var scannedData = scannedURLs.replace(/,/g, '\n');
+  async function writeFile(scannedPath, scannedData) {
+    try {
+        const writeStream = fs.createWriteStream(path, {
+            flags: "w"
+        });
+
+        const promisify = util.promisify(writeStream.write);
+
+        for (const file of data) {
+            await promisify(`${file.name}\n`);
+        }
+
+        writeStream.end();
+        writeStream.on("finish", () => {
+            console.log("All files were written.");
+        });
+
+    } catch (error) {
+        console.log('error',error);
+        throw (error);
+    }
+  }
 
   // update logs
   await fs.ensureDir(logPath);
@@ -59,16 +87,5 @@ exports.createAndUpdateFolders = async (scanDetails, randomToken) => {
     if (exists) {
       await fs.copy('errors.txt', `${logPath}/${randomToken}.txt`);
     }
-  });
-};
-
-exports.getCurrentTime = () => {
-  return new Date().toLocaleTimeString('en-GB', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour12: true,
-    hour: 'numeric',
-    minute: '2-digit',
   });
 };

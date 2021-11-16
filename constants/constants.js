@@ -1,14 +1,71 @@
 // for crawlers
 exports.axeScript = 'node_modules/axe-core/axe.min.js';
 
-exports.maxRequestsPerCrawl = 500;
+exports.maxRequestsPerCrawl = 1000;
+// exports.absoluteMaxRequestsPerCrawl = 5000; // I'd like to be able to override this at the command line.
 
-exports.maxConcurrency = 5;
+exports.maxHTMLdisplay = 250;
 
+// Not successfully adding time in crawlDomain.js
+exports.waitTime = 0; // in seconds
+
+// Only set higher with permission of site owner
+exports.maxConcurrency = 1;
+
+// Apify's pseudoUrls https://sdk.apify.com/docs/api/pseudo-url
 exports.pseudoUrls = host => [
   // eslint-disable-next-line no-useless-escape
-  `[.*(?<!mailto.*)]${host}[(?!.*\.(gif|jpg|jpeg|png|webp|avif|pdf|doc|css|svg|js|ts|xml|csv|tgz|zip|xls|ppt|ico|woff)).*]`,
+  `[.*(?<!mailto.*)]${host}[(?!.*\.(example|extension)).*]`,
 ];
+
+exports.validateUrl = url => {
+  invalidURLends = [
+    '.gif',
+    '.jpg',
+    '.jpeg',
+    '.png',
+    '.webp',
+    '.avif',
+    '.svg',
+    '.pdf',
+    '.epub',
+    '.mobi',
+    '.doc',
+    '.docx',
+    '.css',
+    '.svg',
+    '.js',
+    '.ts',
+    '.xml',
+    '.csv',
+    '.txt',
+    '.tgz',
+    '.zip',
+    '.xls',
+    '.xlsx',
+    '.ppt',
+    '.pptx',
+    '.ico',
+    '.woff',
+    '.mp3',
+    '.mp4',
+    '.mov',
+    '.swf',
+    '.xml',
+    '.rss',
+    '.atom',
+  ];
+  // This change fixes confusion between .js and .jsp pages.
+  // let skip = invalidURLends.some(urlEnd => url.includes(urlEnd));
+  if ((url.indexOf('?') > -1)) {
+    url = url.substring(0, url.indexOf('?'));
+  }
+  if ((url.indexOf('#') > -1)) {
+    url = url.substring(0, url.indexOf('#'));
+  }
+  let skip = invalidURLends.some(urlEnd => url.endsWith(urlEnd));
+  return !skip;
+};
 
 exports.urlsCrawledObj = {
   scanned: [],
@@ -31,10 +88,11 @@ exports.rootPath = __dirname;
 
 // others
 exports.impactOrder = {
-  minor: 0,
-  moderate: 1,
-  serious: 2,
-  critical: 3,
+  unknown: 0,
+  minor: 1,
+  moderate: 2,
+  serious: 3,
+  critical: 4,
 };
 
 exports.wcagWebPage = 'https://www.w3.org/TR/WCAG21/';

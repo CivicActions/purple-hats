@@ -121,70 +121,31 @@ Under this feature, it will also take into consideration of the presence of a lo
 **Required inputs**
 - A website URL
 
-**Sample Output - Public Domain without Login Page**
+**Sample Output**
 ```console
 user@user-MacBook-Pro  Desktop % cd purple-hats
-user@user-MacBook-Pro purple-hats % bash run.sh
-Welcome to HAT's Accessibility Testing Tool!
-We recommend using Chrome browser for the best experience.
-
-What would you like to scan today?
-1) sitemap.xml file containing links
-2) public domain URL
-#? 2
-Please enter domain URL: https://webscraper.io/test-sites/e-commerce/allinone
-Do you need to login to your domain? Y/N: N
-Scanning website...
-
-#The crawler will then start scraping from the file link provided above.
-#Console results
-
-user@user-MacBook-Pro purple-hats %
+user@user-MacBook-Pro purple-hats %  bash run.shwebsite https://example.com/
 ```
-
-### 3. Crawling login page
-The crawler will automated the login and recursively visit the links to generate the results from **all the pages found from the input domain**.
-
-**Required inputs**
-- A website URL
-- User's login credential
-- Selectors of the username field, password field and submit button field
-
-**Sample Output - Public Domain with Login Page**
+  
+Alternatively:
+  
 ```console
-user@user-MacBook-Pro  Desktop % cd purple-hats
-user@user-MacBook-Pro purple-hats %  bash run.sh
-Welcome to HAT's Accessibility Testing Tool!
-We recommend using Chrome browser for the best experience.
-
+user@user-MacBook-Pro  Desktop % cd purple-hatsuser@user-MacBook-Pro purple-hats %  bash run.sh
+Welcome to HATS Accessibility Testing Tool!
+You can specify a website crawl & URL through the command line with:
+    $ bash ./run website https://example.com/
 What would you like to scan today?
-1) sitemap.xml file containing links
-2) public domain URL
+1) sitemap file containing links
+2) website
 #? 2
-Please enter domain URL: https://fontawesome.com/sessions/sign-in
-Do you need to login to your domain? Y/N: y
-Please enter your login ID: user@gmail.com
-Please enter your password: 
-
-Now, go to your browser and right-click on these 3 elements,
-1. Username field
-2. Login password field
-3. Submit button
-
-Select 'inspect' and 'copy selector'
-Next, navigate back here and paste the selector one by one.
-
-Please enter “username field” selector: #email_address
-Please enter “login password field” selector: #password
-Please enter “submit button” selector: #page-top > div.view.flex.flex-column.min-vh-100.db-pr > div.flex-grow-1.flex-shrink-0.flex-basis-auto.flex.flex-column > main > div.relative.z-1.mw6-l.center-l > div > form > button
-Scanning website...
-
-#The crawler will then start scraping from the file link provided above.
-#Console results
-
-user@user-MacBook-Pro purple-hats %
+Please enter URL of website: ttps://example.com/
 ```
 
+### 3. Command line scans
+
+Scripts can now be run from the command line with `bash ./run.sh -o 0 -w 1 -d https://example.com` and strung together for simple automation
+
+`bash ./run.sh -o 0 -w 1 -d https://example.com bash ./run.sh -o 0 -w 1 -d simple.example.com bash ./run.sh -o 0 -w 1 -d http://www.example.com bash ./run.sh -o 0 -w 0 -d https://code.example.com`
 
 
 

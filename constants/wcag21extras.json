@@ -1,0 +1,87 @@
+[
+ {
+   "id": "1.3.4",
+   "name": " Orientation",
+   "level": " AA",
+ },
+ {
+   "id": "1.3.5",
+   "name": " Identify Input Purpose",
+   "level": " AA",
+ },
+ {
+   "id": "1.3.6",
+   "name": " Identify Purpose",
+   "level": " AAA",
+ },
+ {
+   "id": "1.4.10",
+   "name": " Reflow",
+   "level": " AA",
+ },
+ {
+   "id": "1.4.11",
+   "name": " Non-Text Contrast",
+   "level": " AA",
+ },
+ {
+   "id": "1.4.12",
+   "name": " Text Spacing",
+   "level": " AA",
+ },
+ {
+   "id": "1.4.13",
+   "name": " Content on Hover or Focus",
+   "level": " AA",
+ },
+ {
+   "id": "2.1.4",
+   "name": " Character Key Shortcuts",
+   "level": " A",
+ },
+ {
+   "id": "2.2.6",
+   "name": " Timeouts",
+   "level": " AAA",
+ },
+ {
+   "id": "2.3.3",
+   "name": " Animation from Interactions",
+   "level": " AAA",
+ },
+ {
+   "id": "2.5.1",
+   "name": " Pointer Gestures",
+   "level": " A",
+ },
+ {
+   "id": "2.5.2",
+   "name": " Pointer Cancellation",
+   "level": " A",
+ },
+ {
+   "id": "2.5.3",
+   "name": " Label in Name",
+   "level": " A",
+ },
+ {
+   "id": "2.5.4",
+   "name": " Motion",
+   "level": " Actuation",
+ },
+ {
+   "id": "2.5.5",
+   "name": " Target Size",
+   "level": " AAA",
+ },
+ {
+   "id": "2.5.6",
+   "name": " Concurrent Input Mechanisms",
+   "level": " AAA",
+ },
+ {
+   "id": "4.1.3",
+   "name": " Status Messages",
+   "level": " AA",
+ }
+]

@@ -16,7 +16,11 @@ check_values(){
 check_installer_status(){
 
     if ! [ -d "a11y/bin" ]; then
-        echo "Please run the installer script (mac-installer.sh / linux-installer.sh) to install the necessary components."
+        echo "Please run the installer script (mac-installer.sh / linux-installer.sh) to install the necessary components. For a mac it would be: "
+        echo "      cd installers"
+        echo "      chmod +x ./mac-installer.sh"
+        echo "      ./mac-installer.sh"
+        echo "      cd .."
         exit 0
     fi
 
@@ -230,4 +234,3 @@ export -f sitemap_error
 export -f website_error
 export -f check_url
 export -f prompt_website
-

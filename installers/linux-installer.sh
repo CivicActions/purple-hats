@@ -19,8 +19,9 @@ os_identifier=$(echo $get_id_like | grep -E 'rhel|fedora|debian|opensuse|suse')
 if ! [ -d "a11y/bin" ]; then
 deactivate 2>/dev/null;
 
-# Chromium not required, set environment to avoid error regarding failing to download Chromium 
+# Chromium not required, set environment to avoid error regarding failing to download Chromium
 # due to lack of permissions when installing Puppeteer
+# NOTE: Chromium does seem to be required so installing it in the bottom of this script. - MG
 export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=0
 
 #Perform update before installation to get the latest info on pkgs and its updates
@@ -38,14 +39,14 @@ case $os_identifier in
 
       python3 -m venv a11y
       . a11y/bin/activate
-      
+
       # Need to install unzip, not available by default; Required for ansible playbook unarchive to work
       yum install zip -y
       yum install unzip -y
       pip3 install ansible
    ;;
 
-   $(echo $os_identifier | grep -E "debian"))                                                                                         
+   $(echo $os_identifier | grep -E "debian"))
       # Uses APT
       apt-get update
       apt-get install python3 -y
@@ -56,7 +57,7 @@ case $os_identifier in
 
       python3 -m venv a11y
       . a11y/bin/activate
-      
+
       apt-get install zip -y
       pip3 install ansible
    ;;
@@ -93,3 +94,7 @@ fi
 ansible-playbook -i ansible/inventory.yml -c local ansible/ansible-task-install-packages.yml --extra-vars="playbook_dir=$(pwd)"
 
 mv a11y ../
+
+cd ..
+
+node node_modules/puppeteer/install.js

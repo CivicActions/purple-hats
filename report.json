@@ -6,7 +6,7 @@
         {
             "description": "Ensures buttons have discernible text",
             "help": "Buttons must have discernible text",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/button-name?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/button-name?application=purple-hats",
             "id": "button-name",
             "impact": "critical",
             "nodes": [
@@ -91,7 +91,7 @@
         {
             "description": "Ensures every id attribute value is unique",
             "help": "id attribute value must be unique",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/duplicate-id?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/duplicate-id?application=purple-hats",
             "id": "duplicate-id",
             "impact": "moderate",
             "nodes": [
@@ -131,7 +131,7 @@
         {
             "description": "Ensures a navigation point to the primary content of the page. If the page contains iframes, each iframe should contain either no main landmarks or just one.",
             "help": "Page must contain one main landmark.",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/landmark-one-main?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/landmark-one-main?application=purple-hats",
             "id": "landmark-one-main",
             "impact": "moderate",
             "nodes": [
@@ -162,7 +162,7 @@
         {
             "description": "Ensures <meta name=\"viewport\"> does not disable text scaling and zooming",
             "help": "Zooming and scaling must not be disabled",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/meta-viewport?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/meta-viewport?application=purple-hats",
             "id": "meta-viewport",
             "impact": "critical",
             "nodes": [
@@ -200,7 +200,7 @@
         {
             "description": "Ensures buttons have discernible text",
             "help": "Buttons must have discernible text",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/button-name?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/button-name?application=purple-hats",
             "id": "button-name",
             "impact": "critical",
             "nodes": [
@@ -285,7 +285,7 @@
         {
             "description": "Ensures every id attribute value is unique",
             "help": "id attribute value must be unique",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/duplicate-id?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/duplicate-id?application=purple-hats",
             "id": "duplicate-id",
             "impact": "moderate",
             "nodes": [
@@ -325,7 +325,7 @@
         {
             "description": "Ensures a navigation point to the primary content of the page. If the page contains iframes, each iframe should contain either no main landmarks or just one.",
             "help": "Page must contain one main landmark.",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/landmark-one-main?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/landmark-one-main?application=purple-hats",
             "id": "landmark-one-main",
             "impact": "moderate",
             "nodes": [
@@ -356,7 +356,7 @@
         {
             "description": "Ensures that lists are structured correctly",
             "help": "<ul> and <ol> must only directly contain <li>, <script> or <template> elements",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/list?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/list?application=purple-hats",
             "id": "list",
             "impact": "serious",
             "nodes": [
@@ -408,7 +408,7 @@
         {
             "description": "Ensures <meta name=\"viewport\"> does not disable text scaling and zooming",
             "help": "Zooming and scaling must not be disabled",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/meta-viewport?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/meta-viewport?application=purple-hats",
             "id": "meta-viewport",
             "impact": "critical",
             "nodes": [
@@ -446,7 +446,7 @@
         {
             "description": "Ensures buttons have discernible text",
             "help": "Buttons must have discernible text",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/button-name?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/button-name?application=purple-hats",
             "id": "button-name",
             "impact": "critical",
             "nodes": [
@@ -531,7 +531,7 @@
         {
             "description": "Ensures every id attribute value is unique",
             "help": "id attribute value must be unique",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/duplicate-id?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/duplicate-id?application=purple-hats",
             "id": "duplicate-id",
             "impact": "moderate",
             "nodes": [
@@ -571,7 +571,7 @@
         {
             "description": "Ensures a navigation point to the primary content of the page. If the page contains iframes, each iframe should contain either no main landmarks or just one.",
             "help": "Page must contain one main landmark.",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/landmark-one-main?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/landmark-one-main?application=purple-hats",
             "id": "landmark-one-main",
             "impact": "moderate",
             "nodes": [
@@ -602,7 +602,7 @@
         {
             "description": "Ensures that lists are structured correctly",
             "help": "<ul> and <ol> must only directly contain <li>, <script> or <template> elements",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/list?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/list?application=purple-hats",
             "id": "list",
             "impact": "serious",
             "nodes": [
@@ -654,7 +654,7 @@
         {
             "description": "Ensures <meta name=\"viewport\"> does not disable text scaling and zooming",
             "help": "Zooming and scaling must not be disabled",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/meta-viewport?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/meta-viewport?application=purple-hats",
             "id": "meta-viewport",
             "impact": "critical",
             "nodes": [
@@ -692,7 +692,7 @@
         {
             "description": "Ensures buttons have discernible text",
             "help": "Buttons must have discernible text",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/button-name?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/button-name?application=purple-hats",
             "id": "button-name",
             "impact": "critical",
             "nodes": [
@@ -777,7 +777,7 @@
         {
             "description": "Ensures every id attribute value is unique",
             "help": "id attribute value must be unique",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/duplicate-id?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/duplicate-id?application=purple-hats",
             "id": "duplicate-id",
             "impact": "moderate",
             "nodes": [
@@ -817,7 +817,7 @@
         {
             "description": "Ensures <img> elements have alternate text or a role of none or presentation",
             "help": "Images must have alternate text",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/image-alt?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/image-alt?application=purple-hats",
             "id": "image-alt",
             "impact": "critical",
             "nodes": [
@@ -941,7 +941,7 @@
         {
             "description": "Ensures a navigation point to the primary content of the page. If the page contains iframes, each iframe should contain either no main landmarks or just one.",
             "help": "Page must contain one main landmark.",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/landmark-one-main?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/landmark-one-main?application=purple-hats",
             "id": "landmark-one-main",
             "impact": "moderate",
             "nodes": [
@@ -972,7 +972,7 @@
         {
             "description": "Ensures that lists are structured correctly",
             "help": "<ul> and <ol> must only directly contain <li>, <script> or <template> elements",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/list?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/list?application=purple-hats",
             "id": "list",
             "impact": "serious",
             "nodes": [
@@ -1024,7 +1024,7 @@
         {
             "description": "Ensures <meta name=\"viewport\"> does not disable text scaling and zooming",
             "help": "Zooming and scaling must not be disabled",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/meta-viewport?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/meta-viewport?application=purple-hats",
             "id": "meta-viewport",
             "impact": "critical",
             "nodes": [
@@ -1062,7 +1062,7 @@
         {
             "description": "Ensures buttons have discernible text",
             "help": "Buttons must have discernible text",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/button-name?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/button-name?application=purple-hats",
             "id": "button-name",
             "impact": "critical",
             "nodes": [
@@ -1147,7 +1147,7 @@
         {
             "description": "Ensures every id attribute value is unique",
             "help": "id attribute value must be unique",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/duplicate-id?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/duplicate-id?application=purple-hats",
             "id": "duplicate-id",
             "impact": "moderate",
             "nodes": [
@@ -1187,7 +1187,7 @@
         {
             "description": "Ensures <img> elements have alternate text or a role of none or presentation",
             "help": "Images must have alternate text",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/image-alt?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/image-alt?application=purple-hats",
             "id": "image-alt",
             "impact": "critical",
             "nodes": [
@@ -1311,7 +1311,7 @@
         {
             "description": "Ensures a navigation point to the primary content of the page. If the page contains iframes, each iframe should contain either no main landmarks or just one.",
             "help": "Page must contain one main landmark.",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/landmark-one-main?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/landmark-one-main?application=purple-hats",
             "id": "landmark-one-main",
             "impact": "moderate",
             "nodes": [
@@ -1342,7 +1342,7 @@
         {
             "description": "Ensures that lists are structured correctly",
             "help": "<ul> and <ol> must only directly contain <li>, <script> or <template> elements",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/list?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/list?application=purple-hats",
             "id": "list",
             "impact": "serious",
             "nodes": [
@@ -1394,7 +1394,7 @@
         {
             "description": "Ensures <meta name=\"viewport\"> does not disable text scaling and zooming",
             "help": "Zooming and scaling must not be disabled",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/meta-viewport?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/meta-viewport?application=purple-hats",
             "id": "meta-viewport",
             "impact": "critical",
             "nodes": [
@@ -1432,7 +1432,7 @@
         {
             "description": "Ensures buttons have discernible text",
             "help": "Buttons must have discernible text",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/button-name?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/button-name?application=purple-hats",
             "id": "button-name",
             "impact": "critical",
             "nodes": [
@@ -1517,7 +1517,7 @@
         {
             "description": "Ensures every id attribute value is unique",
             "help": "id attribute value must be unique",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/duplicate-id?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/duplicate-id?application=purple-hats",
             "id": "duplicate-id",
             "impact": "moderate",
             "nodes": [
@@ -1557,7 +1557,7 @@
         {
             "description": "Ensures <iframe> and <frame> elements contain a non-empty title attribute",
             "help": "Frames must have title attribute",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/frame-title?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/frame-title?application=purple-hats",
             "id": "frame-title",
             "impact": "serious",
             "nodes": [
@@ -1620,7 +1620,7 @@
         {
             "description": "Ensures a navigation point to the primary content of the page. If the page contains iframes, each iframe should contain either no main landmarks or just one.",
             "help": "Page must contain one main landmark.",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/landmark-one-main?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/landmark-one-main?application=purple-hats",
             "id": "landmark-one-main",
             "impact": "moderate",
             "nodes": [
@@ -1651,7 +1651,7 @@
         {
             "description": "Ensures that lists are structured correctly",
             "help": "<ul> and <ol> must only directly contain <li>, <script> or <template> elements",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/list?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/list?application=purple-hats",
             "id": "list",
             "impact": "serious",
             "nodes": [
@@ -1703,7 +1703,7 @@
         {
             "description": "Ensures <meta name=\"viewport\"> does not disable text scaling and zooming",
             "help": "Zooming and scaling must not be disabled",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/meta-viewport?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/meta-viewport?application=purple-hats",
             "id": "meta-viewport",
             "impact": "critical",
             "nodes": [
@@ -1741,7 +1741,7 @@
         {
             "description": "Ensures buttons have discernible text",
             "help": "Buttons must have discernible text",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/button-name?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/button-name?application=purple-hats",
             "id": "button-name",
             "impact": "critical",
             "nodes": [
@@ -1826,7 +1826,7 @@
         {
             "description": "Ensures every id attribute value is unique",
             "help": "id attribute value must be unique",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/duplicate-id?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/duplicate-id?application=purple-hats",
             "id": "duplicate-id",
             "impact": "moderate",
             "nodes": [
@@ -1866,7 +1866,7 @@
         {
             "description": "Ensures <iframe> and <frame> elements contain a non-empty title attribute",
             "help": "Frames must have title attribute",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/frame-title?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/frame-title?application=purple-hats",
             "id": "frame-title",
             "impact": "serious",
             "nodes": [
@@ -1929,7 +1929,7 @@
         {
             "description": "Ensures a navigation point to the primary content of the page. If the page contains iframes, each iframe should contain either no main landmarks or just one.",
             "help": "Page must contain one main landmark.",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/landmark-one-main?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/landmark-one-main?application=purple-hats",
             "id": "landmark-one-main",
             "impact": "moderate",
             "nodes": [
@@ -1960,7 +1960,7 @@
         {
             "description": "Ensures that lists are structured correctly",
             "help": "<ul> and <ol> must only directly contain <li>, <script> or <template> elements",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/list?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/list?application=purple-hats",
             "id": "list",
             "impact": "serious",
             "nodes": [
@@ -2012,7 +2012,7 @@
         {
             "description": "Ensures <meta name=\"viewport\"> does not disable text scaling and zooming",
             "help": "Zooming and scaling must not be disabled",
-            "helpUrl": "https://dequeuniversity.com/rules/axe/2.6/meta-viewport?application=webdriverjs",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.3/meta-viewport?application=purple-hats",
             "id": "meta-viewport",
             "impact": "critical",
             "nodes": [
