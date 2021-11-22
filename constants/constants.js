@@ -41,6 +41,7 @@ exports.validateUrl = url => {
     '.txt',
     '.tgz',
     '.zip',
+    '.bz2',
     '.xls',
     '.xlsx',
     '.ppt',

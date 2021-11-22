@@ -91,7 +91,7 @@ exports.combineRun = async (details, storagePath) => {
     break;
 
   case 'crawlDomain':
-    urlsCrawled = await crawlDomain(url, randomToken, host, excludeExtArr, excludeMoreArr, excludeQuery);
+    urlsCrawled = await crawlDomain(url, randomToken, host, excludeExtArr, excludeMoreArr, excludeQuery, storagePath);
     break;
 
   default:

@@ -1,4 +1,4 @@
-    /* eslint-disable no-console */
+/* eslint-disable no-console */
 const fs = require('fs-extra');
 const path = require('path');
 const {
@@ -57,7 +57,9 @@ const fetchIcons = async (disabilities, impact) => {
 };
 
 /* Compile final JSON results */
-const writeResults = async (allissues, storagePath) => {
+const writeResults = async (allissues, storagePath, htmlElementArray) => {
+
+  console.log("Running writeResults to generate JSON - URLs " + countURLsCrawled + " & " + allissues.length + " errors found.");
 
   /* Copy without reference to allissues array */
   var shortAllIssuesJSON = []
@@ -68,11 +70,29 @@ const writeResults = async (allissues, storagePath) => {
     console.log(allissues);
   }
 
-  console.log("Writing JSON countURLsCrawled " + countURLsCrawled + " and " + allissues.length + " errors found.");
-
-  /* Delete SVG images in copy of allissues */
+  /* Delete SVG images in copy of allissues and count instances of html errors. */
+  let ii = iii = 0;
   for (let i in shortAllIssuesJSON) {
     delete shortAllIssuesJSON[i].disabilityIcons;
+
+    // Count same errors
+    var value = shortAllIssuesJSON[i].htmlElement;
+
+    function exists(arr, search) {
+      return arr.some(row => row.includes(search));
+    }
+    if (exists(htmlElementArray, value)) {
+      index = htmlElementArray.map(function(x) {
+        // return x[1];
+        return x[0];
+      }).indexOf(value);
+      // ++htmlElementArray[index][2];
+      ++htmlElementArray[index][1];
+    } else {
+      // ++iii;
+      // htmlElementArray.push([iii, value, 1]);
+      htmlElementArray.push([value, 1]);
+    }
   }
 
   /* Store the information about issue order totals (critical, serious, ...) */
@@ -116,7 +136,8 @@ const writeResults = async (allissues, storagePath) => {
       orderCount,
       wcagCounts,
       wappalyzer_short,
-      shortAllIssuesJSON
+      shortAllIssuesJSON,
+      htmlElementArray
     },
     null,
     4,
@@ -127,10 +148,51 @@ const writeResults = async (allissues, storagePath) => {
 };
 
 /* Write HTML from JSON to Mustache for whole page content */
-const writeHTML = async (allissues, storagePath) => {
+const writeHTML = async (allissues, storagePath, htmlElementArray, domain) => {
+
+  // Cycle through WCAG CSV and put together master list.
+  // TODO: WCAG 2.1 & 2.2 should be added here. These should be highlighted.
+  var wcagLinks = require('./constants/wcagLinks.json');
+  var wcagUKlinks = require('./constants/wcagUKlinks.json');
+  var wcag21extras = require('./constants/wcag21extras.json');
+
+  // Pull in WCAG name and W3C links
+  let wcagIDval = "";
+  var totalSentenceCount = totalFleschKincaidGrade = totalDifficultWords = 0;
+  for (let a in wcagLinks) {
+    wcagIDval = wcagLinks[a].wcag;
+
+    wcagLinks[a].wcag21 = 0;
+    for (let c in wcag21extras) {
+      if (wcag21extras[c][0] == wcagIDval) {
+        console.log("WCAG 2.1")
+        wcagLinks[a].wcag21 = 1;
+      }
+    }
+    // Add UK link & role information
+    for (let b in wcagUKlinks) {
+      if (wcagUKlinks[b][0] == wcagIDval) {
+        let desc = "";
+        if (wcagUKlinks[b][2] == 'A') {
+          desc = wcagUKlinks[b][1] + " (<b>" + wcagUKlinks[b][2] + "</b>";
+        } else {
+          desc = wcagUKlinks[b][1] + " (" + wcagUKlinks[b][2];
+        }
+        if (wcagLinks[a].wcag21) {
+          desc += " - 2.1"
+        }
+        wcagLinks[a].desc = desc + ") ";
+        if (wcagLinks[a].role) {
+          wcagLinks[a].role += ", " + '<a href="' + wcagUKlinks[b][3] + '" target="_blank">' + wcagUKlinks[b][4] + "</a>";
+        } else {
+          wcagLinks[a].role = '<a href="' + wcagUKlinks[b][3] + '" target="_blank">' + wcagUKlinks[b][4] + "</a>";
+        }
+      }
+    }
+  }
 
   // Sort by impact order (critical, serious, moderate, minor, unknown)
-  allissues.sort(function (a, b) {
+  allissues.sort(function(a, b) {
     return b.order - a.order || b.errorCount - a.errorCount;
   });
 
@@ -143,42 +205,60 @@ const writeHTML = async (allissues, storagePath) => {
       allissues[i].disabilities = "";
     }
 
-    var sentenceCount = fleschKincaidGrade = difficultWordsMax = 0;
+    var sentenceCount = fleschKincaidGrade = difficultWords = 0;
     var page = allissues[i].page
-    if (sentenceCountMax == 0 || allissues[i].sentenceCount > sentenceCountMax) {
-      if (!((allissues[i].sentenceCount == null) || (allissues[i].sentenceCount == undefined) || (typeof allissues[i].sentenceCount !== 'number'))) {
-        sentenceCount = allissues[i].sentenceCount;
-        sentenceCountMax = sentenceCount;
+
+    // Find longest sentences per page.
+    if (!((allissues[i].sentenceCount == null) || (allissues[i].sentenceCount == undefined) || (typeof allissues[i].sentenceCount !== 'number'))) {
+      totalSentenceCount += allissues[i].sentenceCount;
+      if (sentenceCountMax == 0 || allissues[i].sentenceCount > sentenceCountMax) {
+        if (!((allissues[i].sentenceCount == null) || (allissues[i].sentenceCount == undefined) || (typeof allissues[i].sentenceCount !== 'number'))) {
+          sentenceCount = allissues[i].sentenceCount;
+          sentenceCountMax = sentenceCount;
+          // console.log("Current max sentence count: " + sentenceCountMax);
+        }
       }
-      var sentenceCountMaxText = "Most sentences on page: " + sentenceCountMax + " - <a href='" + domainURL + page + "'>" + page + "</a>";
     }
-    if (fleschKincaidGradeMax == 0 || allissues[i].fleschKincaidGrade > fleschKincaidGradeMax) {
-      if (!((allissues[i].fleschKincaidGrade == null) || (allissues[i].fleschKincaidGrade == undefined) || (typeof allissues[i].fleschKincaidGrade !== 'number'))) {
-        fleschKincaidGrade = allissues[i].fleschKincaidGrade;
-        fleschKincaidGradeMax = fleschKincaidGrade;
+
+    // Find most complicated page.
+    if (!((allissues[i].fleschKincaidGrade == null) || (allissues[i].fleschKincaidGrade == undefined) || (typeof allissues[i].fleschKincaidGrade !== 'number'))) {
+      totalFleschKincaidGrade += allissues[i].fleschKincaidGrade;
+      if (fleschKincaidGradeMax == 0 || allissues[i].fleschKincaidGrade > fleschKincaidGradeMax) {
+        if (!((allissues[i].fleschKincaidGrade == null) || (allissues[i].fleschKincaidGrade == undefined) || (typeof allissues[i].fleschKincaidGrade !== 'number'))) {
+          fleschKincaidGrade = allissues[i].fleschKincaidGrade;
+          fleschKincaidGradeMax = fleschKincaidGrade;
+          // console.log("Current max Flesch-Kincai: " + fleschKincaidGradeMax);
+        }
       }
-      var fleschKincaidGradeMaxText = "Worst Flesch Kincaid score: " + fleschKincaidGradeMax + " - <a href='" + domainURL + page + "'>" + page + "</a>";
     }
-    if ((difficultWordsMax == 0) || (allissues[i].difficultWords > difficultWordsMax)) {
-      if (!((allissues[i].difficultWords == null) || (allissues[i].difficultWords == undefined) || (typeof allissues[i].difficultWords !== 'number'))) {
+
+    // Find page with most difficult words.
+    if (!((allissues[i].difficultWords == null) || (allissues[i].difficultWords == undefined) || (typeof allissues[i].difficultWords !== 'number'))) {
+      totalDifficultWords += allissues[i].difficultWords;
+      if (allissues[i].difficultWords > difficultWordsMax) {
         difficultWords = allissues[i].difficultWords;
         difficultWordsMax = allissues[i].difficultWords;
-      }
-      if (allissues[i].difficultWords != 0) {
-        var difficultWordsMaxText = "Most difficult words: " + difficultWordsMax + " - <a href='" + domainURL + page + "'>" + page + "</a>";
+        // console.log("Current most number of difficult words: " + difficultWordsMaxText);
       }
     }
 
+    // Find the number of instances for a given HTML error on a page.
+    // TODO: Find page with the most axe errors.
+    let htmlElement = allissues[i].htmlElement;
+    for (let n in htmlElementArray) {
+      if (htmlElementArray[n][0] == htmlElement) {
+        if (htmlElementArray[n][1] > 1)
+          allissues[i].htmlElementCount = "<p><b>" + htmlElementArray[n][1] + " duplicate axe errors. </b>" + "</p>";
+      }
+    }
+    // console.log("Can we provide a list of up to 10 links with the same error? ");
+    // console.log(htmlElementArray);
   } // END for (let i in allissues)
 
-  /*
-    I should be able to do the average score, with seomething like:
-       var sentenceCountAverage = (sentenceCountTotal/countURLsCrawled);
-    However this function hits errors, not pages, so it would be inflated
-      var difficultWordsAverage = (difficultWordsTotal/countURLsCrawled);
-    The URLsCrawled may also be inflated as some pages may be skipped or duplicated.
-      var fleschKincaidGradeAverage = (fleschKincaidGradeTotal/countURLsCrawled);
-  */
+  // Create text for HTML report.
+  var sentenceCountMaxText = "Average sentences per page: " + Math.round((totalSentenceCount / allissues.length)) + " <b>Most sentences on page: <a href='" + domainURL + page + "' target='_blank'>" + sentenceCountMax + "</a></b>";
+  var fleschKincaidGradeMaxText = "Average Flesch–Kincaid grade: " + Math.round((totalFleschKincaidGrade / allissues.length)) + " <b>Page with worst Flesch–Kincaid grade: <a href='" + domainURL + page + "' target='_blank'>" + Math.round(fleschKincaidGradeMax) + "</a></b>";
+  var difficultWordsMaxText = "Average difficult words per page: " + Math.round(totalDifficultWords / allissues.length) + " <b>Most difficult words on a page: <a href='" + domainURL + page + "' target='_blank'>" + difficultWordsMax + "</a></b>";
 
   console.log("Writing results to ./reports/allissues.csv");
   const ObjectsToCsv_a = require('objects-to-csv');
@@ -194,7 +274,7 @@ const writeHTML = async (allissues, storagePath) => {
   if (countURLsCrawled > 25) {
     var grade = message = "";
     var score = (minorCount + (moderateCount * 1.5) + (seriousCount * 2) + (criticalCount * 3)) / (countURLsCrawled * 5);
-    console.log("score (minor) + moderate*1.5 + serious*2 + critical*3 / urls*5 = " + Math.round(score));
+    console.log("Score (minor) + moderate*1.5 + serious*2 + critical*3 / urls*5 = " + Math.round(score * 100)/100);
 
 
     console.log("Writing results to ./reports/count.csv");
@@ -226,76 +306,77 @@ const writeHTML = async (allissues, storagePath) => {
       // console.log(await csv_c.toString());
     })();
 
-    console.log("Writing HTML");
+    console.log("Writing HTML report for " + domain);
 
     // Scoring for grade
     // Score number = score (minor) + moderate*1.5 + serious*2 + critical*3 / urls*5
     // A+ = 0 ; A <= 0.1 ; A- <= 0.3 ; B+ <= 0.5 ; B <= 0.7 ; B- <= 0.9 ; C+ <= 2 ;
     // C <= 4 C- <= 6 ; D+ <= 8 ; D <= 10 ; D- <= 13 ; F+ <= 15 ; F <= 20 ; F- >= 20
     switch (true) {
-    case score == 0:
-      grade = "A+";
-      message = "No axe errors, great! Don't forget manual testing."
-      break;
-    case score <= 0.1:
-      grade = "A";
-      message = "Very few axe errors left! Don't forget manual testing."
-      break;
-    case score <= 0.3:
-      grade = "A-";
-      message = "So close to getting the automated errors! Don't forget manual testing."
-      break;
-    case score <= 0.5:
-      grade = "B+";
-      message = "More work to eliminate automated testing errors. Don't forget manual testing."
-      break;
-    case score <= 0.7:
-      grade = "B";
-      message = "More work to eliminate automated testing errors. Don't forget manual testing."
-      break;
-    case score <= 0.9:
-      grade = "B-";
-      message = "More work to eliminate automated testing errors. Don't forget manual testing."
-      break;
-    case score <= 2:
-      grade = "C+";
-      message = "More work to eliminate automated testing errors. Don't forget manual testing."
-      break;
-    case score <= 4:
-      grade = "C";
-      message = "More work to eliminate automated testing errors. Don't forget manual testing."
-      break;
-    case score <= 6:
-      grade = "C-";
-      message = "More work to eliminate automated testing errors. Don't forget manual testing."
-      break;
-    case score <= 8:
-      grade = "D+";
-      message = "More work to eliminate automated testing errors. Don't forget manual testing."
-      break;
-    case score <= 10:
-      grade = "D";
-      message = "More work to eliminate automated testing errors. Don't forget manual testing."
-      break;
-    case score <= 13:
-      grade = "D-";
-      message = "More work to eliminate automated testing errors. Don't forget manual testing."
-      break;
-    case score <= 15:
-      grade = "F+";
-      message = "More work to eliminate automated testing errors. Don't forget manual testing."
-      break;
-    case score <= 20:
-      grade = "F";
-      message = "More work to eliminate automated testing errors. Don't forget manual testing."
-      break;
-    default:
-      grade = "F-";
-      message = "More work to eliminate automated testing errors. Don't forget manual testing."
+      case score == 0:
+        grade = "A+";
+        message = "No axe errors, great! Don't forget manual testing."
+        break;
+      case score <= 0.1:
+        grade = "A";
+        message = "Very few axe errors left! Don't forget manual testing."
+        break;
+      case score <= 0.3:
+        grade = "A-";
+        message = "So close to getting the automated errors! Don't forget manual testing."
+        break;
+      case score <= 0.5:
+        grade = "B+";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+      case score <= 0.7:
+        grade = "B";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+      case score <= 0.9:
+        grade = "B-";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+      case score <= 2:
+        grade = "C+";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+      case score <= 4:
+        grade = "C";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+      case score <= 6:
+        grade = "C-";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+      case score <= 8:
+        grade = "D+";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+      case score <= 10:
+        grade = "D";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+      case score <= 13:
+        grade = "D-";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+      case score <= 15:
+        grade = "F+";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+      case score <= 20:
+        grade = "F";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        break;
+      default:
+        grade = "F-";
+        message = "More work to eliminate automated testing errors. Don't forget manual testing."
     }
   } else {
-    grade = "?";
-    message = "Not enough URLs to evaluate grade. Perhaps there was an error in the scan.";
+    grade = message = "";
+    // grade = "?";
+    // message = "Not enough URLs to evaluate grade. Perhaps there was an error in the scan.";
   }
 
   // TODO - Document what this is doing.
@@ -314,12 +395,8 @@ const writeHTML = async (allissues, storagePath) => {
     }
   }
 
-  var wcagLinks = require('./constants/wcagLinks.json');
-  var wcagsc2role = require('./constants/wcagsc2role.json');
-
-
   // Count the instances of each WCAG error in wcagIDsum and express that in wcagCounts which gets stored
-  wcagCountsArray.forEach(function (x) {
+  wcagCountsArray.forEach(function(x) {
     wcagCountsArray[x] = (wcagCountsArray[x] || 0) + 1;
   });
   var finalWCAGstring = '';
@@ -330,46 +407,15 @@ const writeHTML = async (allissues, storagePath) => {
       if (typeof wcagCountsArray[i] == "number") {
         wcagCountsTemp = wcagCountsArray[i];
 
-
-// NOT TESTED ON AIRPLANE - https://www.freecodecamp.org/news/javascript-array-of-objects-tutorial-how-to-create-update-and-loop-through-objects-using-js-array-methods/
-// let car = cars.find(car => car.color === "red");
-// console.log(car);
-// let wcag_id = cars.find(car => wcag_id.wcag === i);
-// console.log(wcag_id);
-
-/*
-        var link = '';
-        for(let j in wcagLinks) {
-          if (wcagLinks[j].wcag == i) {
-            link = wcagLinks[j].href;
+        // Loop through WCAG errors to provide links & context.
+        for (let c in wcagLinks) {
+          if (wcagLinks[c].wcag == i) {
+            var displayWCAGlink = "<a href ='" + wcagLinks[c].href + "' target='_blank'><b>" + i + ":</b> " + wcagLinks[c].desc + " [" + wcagLinks[c].role + "]</a> - <b>" + wcagCountsTemp + "</b>";
+            // console.log(displayWCAGlink);
           }
         }
-        var name = '';
-        console.log(typeof wcagsc2role);
-        for(let k in wcagsc2role) {
-          if (wcagsc2role[k] == i) {
-            name = wcagsc2role[k];
-          }
-          // console.log(wcagsc2role.i);
-          // console.log(name);
-          // console.log(wcagsc2role.indexOf(k) + " indexOf");
-        }
-        // console.log(link + " plus " + name)
-*/
-// console.log(wcagLinks.indexOf(i) + " indexOf");
-// console.log(wcagLinks.includes(i));
-// var names = obj.wcagLinks.map(function (wcagLink) {
-//  return wcagLink.wcag + ' ' + wcagLink.href;
-// });
-// console.log(names);
+        wcagCountsContent += "<li>" + displayWCAGlink + '</li>';
 
-        if (wcagLinks.includes(i)) {
-console.log("includes i " + i);
-        }
-
-        // console.log(wcagLinks.slice(i) + " slice")
-
-        wcagCountsContent += "<li><b>" + i + ":</b> " + wcagCountsTemp + " "  + '</li>'; // + link
         let finalWCAGarrayTemp = {
           wcag: i,
           count: wcagCountsTemp
@@ -377,14 +423,14 @@ console.log("includes i " + i);
         finalWCAGarray.push(finalWCAGarrayTemp);
         ++ii
         if (ii == 1) {
-          wcagCountsContent = "WCAG Errors: " + wcagCountsContent;
+          wcagCountsContent = "<h2>WCAG Errors</h2> " + wcagCountsContent;
         }
       }
     }
   }
   wcagCountsContent += "</ul>";
 
-  console.log("Writing results to ./reports/wcagErrors.csv");
+  console.log("Writing " + domain + " results to ./reports/wcagErrors.csv");
   const ObjectsToCsv_wc = require('objects-to-csv');
   (async () => {
     // finalWCAGarray.unshift("WCAG Errors", "Count")
@@ -423,7 +469,7 @@ console.log("includes i " + i);
       }
     }
 
-    console.log("Writing results to ./reports/wappalyzer.csv");
+    console.log("Writing " + domain + " results to ./reports/wappalyzer.csv");
     const ObjectsToCsv_wa = require('objects-to-csv');
     // Add if statement to avoid this error
     // node_modules/objects-to-csv/index.js:16
@@ -440,21 +486,27 @@ console.log("includes i " + i);
   }
 
 
-  var axeCountsDescription = "<b>Critical: " + criticalCount + ", Serious: " + seriousCount + "</b>, Moderate: " + moderateCount + ", Minor: " + minorCount + "";
+  let axeCounts1 = "Critical: " + criticalCount + ", Serious: " + seriousCount;
+  let axeCounts2 = "Moderate: " + moderateCount + ", Minor: " + minorCount;
+  let axeCounts3 = "";
   if (unknownCount > 0) {
-    axeCountsDescription += "<i>Unknown: " + unknownCount + "</i>";
+    axeCounts3 = ", Unknown: " + unknownCount;
   }
-  console.log(axeCountsDescription);
+  axeCountsDescription = "<b>" + axeCounts1 + "</b>, " + axeCounts2 + "<i>" + axeCounts3 + "</i>";
+
+  // score is repeated above but I'm not getting the value without redevinging it.
+  var score = (minorCount + (moderateCount * 1.5) + (seriousCount * 2) + (criticalCount * 3)) / (countURLsCrawled * 5);
+  console.log(axeCounts1 + ", " + axeCounts2 + axeCounts3 + " Score: " + Math.round(score * 100)/100);
   var someOfErrors = criticalCount + seriousCount + moderateCount + minorCount;
   const axeCountContentArr = JSON.stringify({
       "criticalCount": criticalCount,
       "seriousCount": seriousCount,
       "moderateCount": moderateCount,
       "minorCount": minorCount,
-      "criticalCountPercent": Math.round((criticalCount/someOfErrors)*100),
-      "seriousCountPercent": Math.round((seriousCount/someOfErrors)*100),
-      "moderateCountPercent": Math.round((moderateCount/someOfErrors)*100),
-      "minorCountPercent": Math.round((minorCount/someOfErrors)*100),
+      "criticalCountPercent": Math.round((criticalCount / someOfErrors) * 100),
+      "seriousCountPercent": Math.round((seriousCount / someOfErrors) * 100),
+      "moderateCountPercent": Math.round((moderateCount / someOfErrors) * 100),
+      "minorCountPercent": Math.round((minorCount / someOfErrors) * 100),
       "axeCountsDescription": axeCountsDescription,
     },
     null,
@@ -469,7 +521,7 @@ console.log("includes i " + i);
       startTime: getCurrentTime(),
       count: id,
       htmlCount: allissues.length,
-      domain: domainURL,
+      domain,
       countURLsCrawled,
       totalTime,
       speed,
@@ -520,6 +572,9 @@ const flattenAxeResults = async (rPath, storagePath) => {
   } = parsedContent;
   var plainLanguageIssues = [];
   var fileExtension = pageNew = '';
+
+  errorsPerURL = errors.length;
+
   errors.forEach(error => {
 
     /* pull out file extension from path */
@@ -607,13 +662,19 @@ const flattenAxeResults = async (rPath, storagePath) => {
       var languageSummary = '';
       // console.log(page + " page " + fleschKincaidGrade + " fk " + difficultWords  + " dw " + sentenceCount);
       if (!((sentenceCount == null) || (sentenceCount == 'undefined') || (typeof sentenceCount !== 'number') || (sentenceCount <= 2))) {
-        languageSummary += sentenceCount + " sentences; ";
+        languageSummary += sentenceCount + " sentences evaluated. ";
       }
       if (!((difficultWords == null) || (difficultWords == 'undefined') || (typeof difficultWords !== 'number') || (sentenceCount <= 2))) {
-        languageSummary += difficultWords + " difficult words; ";
+        if ((difficultWords / sentenceCount) > 3) {
+          languageSummary += "There a lot of difficult words in this page. ";
+        }
+        // languageSummary += difficultWords + " difficult words; ";
       }
       if (!((fleschKincaidGrade == null) || (fleschKincaidGrade == 'undefined') || (typeof fleschKincaidGrade !== 'number') || (fleschKincaidGrade < 0) || (sentenceCount <= 2))) {
-        languageSummary += fleschKincaidGrade + " Flesch Kincaid Grade ";
+        if (fleschKincaidGrade > 10) {
+          languageSummary += "Please <a href='https://hemingwayapp.com/''>review</a> this page for <a href='https://www.plainlanguage.gov/'>plain language</a>. "
+        }
+        // languageSummary += fleschKincaidGrade + " Flesch Kincaid Grade ";
       }
       // console.log(id + " id " + page + " page & language summary " +  languageSummary);
 
@@ -636,6 +697,7 @@ const flattenAxeResults = async (rPath, storagePath) => {
         wcagLinks,
         disabilities,
         disabilityIcons,
+        errorsPerURL
       });
 
     }); // End error.fixes.forEach
@@ -682,91 +744,104 @@ exports.mergeFiles = async randomToken => {
 
   /* Write the JSON then the HTML - Order Matters */
   if (allFiles.length > 0) {
-    console.log("Writing issues to JSON & HTML.")
-    await writeResults(allIssues, storagePath);
-    await writeHTML(allIssues, storagePath);
+    console.log("Writing issues to JSON & HTML for: " + domainURL)
+    var htmlElementArray = [];
+    await writeResults(allIssues, storagePath, htmlElementArray);
+    await writeHTML(allIssues, storagePath, htmlElementArray, getHostnameFromRegex(domainURL));
   } else {
     console.log("No entities in allFiles.");
   }
 
-  /*
-    const host = getHostnameFromRegex(domainURL);
-    // console.log(host);
+  // Get historical scans for the domain if available.
+  const host = getHostnameFromRegex(domainURL);
+  var rootDomainPath = "./results/" + host + "_reports/";
 
-    // console.log(domainURL);
-    // const fs = require("fs")
-    var rootDomainPath = "./results/" + host + "_reports/";
-    // console.log(rootDomainPath + " 1!");
-    // console.log(domainURL.replace('/', ''));
-    // console.log(domainURL.substring(6));
-    fs.readdir(rootDomainPath, (err, files) => { console.log(files) })
-    var dateFolders = fs.readdirSync(rootDomainPath)
+  fs.readdir(rootDomainPath, (err, files) => {
+    // console.log("Display files in each directory.");
+    // console.log(files)
+  })
+  var dateFolders = fs.readdirSync(rootDomainPath)
 
-    // console.log("## " + dateFolders + " 1.5!")
-    var date = "";
-    const fs2 = require("fs")
-    for (let i in dateFolders) {
-      // console.log(" ## " + i + " " + dateFolders[i] + " 2!");
-      date = dateFolders[i];
-  //    console.log(" ## " + i + " " + date + " 2.5!")
-  //   const currentDate = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-      var rootDomainPathAndDate = rootDomainPath + "/" + date + "/reports";
-      // console.log(" ## " + i + " " + rootDomainPathAndDate + " 3!");
-      fs2.readdir(rootDomainPathAndDate, (err, files) => { console.log(files) })
-      var dateFiles = fs2.readdirSync(rootDomainPathAndDate)
-      // console.log(" ## " + i + " " + dateFiles + " 4!");
-      // console.log(typeof dateFiles)
+  console.log("Search for prior axe scans. ");
+  var date = "";
+  const countArray = wcagArray = dateScore = totalArrayAxe2 = totalArrayWCAG2 = [];
+  const totalArrayAxe = totalArrayWCAG = [];
+  const fs2 = require("fs")
+  for (let i in dateFolders) {
+    date = dateFolders[i];  // Note thate date isn't updating
+    var rootDomainPathAndDate = rootDomainPath + "/" + date + "/reports";
+    fs2.readdir(rootDomainPathAndDate, (err, files) => {
+      // console.log(err + " " + files);
+    });
+    var dateFiles = fs2.readdirSync(rootDomainPathAndDate);
+    for (let ii in dateFiles) {
 
-      for (let ii in dateFiles) {
-        var element = {};
-        var countArray = [];
-        if (dateFiles[ii] == "count.csv") {
-          console.log("We can get the number of axe errors");
+      // Load prior axe errors.
+      if (dateFiles[ii] == "count.csv") {
+        var countCSV = rootDomainPathAndDate + "/count.csv";
+        var fs3 = require('fs');
+        var csv3 = require('csv');
+        var parser3 = csv3.parse({delimiter: ','}, function(err, data){
+            var lastRow = data[data.length-1];
+            var score = lastRow[lastRow.length-1];
+            totalArrayAxe.push(dateFolders[i], data);
+            console.log("Date: " + dateFolders[i] + " Score: " +  Math.round(score * 100)/100);
 
-          const fs3 = require('fs');
-          var countCSV = rootDomainPathAndDate + "/count.csv";
-          fs3.createReadStream(countCSV)
-            .pipe(csv())
-            .on('data', (row) => {
+/*
+            // Writing aggregated value to disk
+            console.log("Writing history results to ./reports/axeHistoricalErrors.csv");
+            const ObjectsToCsv_aH = require('objects-to-csv');
+            (async () => {
+              // finalWCAGarray.unshift("WCAG Errors", "Count")
+              const csv_aH = new ObjectsToCsv_aH(totalArrayAxe);
+              // Save to file:
+              await csv_aH.toDisk(storagePath + "/reports/axeHistoricalErrors.csv");
+              // console.log(await csv_wc.toString());
+            })();
+*/
 
-  // element.date = date;
-  // element.count = row;
-  // dailyCount.push(element);
-              // console.log(row);
-              countArray.push(row);
-              console.log(countArray);
+        });
+        fs3.createReadStream(countCSV).pipe(parser3);
+      }
+      // console.log(totalArrayAxe);
 
-              // countArray.date = row;
-              // console.log(countArray);
-            })
-            .on('end', () => {
-              console.log('CSV file successfully processed');
-            });
+      // Load prior WCAG errors.
+      if (dateFiles[ii] == "wcagErrors.csv") {
+        var wcagCSV = rootDomainPathAndDate + "/wcagErrors.csv";
+        var fs4 = require('fs');
+        var csv4 = require('csv');
+        var parser4 = csv4.parse({delimiter: ','}, function(err, data){
+            var lastRow = data[data.length-1];
+            var score = lastRow[lastRow.length-1];
+            totalArrayWCAG.push(dateFolders[i], data);
 
-        }
-        if (dateFiles[ii] == "wcagErrors.csv") {
-          console.log("We can get the number of WCAG errors");
-        }
+/*
+            // Writing aggregated value to disk
+            console.log("Writing history results to ./reports/wcagHistoricalErrors.csv");
+            const ObjectsToCsv_wcH = require('objects-to-csv');
+            (async () => {
+              // finalWCAGarray.unshift("WCAG Errors", "Count")
+              const csv_wcH = new ObjectsToCsv_wcH(totalArrayWCAG);
+              // Save to file:
+              await csv_wcH.toDisk(storagePath + "/reports/wcagHistoricalErrors.csv");
+              // console.log(await csv_wc.toString());
+            })();
+*/
 
-        element[ date ] = countArray;
-        console.log(element);
-        console.log(countArray + " count array !!");
+        });
+        fs4.createReadStream(wcagCSV).pipe(parser4);
+      }
 
-  console.log("not the very end")
+    } // for (let ii in dateFiles)
 
+    // console.log(totalArrayWCAG2);
+    // console.log(totalArrayAxe2);
 
+  } // end of - for (let i in dateFolders)
 
-      } // for (let ii in dateFiles)
+  if (date === "") {
+    console.log("No prior scans found.")
+  }
 
-
-      element[ date ] = countArray;
-      console.log(element);
-      console.log(countArray + " count array !!");
-
-      console.log("very end")
-
-    }
-
-  */
-
-};
+  console.log("Number of prior folders: " + dateFolders.length);
+}
