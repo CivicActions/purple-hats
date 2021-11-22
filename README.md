@@ -114,7 +114,7 @@ user@user-MacBook-Pro purple-hats %
 ### 2. Crawling of Domain
 The crawler will recursively visit the links to generate the results from **all the pages found from the input domain**. This will take a longer time depending on the number of links and pages that are being transversed.
 
-Under this feature, it will also take into consideration of the presence of a login page.
+Under this feature, it will also take into consideration the presence of a login page.
 
 
 #### 2. Crawling of PublicDomain w/o Login Page
