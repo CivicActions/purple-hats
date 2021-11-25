@@ -130,6 +130,7 @@ exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreA
         if (validateUrl(currentUrl) && !skip) {
 
           const results = await runAxeScript(page, host);
+          // console.log(results); - This doesn't give me more information -> fixes: [Array]
 
           // Check readability of the page
           getPage(currentUrl, function (err, article, meta, callback) {
@@ -171,6 +172,8 @@ exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreA
               readability: readability,
               time: (stop - start)/1000
             });
+            // console.log(results);
+            // console.log(newResults);
           }
 
 
@@ -228,9 +231,9 @@ console.log("Skip url? " + skip);
   /*
   This isn't right. It should be appending like - https://attacomsian.com/blog/nodejs-append-data-to-file
   console.log("Writing list of PDFs to" + storagePath + "/reports/pdf.csv");
-  const ObjectsToCsv_p = require('objects-to-csv');
+  const ObjectsToCsv = require('objects-to-csv'); // Just needs to be defined once at top of page
   (async () => {
-    const csv_p = new ObjectsToCsv_p(pdfs);
+    const csv_p = new ObjectsToCsv(pdfs);
 
     // Save to file:
     await csv_p.toDisk(storagePath + "/reports/pdf.csv");

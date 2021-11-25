@@ -17,6 +17,9 @@ const {
   getCurrentTime,
   getStoragePath
 } = require('./utils');
+const ObjectsToCsv = require('objects-to-csv');
+var csv2 = require('csv');
+
 
 /* There's likely a good reason not to do this */
 global.wcagCounts = [];
@@ -261,9 +264,8 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domain) => {
   var difficultWordsMaxText = "Average difficult words per page: " + Math.round(totalDifficultWords / allissues.length) + " <b>Most difficult words on a page: <a href='" + domainURL + page + "' target='_blank'>" + difficultWordsMax + "</a></b>";
 
   console.log("Writing results to ./reports/allissues.csv");
-  const ObjectsToCsv_a = require('objects-to-csv');
   (async () => {
-    const csv_a = new ObjectsToCsv_a(allissues);
+    const csv_a = new ObjectsToCsv(allissues);
 
     // Save to file:
     await csv_a.toDisk(storagePath + "/reports/allissues.csv");
@@ -278,7 +280,6 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domain) => {
 
 
     console.log("Writing results to ./reports/count.csv");
-    const ObjectsToCsv_c = require('objects-to-csv');
     (async () => {
       let count_array = [{
         level: 'minor',
@@ -299,7 +300,7 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domain) => {
         level: 'score',
         count: score
       }];
-      const csv_c = new ObjectsToCsv_c(count_array);
+      const csv_c = new ObjectsToCsv(count_array);
 
       // Save to file:
       await csv_c.toDisk(storagePath + "/reports/count.csv");
@@ -431,10 +432,9 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domain) => {
   wcagCountsContent += "</ul>";
 
   console.log("Writing " + domain + " results to ./reports/wcagErrors.csv");
-  const ObjectsToCsv_wc = require('objects-to-csv');
   (async () => {
     // finalWCAGarray.unshift("WCAG Errors", "Count")
-    const csv_wc = new ObjectsToCsv_wc(finalWCAGarray);
+    const csv_wc = new ObjectsToCsv(finalWCAGarray);
     // Save to file:
     await csv_wc.toDisk(storagePath + "/reports/wcagErrors.csv");
     // console.log(await csv_wc.toString());
@@ -469,16 +469,15 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domain) => {
       }
     }
 
-    console.log("Writing " + domain + " results to ./reports/wappalyzer.csv");
-    const ObjectsToCsv_wa = require('objects-to-csv');
     // Add if statement to avoid this error
     // node_modules/objects-to-csv/index.js:16
     //   throw new Error('The input to objects-to-csv must be an array of objects.');
     if ((typeof wappalyzer_array['technologies'] == 'array') && (wappalyzer_array['technologies'].length > 0)) {
       (async () => {
-        const csv_wa = new ObjectsToCsv_wa(wappalyzer_array['technologies']);
+        const csv_wa = new ObjectsToCsv(wappalyzer_array['technologies']);
 
         // Save to file:
+        console.log("Writing " + domain + " results to ./reports/wappalyzer.csv");
         await csv_wa.toDisk(storagePath + "/reports/wappalyzer.csv");
         // console.log(await csv_wa.toString());
       })();
@@ -645,9 +644,8 @@ const flattenAxeResults = async (rPath, storagePath) => {
 
         plainLanguageIssues.push([url, page, sentenceCount, difficultWords, fleschKincaidGrade]);
 
-        const ObjectsToCsv_d = require('objects-to-csv');
         (async () => {
-          const csv_d = new ObjectsToCsv_d(plainLanguageIssues);
+          const csv_d = new ObjectsToCsv(plainLanguageIssues);
 
           // Save to file:
           await csv_d.toDisk(storagePath + "/reports/plainLanguage.csv", {
@@ -756,92 +754,113 @@ exports.mergeFiles = async randomToken => {
   const host = getHostnameFromRegex(domainURL);
   var rootDomainPath = "./results/" + host + "_reports/";
 
-  fs.readdir(rootDomainPath, (err, files) => {
-    // console.log("Display files in each directory.");
-    // console.log(files)
-  })
-  var dateFolders = fs.readdirSync(rootDomainPath)
+  if (fs.existsSync(rootDomainPath)) {
+    console.log('The ' + rootDomainPath + ' directory exists, so this scan has been run before.');
 
-  console.log("Search for prior axe scans. ");
-  var date = "";
-  const countArray = wcagArray = dateScore = totalArrayAxe2 = totalArrayWCAG2 = [];
-  const totalArrayAxe = totalArrayWCAG = [];
-  const fs2 = require("fs")
-  for (let i in dateFolders) {
-    date = dateFolders[i];  // Note thate date isn't updating
-    var rootDomainPathAndDate = rootDomainPath + "/" + date + "/reports";
-    fs2.readdir(rootDomainPathAndDate, (err, files) => {
-      // console.log(err + " " + files);
-    });
-    var dateFiles = fs2.readdirSync(rootDomainPathAndDate);
-    for (let ii in dateFiles) {
 
-      // Load prior axe errors.
-      if (dateFiles[ii] == "count.csv") {
-        var countCSV = rootDomainPathAndDate + "/count.csv";
-        var fs3 = require('fs');
-        var csv3 = require('csv');
-        var parser3 = csv3.parse({delimiter: ','}, function(err, data){
-            var lastRow = data[data.length-1];
-            var score = lastRow[lastRow.length-1];
-            totalArrayAxe.push(dateFolders[i], data);
-            console.log("Date: " + dateFolders[i] + " Score: " +  Math.round(score * 100)/100);
+        fs.readdir(rootDomainPath, (err, files) => {
+          console.log("Display files in each directory.");
+          console.log(files);
+        })
+        var dateFolders = fs.readdirSync(rootDomainPath)
 
+        console.log("Search for prior axe scans. ");
+        var date = "";
+        const countArray = wcagArray = dateScore = totalArrayAxe2 = totalArrayWCAG2 = [];
+        const totalArrayAxe = totalArrayWCAG = [];
+        for (let i in dateFolders) {
+          date = dateFolders[i];  // Note thate date isn't updating
+          var rootDomainPathAndDate = rootDomainPath + "/" + date + "/reports";
+          fs.readdir(rootDomainPathAndDate, (err, files) => {
+            // console.log(err + " " + files);
+          });
+          var dateFiles = fs.readdirSync(rootDomainPathAndDate);
+          for (let ii in dateFiles) {
+            console.log(dateFiles[ii])
 /*
-            // Writing aggregated value to disk
-            console.log("Writing history results to ./reports/axeHistoricalErrors.csv");
-            const ObjectsToCsv_aH = require('objects-to-csv');
-            (async () => {
-              // finalWCAGarray.unshift("WCAG Errors", "Count")
-              const csv_aH = new ObjectsToCsv_aH(totalArrayAxe);
-              // Save to file:
-              await csv_aH.toDisk(storagePath + "/reports/axeHistoricalErrors.csv");
-              // console.log(await csv_wc.toString());
-            })();
+            // Load prior axe errors.
+            if (dateFiles[ii] == "count.csv") {
+              var countCSV = rootDomainPathAndDate + "/count.csv";
+
+              var parser3 = csv2.parse({delimiter: ','}, function(err, data){
+                  let lastRowDataCount = data.length-1
+                  var lastRow = data[lastRowDataCount];
+                  let scoreColunnCount = lastRow.length-1
+                  var score = lastRow[scoreColunnCount];
+                  totalArrayAxe.push(dateFolders[i], data);
+                  console.log("Date: " + dateFolders[i] + " Score: " +  Math.round(score * 100)/100);
+
+
+                  // Writing aggregated value to disk
+                  // console.log("Writing history results to ./reports/axeHistoricalErrors.csv");
+                  // (async () => {
+                    // finalWCAGarray.unshift("WCAG Errors", "Count")
+                    // const csv_aH = new ObjectsToCsv(totalArrayAxe);
+                    // Save to file:
+                    // await csv_aH.toDisk(storagePath + "/reports/axeHistoricalErrors.csv");
+                    // console.log(await csv_wc.toString());
+                  })();
+
+
+              });
+// B - Spitting out error to console - Error: ENOENT: no such file or directory, open './results/eng-hiring.18f.gov_reports//2021-11-17/reports/count.csv'
+
+              // try {
+              // fs.createReadStream(countCSV).pipe(parser3);
+          //  }
+            //} catch (e) {
+            //  console.log("entering catch block");
+            //  console.log(e);
+            //  console.log("leaving catch block");
+            // }
+
+            }
+            // console.log(totalArrayAxe);
+
+            // Load prior WCAG errors.
+            if (dateFiles[ii] == "wcagErrors.csv") {
+              var wcagCSV = rootDomainPathAndDate + "/wcagErrors.csv";
+              var parser4 = csv2.parse({delimiter: ','}, function(err, data){
+                  let lastRowDataWCAG = data.length-1
+                  var lastRow = data[lastRowDataWCAG];
+                  if (lastRow) {
+                    let scoreColunnWCAG = lastRow.length-1
+                    var score = lastRow[scoreColunnWCAG];
+                    totalArrayWCAG.push(dateFolders[i], data);
+                  }
+
+
+                  // Writing aggregated value to disk
+                  // console.log("Writing history results to ./reports/wcagHistoricalErrors.csv");
+                  // (async () => {
+                    // finalWCAGarray.unshift("WCAG Errors", "Count")
+                    // const csv_wcH = new ObjectsToCsv(totalArrayWCAG);
+                    // Save to file:
+                    // await csv_wcH.toDisk(storagePath + "/reports/wcagHistoricalErrors.csv");
+                    // console.log(await csv_wc.toString());
+                  // })();
+
+
+              });
+              // This is coming up null and overwriting the file.
+              // fs.createReadStream(wcagCSV).pipe(parser4);
+            }
 */
 
-        });
-        fs3.createReadStream(countCSV).pipe(parser3);
-      }
-      // console.log(totalArrayAxe);
+          } // for (let ii in dateFiles)
 
-      // Load prior WCAG errors.
-      if (dateFiles[ii] == "wcagErrors.csv") {
-        var wcagCSV = rootDomainPathAndDate + "/wcagErrors.csv";
-        var fs4 = require('fs');
-        var csv4 = require('csv');
-        var parser4 = csv4.parse({delimiter: ','}, function(err, data){
-            var lastRow = data[data.length-1];
-            var score = lastRow[lastRow.length-1];
-            totalArrayWCAG.push(dateFolders[i], data);
+          // console.log(totalArrayWCAG2);
+          // console.log(totalArrayAxe2);
 
-/*
-            // Writing aggregated value to disk
-            console.log("Writing history results to ./reports/wcagHistoricalErrors.csv");
-            const ObjectsToCsv_wcH = require('objects-to-csv');
-            (async () => {
-              // finalWCAGarray.unshift("WCAG Errors", "Count")
-              const csv_wcH = new ObjectsToCsv_wcH(totalArrayWCAG);
-              // Save to file:
-              await csv_wcH.toDisk(storagePath + "/reports/wcagHistoricalErrors.csv");
-              // console.log(await csv_wc.toString());
-            })();
-*/
+        } // end of - for (let i in dateFolders)
 
-        });
-        fs4.createReadStream(wcagCSV).pipe(parser4);
-      }
+        if (date === "") {
+          console.log("No prior scans found.")
+        }
 
-    } // for (let ii in dateFiles)
+        console.log("Number of prior folders: " + dateFolders.length);
 
-    // console.log(totalArrayWCAG2);
-    // console.log(totalArrayAxe2);
-
-  } // end of - for (let i in dateFolders)
-
-  if (date === "") {
-    console.log("No prior scans found.")
+  } else {
+      console.log('The ' + rootDomainPath + ' directory does not exist, so this is a new domain.');
   }
-
-  console.log("Number of prior folders: " + dateFolders.length);
 }
