@@ -60,11 +60,11 @@ exports.combineRun = async (details, storagePath) => {
     requestUrl: url,
   };
 
-  global.domainURL = scanDetails.requestUrl;
-  global.startTime = scanDetails.startTime;
-  global.wappalyzer_json = wappalyzer;
-  global.email = email;
-  // global.maxRequestsPerCrawl = number; // Not getting passed along
+  var domainURL = scanDetails.requestUrl;
+  var startTime = scanDetails.startTime;
+  var wappalyzer_json = wappalyzer;
+  // var email = email; // Placeholder for when you can send via email.
+  var maxRequestsPerCrawl = number; // Needs to be passed along.
 
   // Highlight if strings or extensions are being excluded
   const excludeExtArr = excludeExt.substring(1).split('.');
@@ -87,7 +87,7 @@ exports.combineRun = async (details, storagePath) => {
   let urlsCrawled;
   switch (type) {
   case 'crawlSitemap':
-    urlsCrawled = await crawlSitemap(url, randomToken, host, excludeExtArr, excludeMoreArr, excludeQuery);
+    urlsCrawled = await crawlSitemap(url, randomToken, host);
     break;
 
   case 'crawlDomain':
@@ -100,7 +100,7 @@ exports.combineRun = async (details, storagePath) => {
 
   scanDetails.urlsCrawled = urlsCrawled;
   scanDetails.endTime = new Date().getTime();
-  global.endTime = scanDetails.endTime;
+  var endTime = scanDetails.endTime;
   var totalTimeSeconds = Math.round((endTime - startTime) / 1000);
   var hours = (totalTimeSeconds / 3600);
   var rhours = Math.floor(hours);
@@ -109,9 +109,9 @@ exports.combineRun = async (details, storagePath) => {
   var seconds = (minutes - rminutes) * 60;
   var rseconds = Math.abs(Math.round(seconds));
   var speedExact = (urlsCrawled.scanned.length / totalTimeSeconds);
-  global.speed = speedExact.toPrecision(2);
-  global.totalTime = rhours + "h " + rminutes + "m " + rseconds + "s ";
-  global.countURLsCrawled = urlsCrawled['scanned'].length;
+  var speed = speedExact.toPrecision(2);
+  var totalTime = rhours + "h " + rminutes + "m " + rseconds + "s ";
+  var countURLsCrawled = urlsCrawled['scanned'].length;
   await createAndUpdateFolders(scanDetails, randomToken);
-  await mergeFiles(randomToken);
+  await mergeFiles(randomToken, domainURL, wappalyzer_json, startTime, endTime, speed, totalTime, countURLsCrawled);
 };

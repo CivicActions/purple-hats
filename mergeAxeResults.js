@@ -15,22 +15,22 @@ const {
 } = require('./constants/constants');
 const {
   getCurrentTime,
-  getStoragePath
+  getStoragePath,
+  getHostnameFromRegex
 } = require('./utils');
 const ObjectsToCsv = require('objects-to-csv');
-var csv2 = require('csv');
+const csv2 = require('csv');
 
-
-/* There's likely a good reason not to do this */
-global.wcagCounts = [];
-global.wcagIDsum = [];
-global.orderCount = [];
-global.id = 0;
-global.criticalCount = 0;
-global.seriousCount = 0;
-global.moderateCount = 0;
-global.minorCount = 0;
-global.unknownCount = 0;
+var wcagCounts = [];
+var orderCount = [];
+var id = 0;
+var criticalCount = 0;
+var seriousCount = 0;
+var moderateCount = 0;
+var minorCount = 0;
+var unknownCount = 0;
+var domainURL = '';
+var wappalyzer_json = '';
 
 const extractFileNames = async directory => {
   const allFiles = await fs
@@ -60,7 +60,7 @@ const fetchIcons = async (disabilities, impact) => {
 };
 
 /* Compile final JSON results */
-const writeResults = async (allissues, storagePath, htmlElementArray) => {
+const writeResults = async (allissues, storagePath, htmlElementArray,  domainURL, wappalyzer_json, startTime, endTime, speed, totalTime, countURLsCrawled) => {
 
   console.log("Running writeResults to generate JSON - URLs " + countURLsCrawled + " & " + allissues.length + " errors found.");
 
@@ -151,7 +151,9 @@ const writeResults = async (allissues, storagePath, htmlElementArray) => {
 };
 
 /* Write HTML from JSON to Mustache for whole page content */
-const writeHTML = async (allissues, storagePath, htmlElementArray, domain) => {
+const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wappalyzer_json, startTime, endTime, speed, totalTime, countURLsCrawled) => {
+
+  var domain = getHostnameFromRegex(domainURL);
 
   // Cycle through WCAG CSV and put together master list.
   // TODO: WCAG 2.1 & 2.2 should be added here. These should be highlighted.
@@ -720,11 +722,7 @@ const flattenAxeResults = async (rPath, storagePath) => {
   );
 };
 
-exports.mergeFiles = async randomToken => {
-  const {
-    getCurrentTime,
-    getHostnameFromRegex
-  } = require('./utils');
+exports.mergeFiles = async (randomToken, domainURL, wappalyzer_json, startTime, endTime, speed, totalTime, countURLsCrawled) => {
   const storagePath = getStoragePath(randomToken);
   const directory = `${storagePath}/${allIssueFileName}`;
   let allIssues = [];
@@ -744,8 +742,8 @@ exports.mergeFiles = async randomToken => {
   if (allFiles.length > 0) {
     console.log("Writing issues to JSON & HTML for: " + domainURL)
     var htmlElementArray = [];
-    await writeResults(allIssues, storagePath, htmlElementArray);
-    await writeHTML(allIssues, storagePath, htmlElementArray, getHostnameFromRegex(domainURL));
+    await writeResults(allIssues, storagePath, htmlElementArray, domainURL, wappalyzer_json, startTime, endTime, speed, totalTime, countURLsCrawled);
+    await writeHTML(allIssues, storagePath, htmlElementArray, domainURL, wappalyzer_json, startTime, endTime, speed, totalTime, countURLsCrawled); // should be able to eliminate getHostnameFromRegex(domainURL)
   } else {
     console.log("No entities in allFiles.");
   }
