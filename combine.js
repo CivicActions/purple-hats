@@ -72,7 +72,7 @@ exports.combineRun = async (details, storagePath) => {
   if ((excludeExtArr[0] !== '') || (excludeMoreArr[0] !== '') || (excludeQuery == 1)) console.log("Exclude: ");
   if (excludeExtArr[0] !== '') console.log(excludeExtArr);
   if (excludeMoreArr[0] !== '') console.log(excludeMoreArr);
-  if (excludeQuery == 1) console.log("Exclude queries ");
+  if (excludeQuery == 1) console.log("Exclude queries: ");
 
   /* I couldn't override the constant.js and avoid a "ApifyClientError: Parameter "options.maxRequestsPerCrawl" of type Maybe Number" error
     var maxRequestsPerCrawl = 0;
@@ -110,7 +110,7 @@ exports.combineRun = async (details, storagePath) => {
   var rseconds = Math.abs(Math.round(seconds));
   var speedExact = (urlsCrawled.scanned.length / totalTimeSeconds);
   var speed = speedExact.toPrecision(2);
-  var totalTime = rhours + "h " + rminutes + "m " + rseconds + "s ";
+  var totalTime = `${rhours} h ${rminutes} m ${rseconds} s `;
   var countURLsCrawled = urlsCrawled['scanned'].length;
   await createAndUpdateFolders(scanDetails, randomToken);
   await mergeFiles(randomToken, domainURL, wappalyzer_json, startTime, endTime, speed, totalTime, countURLsCrawled);

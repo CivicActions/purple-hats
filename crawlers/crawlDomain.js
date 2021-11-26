@@ -80,7 +80,7 @@ exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreA
           skip = excludeExtArr.includes(path.extname(currentUrl).substring(1));
         }
         if (skip) {
-          console.log("Blocked (excludeExtArr) " + path.extname(currentUrl)); // + skip + " " + currentUrl);
+          console.log(`Blocked (excludeExtArr) ${path.extname(currentUrl)}`); // + `${skip} ${currentUrl`);
           console.log(excludeExtArr);
         } else { // Test for excludeMoreArr
           if (excludeExtArr[0] !== '') {
@@ -93,7 +93,7 @@ exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreA
             });
           }
           if (skip) {
-            console.log("Blocked (excludeMoreArr) " + skipElement);
+            console.log(`Blocked (excludeMoreArr) ${skipElement}`);
             console.log(excludeMoreArr);
           } else {
 
@@ -107,7 +107,7 @@ exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreA
               });
             }
             if (skip) {
-              console.log("Blocked (excludeExtArr - plus) " + skipElement);
+              console.log(`Blocked (excludeExtArr - plus) ${skipElement} `);
             } else {
 
               // This should be enabled from the CLI and not hard coded.
@@ -118,9 +118,7 @@ exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreA
 
                 if (query !== '{}') {
                   skip = true;
-                  console.log("");
                   console.log("Block query strings - ? & # ");
-                  console.log("");
                 }
               }
             }
@@ -183,25 +181,25 @@ exports.crawlDomain = async (url, randomToken, host, excludeExtArr, excludeMoreA
             const timer = ms => new Promise( res => setTimeout(res, ms));
             (async function(){
              await timer(waitTime * 1000);
-             console.log("Waiting " + waitTime + " seconds.");
+             console.log(`Waiting ${waitTime} seconds.`);
            })()
           }
 
           // Provide output to console for progress
           ++i;
-          console.log("id: " + i + ", Errors: " + results.errors.length + ", URL: " + currentUrl + ` Time to load: ${(stop - start)/1000} seconds`);
+          console.log(`id: ${i}, Errors: ${results.errors.length}, URL: ${currentUrl} Time to load: ${(stop - start)/1000} seconds`);
 
           await dataset.pushData(results);
           urlsCrawled.scanned.push(currentUrl);
 
         } else {
           ++ii;
-          console.log("Skipped id: " + ii + ", URL: " + currentUrl);
-console.log("Valid url? " + validateUrl(currentUrl));
-console.log("Skip url? " + skip);
+          console.log(`Skipped id: ${ii}, URL: ${currentUrl}`);
+console.log(`Valid url? ${validateUrl(currentUrl)}`);
+console.log(`Skip url? ${skip}`);
           if (currentUrl.includes(".pdf")) {
             ++iii;
-            console.log("Number of PDFs: " + iii);
+            console.log(`Number of PDFs: ${iii}`);
             pdfs[iii] = currentUrl;
           }
           urlsCrawled.invalid.push(currentUrl);
@@ -230,13 +228,13 @@ console.log("Skip url? " + skip);
 
   /*
   This isn't right. It should be appending like - https://attacomsian.com/blog/nodejs-append-data-to-file
-  console.log("Writing list of PDFs to" + storagePath + "/reports/pdf.csv");
+  console.log(`Writing list of PDFs to ${storagePath}/reports/pdf.csv`);
   const ObjectsToCsv = require('objects-to-csv'); // Just needs to be defined once at top of page
   (async () => {
     const csv_p = new ObjectsToCsv(pdfs);
 
     // Save to file:
-    await csv_p.toDisk(storagePath + "/reports/pdf.csv");
+    await csv_p.toDisk(`${storagePath}/reports/pdf.csv`);
     // console.log(await csv_a.toString());
   })();
   */

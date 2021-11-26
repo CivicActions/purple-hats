@@ -62,7 +62,7 @@ const fetchIcons = async (disabilities, impact) => {
 /* Compile final JSON results */
 const writeResults = async (allissues, storagePath, htmlElementArray,  domainURL, wappalyzer_json, startTime, endTime, speed, totalTime, countURLsCrawled) => {
 
-  console.log("Running writeResults to generate JSON - URLs " + countURLsCrawled + " & " + allissues.length + " errors found.");
+  console.log(`Running writeResults to generate JSON - URLs ${countURLsCrawled} & ${allissues.length} errors found.`);
 
   /* Copy without reference to allissues array */
   var shortAllIssuesJSON = []
@@ -122,7 +122,7 @@ const writeResults = async (allissues, storagePath, htmlElementArray,  domainURL
         if (wappalyzer_array['technologies'][x].version == null) {
           wappalyzer_short.push(wappalyzer_array['technologies'][x].name)
         } else {
-          wappalyzer_short.push(wappalyzer_array['technologies'][x].name + " (" + wappalyzer_array['technologies'][x].version + ")")
+          wappalyzer_short.push(`${wappalyzer_array['technologies'][x].name} (${wappalyzer_array['technologies'][x].version})`)
         }
         x++
       }
@@ -179,18 +179,20 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
       if (wcagUKlinks[b][0] == wcagIDval) {
         let desc = "";
         if (wcagUKlinks[b][2] == 'A') {
-          desc = wcagUKlinks[b][1] + " (<b>" + wcagUKlinks[b][2] + "</b>";
+          desc = `${wcagUKlinks[b][1]} (<b>${wcagUKlinks[b][2]}</b>`;
         } else {
-          desc = wcagUKlinks[b][1] + " (" + wcagUKlinks[b][2];
+          desc = `${wcagUKlinks[b][1]} (${wcagUKlinks[b][2]}`;
+
         }
         if (wcagLinks[a].wcag21) {
-          desc += " - 2.1"
+          desc += ` - 2.1`
         }
-        wcagLinks[a].desc = desc + ") ";
+        // wcagLinks[a].desc = desc + ") ";
+        wcagLinks[a].desc = `${desc}) `;
         if (wcagLinks[a].role) {
-          wcagLinks[a].role += ", " + '<a href="' + wcagUKlinks[b][3] + '" target="_blank">' + wcagUKlinks[b][4] + "</a>";
+          wcagLinks[a].role += `, <a href="${wcagUKlinks[b][3]}" target="_blank">${wcagUKlinks[b][4]}</a>`;
         } else {
-          wcagLinks[a].role = '<a href="' + wcagUKlinks[b][3] + '" target="_blank">' + wcagUKlinks[b][4] + "</a>";
+          wcagLinks[a].role += `<a href="${wcagUKlinks[b][3]}" target="_blank">${wcagUKlinks[b][4]}</a>`;
         }
       }
     }
@@ -232,7 +234,7 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
         if (!((allissues[i].fleschKincaidGrade == null) || (allissues[i].fleschKincaidGrade == undefined) || (typeof allissues[i].fleschKincaidGrade !== 'number'))) {
           fleschKincaidGrade = allissues[i].fleschKincaidGrade;
           fleschKincaidGradeMax = fleschKincaidGrade;
-          // console.log("Current max Flesch-Kincai: " + fleschKincaidGradeMax);
+          // console.log(`Current max Flesch-Kincai: ${fleschKincaidGradeMax}`);
         }
       }
     }
@@ -243,7 +245,7 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
       if (allissues[i].difficultWords > difficultWordsMax) {
         difficultWords = allissues[i].difficultWords;
         difficultWordsMax = allissues[i].difficultWords;
-        // console.log("Current most number of difficult words: " + difficultWordsMaxText);
+        // console.log(`Current most number of difficult words: ${difficultWordsMaxText}`);
       }
     }
 
@@ -253,7 +255,7 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
     for (let n in htmlElementArray) {
       if (htmlElementArray[n][0] == htmlElement) {
         if (htmlElementArray[n][1] > 1)
-          allissues[i].htmlElementCount = "<p><b>" + htmlElementArray[n][1] + " duplicate axe errors. </b>" + "</p>";
+          allissues[i].htmlElementCount = `<p><b>${htmlElementArray[n][1]} duplicate axe errors.</b></p>`;
       }
     }
     // console.log("Can we provide a list of up to 10 links with the same error? ");
@@ -261,16 +263,16 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
   } // END for (let i in allissues)
 
   // Create text for HTML report.
-  var sentenceCountMaxText = "Average sentences per page: " + Math.round((totalSentenceCount / allissues.length)) + " <b>Most sentences on page: <a href='" + domainURL + page + "' target='_blank'>" + sentenceCountMax + "</a></b>";
-  var fleschKincaidGradeMaxText = "Average Flesch–Kincaid grade: " + Math.round((totalFleschKincaidGrade / allissues.length)) + " <b>Page with worst Flesch–Kincaid grade: <a href='" + domainURL + page + "' target='_blank'>" + Math.round(fleschKincaidGradeMax) + "</a></b>";
-  var difficultWordsMaxText = "Average difficult words per page: " + Math.round(totalDifficultWords / allissues.length) + " <b>Most difficult words on a page: <a href='" + domainURL + page + "' target='_blank'>" + difficultWordsMax + "</a></b>";
+  var sentenceCountMaxText = `Average sentences per page:  ${Math.round((totalSentenceCount / allissues.length))} <b>Most sentences on page: <a href="${domainURL + page}" target="_blank">${sentenceCountMax}</a></b>`;
+  var fleschKincaidGradeMaxText = `Average Flesch–Kincaid grade: ${Math.round((totalFleschKincaidGrade / allissues.length))} <b>Page with worst Flesch–Kincaid grade: <a href="${domainURL + page}" target="_blank">${Math.round(fleschKincaidGradeMax)}</a></b>`;
+  var difficultWordsMaxText = `Average difficult words per page: ${Math.round(totalDifficultWords / allissues.length)} <b>Most difficult words on a page: <a href="${domainURL + page}" target="_blank">${difficultWordsMax}</a></b>`;
 
   console.log("Writing results to ./reports/allissues.csv");
   (async () => {
     const csv_a = new ObjectsToCsv(allissues);
 
     // Save to file:
-    await csv_a.toDisk(storagePath + "/reports/allissues.csv");
+    await csv_a.toDisk(`${storagePath}/reports/allissues.csv`);
     // console.log(await csv_a.toString());
   })();
 
@@ -278,7 +280,7 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
   if (countURLsCrawled > 25) {
     var grade = message = "";
     var score = (minorCount + (moderateCount * 1.5) + (seriousCount * 2) + (criticalCount * 3)) / (countURLsCrawled * 5);
-    console.log("Score (minor) + moderate*1.5 + serious*2 + critical*3 / urls*5 = " + Math.round(score * 100)/100);
+    console.log(`Score (minor) moderate*1.5 + serious*2 + critical*3 / urls*5 = ${Math.round(score * 100)/100}`);
 
 
     console.log("Writing results to ./reports/count.csv");
@@ -305,11 +307,11 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
       const csv_c = new ObjectsToCsv(count_array);
 
       // Save to file:
-      await csv_c.toDisk(storagePath + "/reports/count.csv");
+      await csv_c.toDisk(`${storagePath}/reports/count.csv`);
       // console.log(await csv_c.toString());
     })();
 
-    console.log("Writing HTML report for " + domain);
+    console.log(`Writing HTML report for ${domain}`);
 
     // Scoring for grade
     // Score number = score (minor) + moderate*1.5 + serious*2 + critical*3 / urls*5
@@ -413,11 +415,11 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
         // Loop through WCAG errors to provide links & context.
         for (let c in wcagLinks) {
           if (wcagLinks[c].wcag == i) {
-            var displayWCAGlink = "<a href ='" + wcagLinks[c].href + "' target='_blank'><b>" + i + ":</b> " + wcagLinks[c].desc + " [" + wcagLinks[c].role + "]</a> - <b>" + wcagCountsTemp + "</b>";
+            var displayWCAGlink = `<a href="${wcagLinks[c].href}" target='_blank'><b>${i}:</b> ${wcagLinks[c].desc} [${wcagLinks[c].role}]</a> - <b>${wcagCountsTemp}</b>`;
             // console.log(displayWCAGlink);
           }
         }
-        wcagCountsContent += "<li>" + displayWCAGlink + '</li>';
+        wcagCountsContent += `<li>${displayWCAGlink}</li>`;
 
         let finalWCAGarrayTemp = {
           wcag: i,
@@ -433,12 +435,12 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
   }
   wcagCountsContent += "</ul>";
 
-  console.log("Writing " + domain + " results to ./reports/wcagErrors.csv");
+  console.log(`Writing ${domain} results to ./reports/wcagErrors.csv`);
   (async () => {
     // finalWCAGarray.unshift("WCAG Errors", "Count")
     const csv_wc = new ObjectsToCsv(finalWCAGarray);
     // Save to file:
-    await csv_wc.toDisk(storagePath + "/reports/wcagErrors.csv");
+    await csv_wc.toDisk(`${storagePath}/reports/wcagErrors.csv`);
     // console.log(await csv_wc.toString());
   })();
 
@@ -465,7 +467,7 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
         if (wappalyzer_array['technologies'][x].version == null) {
           wappalyzer_string += wappalyzer_array['technologies'][x].name
         } else {
-          wappalyzer_string += wappalyzer_array['technologies'][x].name + " (" + wappalyzer_array['technologies'][x].version + ")"
+          wappalyzer_string += `${wappalyzer_array['technologies'][x].name} (${wappalyzer_array['technologies'][x].version})`;
         }
         x++
       }
@@ -479,25 +481,25 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
         const csv_wa = new ObjectsToCsv(wappalyzer_array['technologies']);
 
         // Save to file:
-        console.log("Writing " + domain + " results to ./reports/wappalyzer.csv");
-        await csv_wa.toDisk(storagePath + "/reports/wappalyzer.csv");
+        console.log(`Writing ${domain} results to ./reports/wappalyzer.csv`);
+        await csv_wa.toDisk(`${storagePath} /reports/wappalyzer.csv`);
         // console.log(await csv_wa.toString());
       })();
     }
   }
 
 
-  let axeCounts1 = "Critical: " + criticalCount + ", Serious: " + seriousCount;
-  let axeCounts2 = "Moderate: " + moderateCount + ", Minor: " + minorCount;
+  let axeCounts1 = `Critical: ${criticalCount}, Serious: ${seriousCount}`;
+  let axeCounts2 = `Moderate: ${moderateCount} , Minor: ${minorCount}`;
   let axeCounts3 = "";
   if (unknownCount > 0) {
-    axeCounts3 = ", Unknown: " + unknownCount;
+    axeCounts3 = `, Unknown: ${unknownCount}`;
   }
-  axeCountsDescription = "<b>" + axeCounts1 + "</b>, " + axeCounts2 + "<i>" + axeCounts3 + "</i>";
+  axeCountsDescription = `<b>${axeCounts1}</b>, ${axeCounts2}<i>${axeCounts3}</i>`;
 
   // score is repeated above but I'm not getting the value without redevinging it.
   var score = (minorCount + (moderateCount * 1.5) + (seriousCount * 2) + (criticalCount * 3)) / (countURLsCrawled * 5);
-  console.log(axeCounts1 + ", " + axeCounts2 + axeCounts3 + " Score: " + Math.round(score * 100)/100);
+  console.log(`${axeCounts1}, ${axeCounts2}${axeCounts3} Score: ${Math.round(score * 100)/100}`);
   var someOfErrors = criticalCount + seriousCount + moderateCount + minorCount;
   const axeCountContentArr = JSON.stringify({
       "criticalCount": criticalCount,
@@ -547,7 +549,7 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
   const output = Mustache.render(musTemp.toString(), JSON.parse(finalResultsInJson));
 
   // Test both the read and write permissions
-  var reportPath = storagePath + "/reports/report.html"
+  var reportPath = `${storagePath}/reports/report.html`;
   fs.access(storagePath, (err) => {
     console.log(`${err ? 'Directory does not exist' : ''}`);
   });
@@ -608,7 +610,7 @@ const flattenAxeResults = async (rPath, storagePath) => {
           JSON.parse(JSON.stringify(wcag).toString());
           wcagID = JSON.parse(JSON.stringify(wcag)).toString();
         } catch (e) {
-          console.log("Issue loading wcag JSON string in " + id + " when looking up wcag value " + wcag + " on " + page);
+          console.log(`Issue loading wcag JSON string in ${id} when looking up wcag value ${wcag} on ${page}`);
           console.log(wcag);
         }
       }
@@ -641,7 +643,7 @@ const flattenAxeResults = async (rPath, storagePath) => {
 
       // Aggregate plain language issues
       if ((page != pageNew)) {
-        // console.log(pageNew + " new and " + page + "page ");
+        // console.log(`${pageNew} new and ${page} page`);
         pageNew = page;
 
         plainLanguageIssues.push([url, page, sentenceCount, difficultWords, fleschKincaidGrade]);
@@ -650,7 +652,7 @@ const flattenAxeResults = async (rPath, storagePath) => {
           const csv_d = new ObjectsToCsv(plainLanguageIssues);
 
           // Save to file:
-          await csv_d.toDisk(storagePath + "/reports/plainLanguage.csv", {
+          await csv_d.toDisk(`${storagePath}/reports/plainLanguage.csv`, {
             append: true
           });
           // console.log(await csv_d.toString());
@@ -660,23 +662,23 @@ const flattenAxeResults = async (rPath, storagePath) => {
 
       // Count difficult works for eacy page and add to error link
       var languageSummary = '';
-      // console.log(page + " page " + fleschKincaidGrade + " fk " + difficultWords  + " dw " + sentenceCount);
+      // console.log(`${page} page ${fleschKincaidGrade} fk ${difficultWords} dw ${sentenceCount}`);
       if (!((sentenceCount == null) || (sentenceCount == 'undefined') || (typeof sentenceCount !== 'number') || (sentenceCount <= 2))) {
-        languageSummary += sentenceCount + " sentences evaluated. ";
+        languageSummary += `${sentenceCount} sentences evaluated. `;
       }
       if (!((difficultWords == null) || (difficultWords == 'undefined') || (typeof difficultWords !== 'number') || (sentenceCount <= 2))) {
         if ((difficultWords / sentenceCount) > 3) {
           languageSummary += "There a lot of difficult words in this page. ";
         }
-        // languageSummary += difficultWords + " difficult words; ";
+        // languageSummary += `${difficultWords} difficult words; `;
       }
       if (!((fleschKincaidGrade == null) || (fleschKincaidGrade == 'undefined') || (typeof fleschKincaidGrade !== 'number') || (fleschKincaidGrade < 0) || (sentenceCount <= 2))) {
         if (fleschKincaidGrade > 10) {
-          languageSummary += "Please <a href='https://hemingwayapp.com/''>review</a> this page for <a href='https://www.plainlanguage.gov/'>plain language</a>. "
+          languageSummary += "Please <a href='https://hemingwayapp.com/'>review</a> this page for <a href='https://www.plainlanguage.gov/'>plain language</a>. "
         }
-        // languageSummary += fleschKincaidGrade + " Flesch Kincaid Grade ";
+        // languageSummary += `${fleschKincaidGrade} Flesch Kincaid Grade `;
       }
-      // console.log(id + " id " + page + " page & language summary " +  languageSummary);
+      // console.log(`${id} id ${page} page & language summary ${languageSummary}`);
 
       /* Build array with all of the issues */
       flattenedIssues.push({
@@ -740,7 +742,7 @@ exports.mergeFiles = async (randomToken, domainURL, wappalyzer_json, startTime, 
 
   /* Write the JSON then the HTML - Order Matters */
   if (allFiles.length > 0) {
-    console.log("Writing issues to JSON & HTML for: " + domainURL)
+    console.log(`Writing issues to JSON & HTML for: ${domainURL}`)
     var htmlElementArray = [];
     await writeResults(allIssues, storagePath, htmlElementArray, domainURL, wappalyzer_json, startTime, endTime, speed, totalTime, countURLsCrawled);
     await writeHTML(allIssues, storagePath, htmlElementArray, domainURL, wappalyzer_json, startTime, endTime, speed, totalTime, countURLsCrawled); // should be able to eliminate getHostnameFromRegex(domainURL)
@@ -750,10 +752,10 @@ exports.mergeFiles = async (randomToken, domainURL, wappalyzer_json, startTime, 
 
   // Get historical scans for the domain if available.
   const host = getHostnameFromRegex(domainURL);
-  var rootDomainPath = "./results/" + host + "_reports/";
+  var rootDomainPath = `./results/${host}_reports/`;
 
   if (fs.existsSync(rootDomainPath)) {
-    console.log('The ' + rootDomainPath + ' directory exists, so this scan has been run before.');
+    console.log(`The ${rootDomainPath} directory exists, so this scan has been run before.`);
 
 
         fs.readdir(rootDomainPath, (err, files) => {
@@ -768,9 +770,9 @@ exports.mergeFiles = async (randomToken, domainURL, wappalyzer_json, startTime, 
         const totalArrayAxe = totalArrayWCAG = [];
         for (let i in dateFolders) {
           date = dateFolders[i];  // Note thate date isn't updating
-          var rootDomainPathAndDate = rootDomainPath + "/" + date + "/reports";
+          var rootDomainPathAndDate = `${rootDomainPath}/${date}/reports`;
           fs.readdir(rootDomainPathAndDate, (err, files) => {
-            // console.log(err + " " + files);
+            // console.log(`${err} ${files}`);
           });
           var dateFiles = fs.readdirSync(rootDomainPathAndDate);
           for (let ii in dateFiles) {
@@ -778,7 +780,7 @@ exports.mergeFiles = async (randomToken, domainURL, wappalyzer_json, startTime, 
 /*
             // Load prior axe errors.
             if (dateFiles[ii] == "count.csv") {
-              var countCSV = rootDomainPathAndDate + "/count.csv";
+              var countCSV = `${rootDomainPathAndDate}/count.csv`;
 
               var parser3 = csv2.parse({delimiter: ','}, function(err, data){
                   let lastRowDataCount = data.length-1
@@ -786,7 +788,7 @@ exports.mergeFiles = async (randomToken, domainURL, wappalyzer_json, startTime, 
                   let scoreColunnCount = lastRow.length-1
                   var score = lastRow[scoreColunnCount];
                   totalArrayAxe.push(dateFolders[i], data);
-                  console.log("Date: " + dateFolders[i] + " Score: " +  Math.round(score * 100)/100);
+                  console.log(`Date: ${dateFolders[i]} Score: ${Math.round(score * 100)/100}`);
 
 
                   // Writing aggregated value to disk
@@ -795,7 +797,7 @@ exports.mergeFiles = async (randomToken, domainURL, wappalyzer_json, startTime, 
                     // finalWCAGarray.unshift("WCAG Errors", "Count")
                     // const csv_aH = new ObjectsToCsv(totalArrayAxe);
                     // Save to file:
-                    // await csv_aH.toDisk(storagePath + "/reports/axeHistoricalErrors.csv");
+                    // await csv_aH.toDisk(`${storagePath}/reports/axeHistoricalErrors.csv`);
                     // console.log(await csv_wc.toString());
                   })();
 
@@ -817,7 +819,7 @@ exports.mergeFiles = async (randomToken, domainURL, wappalyzer_json, startTime, 
 
             // Load prior WCAG errors.
             if (dateFiles[ii] == "wcagErrors.csv") {
-              var wcagCSV = rootDomainPathAndDate + "/wcagErrors.csv";
+              var wcagCSV = `${rootDomainPathAndDate}/wcagErrors.csv`;
               var parser4 = csv2.parse({delimiter: ','}, function(err, data){
                   let lastRowDataWCAG = data.length-1
                   var lastRow = data[lastRowDataWCAG];
@@ -834,7 +836,7 @@ exports.mergeFiles = async (randomToken, domainURL, wappalyzer_json, startTime, 
                     // finalWCAGarray.unshift("WCAG Errors", "Count")
                     // const csv_wcH = new ObjectsToCsv(totalArrayWCAG);
                     // Save to file:
-                    // await csv_wcH.toDisk(storagePath + "/reports/wcagHistoricalErrors.csv");
+                    // await csv_wcH.toDisk(`${storagePath}/reports/wcagHistoricalErrors.csv`);
                     // console.log(await csv_wc.toString());
                   // })();
 
@@ -856,9 +858,9 @@ exports.mergeFiles = async (randomToken, domainURL, wappalyzer_json, startTime, 
           console.log("No prior scans found.")
         }
 
-        console.log("Number of prior folders: " + dateFolders.length);
+        console.log(`Number of prior folders: ${dateFolders.length}`);
 
   } else {
-      console.log('The ' + rootDomainPath + ' directory does not exist, so this is a new domain.');
+      console.log(`The ${rootDomainPath} directory does not exist, so this is a new domain.`);
   }
 }
