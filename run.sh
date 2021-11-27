@@ -206,7 +206,7 @@ if [ -d "results/$currentDate/$randomToken" ]; then
     # Compress most files and delete originals.
     echo "Compressing files."
     cd last-scan
-    tar -cjvf "$domain-$currentDate-all_issues.tar.bz2" "all_issues" 2>/dev/null
+    tar -cjf "$domain-$currentDate-all_issues.tar.bz2" "all_issues" 2>/dev/null
     rm -fr "all_issues"
     cd reports
     tar -cjvf "$domain-$currentDate-compiledResults.json.tar.bz2" "compiledResults.json" 2>/dev/null
@@ -217,7 +217,12 @@ if [ -d "results/$currentDate/$randomToken" ]; then
     rm "allissues.csv"
     tar -cjvf "$domain-$currentDate-plainLanguage.csv.bz2" "plainLanguage.csv" 2>/dev/null
     rm "plainLanguage.csv"
+    pwd
+    cp "$domain-$currentDate-allissues.csv.bz2" ../../../../data/
+    cp "$domain-$currentDate-report.html.tar.bz2" ../../../../data/
+    cp "$domain-$currentDate-plainLanguage.csv.bz2" ../../../../data/
     cd ../..
+    pwd
 
     # Make directory for domain and store prior scans
     echo "Adding domain tracking - $domain."
@@ -236,11 +241,33 @@ if [ -d "results/$currentDate/$randomToken" ]; then
 
     echo "Renaming reports to make it easier to access from last-scan."
     cd ../last-scan/reports
+    ls count.csv
     mv report.html "$domain-$currentDate-report.html"
-    ln  -sfn "$domain-$currentDate-report.html" report.html
+    mv count.csv "$domain-$currentDate-count.csv"
+    mv wcagErrors.csv "$domain-$currentDate-wcagErrors.csv"
+    ln -sfn "$domain-$currentDate-report.html" report.html
+    ln -sfn "$domain-$currentDate-count.csv" count.csv
+    ln -sfn "$domain-$currentDate-wcagErrors.csv" wcagErrors.csv
+    pwd
+    # ls ../../../../data/
+    cp "$domain-$currentDate-count.csv" ../../../../data/
+    cp "$domain-$currentDate-wcagErrors.csv" ../../../../data/
     cd ..
     ln  -sfn "reports/$domain-$currentDate-report.html" report.html
     cd ../..
+
+    # Add to Git report
+    # Todo: This should be something that is explicitly set from the command line
+    pwd
+    ls
+    
+    # This isn't working properly
+    # git checkout -B new_data_branch
+    # git add "./data/$domain-$currentDate-count.csv"
+    # git add "data/$domain-$currentDate-wcagErrors.csv data/$domain-$currentDate-allissues.csv.bz2 data/$domain-$currentDate-report.html.tar.bz2 data/$domain-$currentDate-plainLanguage.csv.bz2"
+    # git commit -m "updated data"
+    # git push
+    # git push --setupstream origin main
 
     # Test for the command before attempting to open the report
     if [[ "$OPENBROWSER" == 1 ]]; then
@@ -268,7 +295,7 @@ fi
     # I should be able to use --print-media-type
     wkhtmltopdf -q --enable-javascript --javascript-delay 10000 "last-scan/reports/report.html" "last-scan/reports/$domain-$currentDate-report.pdf"
   else
-    echo "If you want a PDF export, then install wkhtmltopdf (i.e. brew install wkhtmltopdf).";
+    echo "If you want a PDF export, then install wkhtmltopdf - i.e. brew install wkhtmltopdf.";
   fi # End command -v wkhtmltopdf
 
 else

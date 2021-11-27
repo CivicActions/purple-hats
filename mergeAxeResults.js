@@ -98,9 +98,6 @@ const writeResults = async (allissues, storagePath, htmlElementArray,  domainURL
     }
   }
 
-  /* Store the information about issue order totals (critical, serious, ...) */
-  orderCount = [criticalCount, seriousCount, moderateCount, minorCount, unknownCount];
-
   /* Count the instances of each WCAG error in wcagIDsum and express that in wcagCounts which gets stored  */
   // wcagIDsum.forEach(function (x) { wcagCounts[x] = (wcagCounts[x] || 0) + 1; });
 
@@ -128,6 +125,9 @@ const writeResults = async (allissues, storagePath, htmlElementArray,  domainURL
       }
     }
   }
+
+  /* Store the information about issue order totals (critical, serious, ...) */
+  orderCount = [criticalCount, seriousCount, moderateCount, minorCount, unknownCount];
 
   const finalResultsInJson = JSON.stringify({
       startTime: getCurrentTime(),
@@ -205,6 +205,7 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
 
   // Replace array of disabilities for string of disabilities for HTML
   var sentenceCountMax = fleschKincaidGradeMax = automatedReadabilityMax = difficultWordsMax = 0;
+  allissues_csv = [];
   for (let i in allissues) {
     if (allissues[i].disabilities != undefined) {
       allissues[i].disabilities = allissues[i].disabilities.toString().replace(/,/g, ' ').toLowerCase();
@@ -218,6 +219,7 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
     // Find longest sentences per page.
     if (!((allissues[i].sentenceCount == null) || (allissues[i].sentenceCount == undefined) || (typeof allissues[i].sentenceCount !== 'number'))) {
       totalSentenceCount += allissues[i].sentenceCount;
+      // sentenceCountMax = longestSentence(totalSentenceCount, allissues[i].sentenceCount);
       if (sentenceCountMax == 0 || allissues[i].sentenceCount > sentenceCountMax) {
         if (!((allissues[i].sentenceCount == null) || (allissues[i].sentenceCount == undefined) || (typeof allissues[i].sentenceCount !== 'number'))) {
           sentenceCount = allissues[i].sentenceCount;
@@ -258,6 +260,26 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
           allissues[i].htmlElementCount = `<p><b>${htmlElementArray[n][1]} duplicate axe errors.</b></p>`;
       }
     }
+/* I think this needs to be defined as an object.
+
+    // Customize the array to be exported.
+    allissues_csv[i].full_url = allissues[i].url;
+    allissues_csv[i].error_description = allissues[i].description;
+    allissues_csv[i].html_error = allissues[i].htmlElement;
+    allissues_csv[i].wcag_id = allissues[i].wcagID;
+    allissues_csv[i].impact = allissues[i].impact;
+    // allissues_csv[i].order = allissues[i].order; // This is similar to the impact.
+    allissues_csv[i].disabilities_affected = allissues[i].disabilities;
+    allissues_csv[i].help_URL = allissues[i].helpUrl;
+    allissues_csv[i].page = allissues[i].page;
+    allissues_csv[i].errors_per_page = allissues[i].errorsPerURL;
+    allissues_csv[i].scan_id = allissues[i].id;
+    allissues_csv[i].sentence_count = allissues[i].sentenceCount;
+    allissues_csv[i].difficult_words = allissues[i].difficultWords;
+    allissues_csv[i].flesch_kincaid_grade = allissues[i].fleschKincaidGrade;
+    allissues_csv[i].page = allissues[i].page;
+    allissues_csv[i].file_ext = allissues[i].fileExtension;
+*/
     // console.log("Can we provide a list of up to 10 links with the same error? ");
     // console.log(htmlElementArray);
   } // END for (let i in allissues)
@@ -267,124 +289,146 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
   var fleschKincaidGradeMaxText = `Average Flesch–Kincaid grade: ${Math.round((totalFleschKincaidGrade / allissues.length))} <b>Page with worst Flesch–Kincaid grade: <a href="${domainURL + page}" target="_blank">${Math.round(fleschKincaidGradeMax)}</a></b>`;
   var difficultWordsMaxText = `Average difficult words per page: ${Math.round(totalDifficultWords / allissues.length)} <b>Most difficult words on a page: <a href="${domainURL + page}" target="_blank">${difficultWordsMax}</a></b>`;
 
+  // Write CSV file of all issues - Make function
+  // Possibly call from writeResults to have cleaner results
   console.log("Writing results to ./reports/allissues.csv");
   (async () => {
     const csv_a = new ObjectsToCsv(allissues);
+    // const csv_a = new ObjectsToCsv(allissues_csv);
 
     // Save to file:
     await csv_a.toDisk(`${storagePath}/reports/allissues.csv`);
     // console.log(await csv_a.toString());
   })();
 
-  /* Grading evaluations - */
+  // This should be written for every crawl - Make function
+  console.log("Writing results to ./reports/count.csv");
+  (async () => {
+    let count_array = [{
+      level: 'minor',
+      count: minorCount
+    }, {
+      level: 'moderate',
+      count: moderateCount
+    }, {
+      level: 'serious',
+      count: seriousCount
+    }, {
+      level: 'critical',
+      count: criticalCount
+    }, {
+      level: 'countURLs',
+      count: countURLsCrawled
+    }, {
+      level: 'score',
+      count: score
+    }];
+    const csv_c = new ObjectsToCsv(count_array);
+
+    // Save to file:
+    await csv_c.toDisk(`${storagePath}/reports/count.csv`);
+    // console.log(await csv_c.toString());
+  })();
+
+  console.log(`Writing HTML report for ${domain}`);
+
+  // Calculate score to 2 decimal places - Make function
+  var score = Math.round((criticalCount*3 + seriousCount*2 + moderateCount*1.5 + minorCount) / countURLsCrawled*5*100) / 100;
+  console.log(`Score (critical*3 + serious*2 + moderate*1.5 + minor)/ urls*5:  ((${criticalCount})*3 + (${seriousCount})*2 + (${moderateCount})*1.5  + (${minorCount})) / (${countURLsCrawled})*5 = ${score}`);
+
+  var axeCounts1 = `Critical: ${criticalCount}, Serious: ${seriousCount}`;
+  var axeCounts2 = `Moderate: ${moderateCount} , Minor: ${minorCount}`;
+  var axeCounts3 = "";
+  if (unknownCount > 0) {
+    axeCounts3 = `, Unknown: ${unknownCount}`;
+  }
+  var axeCountsDescription = `<b>${axeCounts1}</b>, ${axeCounts2}<i>${axeCounts3}</i>`;
+
+
+  var message = `${axeCounts1}, ${axeCounts2} ${axeCounts3} in ${countURLsCrawled} URLs (Score: ${score}). `;
+
+  // Give grades if enough URLs have been called - Make function
+  // Possibly define in the constant.js file.
   if (countURLsCrawled > 25) {
-    var grade = message = "";
-    var score = (minorCount + (moderateCount * 1.5) + (seriousCount * 2) + (criticalCount * 3)) / (countURLsCrawled * 5);
-    console.log(`Score (minor) moderate*1.5 + serious*2 + critical*3 / urls*5 = ${Math.round(score * 100)/100}`);
-
-
-    console.log("Writing results to ./reports/count.csv");
-    (async () => {
-      let count_array = [{
-        level: 'minor',
-        count: minorCount
-      }, {
-        level: 'moderate',
-        count: moderateCount
-      }, {
-        level: 'serious',
-        count: seriousCount
-      }, {
-        level: 'critical',
-        count: criticalCount
-      }, {
-        level: 'countURLs',
-        count: countURLsCrawled
-      }, {
-        level: 'score',
-        count: score
-      }];
-      const csv_c = new ObjectsToCsv(count_array);
-
-      // Save to file:
-      await csv_c.toDisk(`${storagePath}/reports/count.csv`);
-      // console.log(await csv_c.toString());
-    })();
-
-    console.log(`Writing HTML report for ${domain}`);
+    var grade = '';
 
     // Scoring for grade
-    // Score number = score (minor) + moderate*1.5 + serious*2 + critical*3 / urls*5
-    // A+ = 0 ; A <= 0.1 ; A- <= 0.3 ; B+ <= 0.5 ; B <= 0.7 ; B- <= 0.9 ; C+ <= 2 ;
-    // C <= 4 C- <= 6 ; D+ <= 8 ; D <= 10 ; D- <= 13 ; F+ <= 15 ; F <= 20 ; F- >= 20
+    // Score  = (critical*3 + serious*2 + moderate*1.5 minor) / urls*5
+    // A+ = 0 ; A <= 0.1 ; A- <= 0.3 ;
+    // B+ <= 0.5 ; B <= 0.7 ; B- <= 0.9 ;
+    // C+ <= 2 ; C <= 4 C- <= 6 ;
+    // D+ <= 8 ; D <= 10 ; D- <= 13 ;
+    // F+ <= 15 ; F <= 20 ; F- >= 20 ;
     switch (true) {
       case score == 0:
         grade = "A+";
-        message = "No axe errors, great! Don't forget manual testing."
+        message += "No axe errors, great! Have you tested with a screen reader?"
         break;
       case score <= 0.1:
         grade = "A";
-        message = "Very few axe errors left! Don't forget manual testing."
+        message += "Very few axe errors left! Don't forget manual testing."
         break;
       case score <= 0.3:
         grade = "A-";
-        message = "So close to getting the automated errors! Don't forget manual testing."
+        message += "So close to getting the automated errors! Remember keyboard only testing."
         break;
       case score <= 0.5:
         grade = "B+";
-        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        message += "More work to eliminate automated testing errors. Have you tested zooming the in 200% with your browser."
         break;
       case score <= 0.7:
         grade = "B";
-        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        message += "More work to eliminate automated testing errors. Are the text alternatives meaningful?"
         break;
       case score <= 0.9:
         grade = "B-";
-        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        message += "More work to eliminate automated testing errors. Don't forget manual testing."
         break;
       case score <= 2:
         grade = "C+";
-        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        message += "More work to eliminate automated testing errors. Have you tested in grey scale to see color isn't conveying meaning?"
         break;
       case score <= 4:
         grade = "C";
-        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        message += "More work to eliminate automated testing errors. Have you checked if gradients or background images making it difficult to read text?"
         break;
       case score <= 6:
         grade = "C-";
-        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        message += "More work to eliminate automated testing errors. Don't forget manual testing."
         break;
       case score <= 8:
         grade = "D+";
-        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        message += "A lot more work to eliminate automated testing errors. Most WCAG success criterion can be fully automated."
         break;
       case score <= 10:
         grade = "D";
-        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        message += "A lot more work to eliminate automated testing errors. Don't forget manual testing."
         break;
       case score <= 13:
         grade = "D-";
-        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        message += "A lot more work to eliminate automated testing errors. Can users navigate your site without using a mouse?"
         break;
       case score <= 15:
         grade = "F+";
-        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        message += "A lot more work to eliminate automated testing errors. Are there keyboard traps that stop users from navigating the site?"
         break;
       case score <= 20:
         grade = "F";
-        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        message += "A lot more work to eliminate automated testing errors. Don't forget manual testing."
         break;
       default:
         grade = "F-";
-        message = "More work to eliminate automated testing errors. Don't forget manual testing."
+        message += "A lot more work to eliminate automated testing errors. Considerable room for improvement."
     }
   } else {
-    grade = message = "";
+    grade = '';
     // grade = "?";
-    // message = "Not enough URLs to evaluate grade. Perhaps there was an error in the scan.";
+    message += "Not enough URLs to evaluate grade or perhaps there was an error in the scan.";
   }
+  console.log(`Grade ${grade} - ${message}`)
 
-  // TODO - Document what this is doing.
+  // Count the number of errors per WCAG SC - Make function
+  // TODO - Document how this works.
   // console.log(wcagCounts)
   var wcagCountsContent = '<ul>';
   var wcagCountsArray = [];
@@ -399,7 +443,6 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
       wcagCountsArray.push(wcagCounts[ii]);
     }
   }
-
   // Count the instances of each WCAG error in wcagIDsum and express that in wcagCounts which gets stored
   wcagCountsArray.forEach(function(x) {
     wcagCountsArray[x] = (wcagCountsArray[x] || 0) + 1;
@@ -446,7 +489,7 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
 
   if (allissues.length > maxHTMLdisplay) allissues.length = maxHTMLdisplay;
 
-  /* add information about environment if possible. */
+  // Add information about environment if possible - Make function
   if (wappalyzer_json != null) {
     var wappalyzer_array = ''
     try {
@@ -455,7 +498,6 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
     } catch (e) {
       console.log(wappalyzer_json);
     }
-
     /* Define string of libraries used. */
     let x = 0
     if (wappalyzer_array['technologies']) {
@@ -472,7 +514,6 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
         x++
       }
     }
-
     // Add if statement to avoid this error
     // node_modules/objects-to-csv/index.js:16
     //   throw new Error('The input to objects-to-csv must be an array of objects.');
@@ -488,28 +529,17 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
     }
   }
 
-
-  let axeCounts1 = `Critical: ${criticalCount}, Serious: ${seriousCount}`;
-  let axeCounts2 = `Moderate: ${moderateCount} , Minor: ${minorCount}`;
-  let axeCounts3 = "";
-  if (unknownCount > 0) {
-    axeCounts3 = `, Unknown: ${unknownCount}`;
-  }
-  axeCountsDescription = `<b>${axeCounts1}</b>, ${axeCounts2}<i>${axeCounts3}</i>`;
-
-  // score is repeated above but I'm not getting the value without redevinging it.
-  var score = (minorCount + (moderateCount * 1.5) + (seriousCount * 2) + (criticalCount * 3)) / (countURLsCrawled * 5);
-  console.log(`${axeCounts1}, ${axeCounts2}${axeCounts3} Score: ${Math.round(score * 100)/100}`);
-  var someOfErrors = criticalCount + seriousCount + moderateCount + minorCount;
+  // console.log(`${axeCounts1}, ${axeCounts2}${axeCounts3} Score: ${Math.round(score * 100)/100}`);
+  var sumOfErrors = criticalCount + seriousCount + moderateCount + minorCount;
   const axeCountContentArr = JSON.stringify({
       "criticalCount": criticalCount,
       "seriousCount": seriousCount,
       "moderateCount": moderateCount,
       "minorCount": minorCount,
-      "criticalCountPercent": Math.round((criticalCount / someOfErrors) * 100),
-      "seriousCountPercent": Math.round((seriousCount / someOfErrors) * 100),
-      "moderateCountPercent": Math.round((moderateCount / someOfErrors) * 100),
-      "minorCountPercent": Math.round((minorCount / someOfErrors) * 100),
+      "criticalCountPercent": Math.round((criticalCount / sumOfErrors) * 100),
+      "seriousCountPercent": Math.round((seriousCount / sumOfErrors) * 100),
+      "moderateCountPercent": Math.round((moderateCount / sumOfErrors) * 100),
+      "minorCountPercent": Math.round((minorCount / sumOfErrors) * 100),
       "axeCountsDescription": axeCountsDescription,
     },
     null,
