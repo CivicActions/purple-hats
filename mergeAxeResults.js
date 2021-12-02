@@ -163,7 +163,6 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
 
   // Pull in WCAG name and W3C links
   let wcagIDval = "";
-  var totalSentenceCount = totalFleschKincaidGrade = totalDifficultWords = 0;
   for (let a in wcagLinks) {
     wcagIDval = wcagLinks[a].wcag;
 
@@ -186,14 +185,20 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
         }
         if (wcagLinks[a].wcag21) {
           desc += ` - 2.1`
+          console.log(`WCAG 2.1 error - ${wcagLinks[a]}`);
         }
         // wcagLinks[a].desc = desc + ") ";
+
+        // If existing link to UK role based documentation, include it.
         wcagLinks[a].desc = `${desc}) `;
-        if (wcagLinks[a].role) {
-          wcagLinks[a].role += `, <a href="${wcagUKlinks[b][3]}" target="_blank">${wcagUKlinks[b][4]}</a>`;
-        } else {
-          wcagLinks[a].role += `<a href="${wcagUKlinks[b][3]}" target="_blank">${wcagUKlinks[b][4]}</a>`;
+        if (wcagUKlinks[b][4] != undefined) {
+          if (wcagLinks[a].role) {
+            wcagLinks[a].role += `, <a href="${wcagUKlinks[b][3]}" target="_blank">${wcagUKlinks[b][4]}</a>`;
+          } else {
+            wcagLinks[a].role += `<a href="${wcagUKlinks[b][3]}" target="_blank">${wcagUKlinks[b][4]}</a>`;
+          }
         }
+
       }
     }
   }
@@ -205,16 +210,17 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
 
   // Replace array of disabilities for string of disabilities for HTML
   var sentenceCountMax = fleschKincaidGradeMax = automatedReadabilityMax = difficultWordsMax = 0;
+  var totalSentenceCount = totalFleschKincaidGrade = totalDifficultWords = 0;
   allissues_csv = [];
   for (let i in allissues) {
+    var sentenceCount = fleschKincaidGrade = difficultWords = 0;
+    var page = allissues[i].page
+
     if (allissues[i].disabilities != undefined) {
       allissues[i].disabilities = allissues[i].disabilities.toString().replace(/,/g, ' ').toLowerCase();
     } else {
       allissues[i].disabilities = "";
     }
-
-    var sentenceCount = fleschKincaidGrade = difficultWords = 0;
-    var page = allissues[i].page
 
     // Find longest sentences per page.
     if (!((allissues[i].sentenceCount == null) || (allissues[i].sentenceCount == undefined) || (typeof allissues[i].sentenceCount !== 'number'))) {
@@ -260,29 +266,32 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
           allissues[i].htmlElementCount = `<p><b>${htmlElementArray[n][1]} duplicate axe errors.</b></p>`;
       }
     }
-/* I think this needs to be defined as an object.
 
     // Customize the array to be exported.
-    allissues_csv[i].full_url = allissues[i].url;
-    allissues_csv[i].error_description = allissues[i].description;
-    allissues_csv[i].html_error = allissues[i].htmlElement;
-    allissues_csv[i].wcag_id = allissues[i].wcagID;
-    allissues_csv[i].impact = allissues[i].impact;
-    // allissues_csv[i].order = allissues[i].order; // This is similar to the impact.
-    allissues_csv[i].disabilities_affected = allissues[i].disabilities;
-    allissues_csv[i].help_URL = allissues[i].helpUrl;
-    allissues_csv[i].page = allissues[i].page;
-    allissues_csv[i].errors_per_page = allissues[i].errorsPerURL;
-    allissues_csv[i].scan_id = allissues[i].id;
-    allissues_csv[i].sentence_count = allissues[i].sentenceCount;
-    allissues_csv[i].difficult_words = allissues[i].difficultWords;
-    allissues_csv[i].flesch_kincaid_grade = allissues[i].fleschKincaidGrade;
-    allissues_csv[i].page = allissues[i].page;
-    allissues_csv[i].file_ext = allissues[i].fileExtension;
-*/
+    allissues_csv[i] = {
+      full_url:allissues[i].url,
+      error_description:allissues[i].description,
+      html_error:allissues[i].htmlElement,
+      wcag_id:allissues[i].wcagID,
+      impact:allissues[i].impact,
+      order:allissues[i].order, // This is similar to the impact.
+      disabilities_affected:allissues[i].disabilities,
+      help_URL:allissues[i].helpUrl,
+      page:allissues[i].page,
+      errors_per_page:allissues[i].errorsPerURL,
+      scan_id:allissues[i].id,
+      sentence_count:allissues[i].sentenceCount,
+      difficult_words:allissues[i].difficultWords,
+      flesch_kincaid_grade:allissues[i].fleschKincaidGrade,
+      page:allissues[i].page,
+      file_ext:allissues[i].fileExtension
+    };
+
     // console.log("Can we provide a list of up to 10 links with the same error? ");
     // console.log(htmlElementArray);
   } // END for (let i in allissues)
+
+  console.log(allissues_csv);
 
   // Create text for HTML report.
   var sentenceCountMaxText = `Average sentences per page:  ${Math.round((totalSentenceCount / allissues.length))} <b>Most sentences on page: <a href="${domainURL + page}" target="_blank">${sentenceCountMax}</a></b>`;
@@ -333,11 +342,11 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
   console.log(`Writing HTML report for ${domain}`);
 
   // Calculate score to 2 decimal places - Make function
-  var score = Math.round((criticalCount*3 + seriousCount*2 + moderateCount*1.5 + minorCount) / countURLsCrawled*5*100) / 100;
+  var score = Math.round((criticalCount*3 + seriousCount*2 + moderateCount*1.5 + minorCount) / (countURLsCrawled*5)*100) / 100;
   console.log(`Score (critical*3 + serious*2 + moderate*1.5 + minor)/ urls*5:  ((${criticalCount})*3 + (${seriousCount})*2 + (${moderateCount})*1.5  + (${minorCount})) / (${countURLsCrawled})*5 = ${score}`);
 
-  var axeCounts1 = `Critical: ${criticalCount}, Serious: ${seriousCount}`;
-  var axeCounts2 = `Moderate: ${moderateCount} , Minor: ${minorCount}`;
+  var axeCounts1 = `Critical: ${criticalCount}, Serious: ${seriousCount} `;
+  var axeCounts2 = `Moderate: ${moderateCount}, Minor: ${minorCount}`;
   var axeCounts3 = "";
   if (unknownCount > 0) {
     axeCounts3 = `, Unknown: ${unknownCount}`;
@@ -345,7 +354,8 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
   var axeCountsDescription = `<b>${axeCounts1}</b>, ${axeCounts2}<i>${axeCounts3}</i>`;
 
 
-  var message = `${axeCounts1}, ${axeCounts2} ${axeCounts3} in ${countURLsCrawled} URLs (Score: ${score}). `;
+  var message = `${axeCounts1}, ${axeCounts2} ${axeCounts3} in ${countURLsCrawled} `;
+  message += `<br>(${criticalCount*3} + ${seriousCount*2} + ${moderateCount*1.5} + ${minorCount}) / ${countURLsCrawled*5} = ${score} <br>`;
 
   // Give grades if enough URLs have been called - Make function
   // Possibly define in the constant.js file.
@@ -360,72 +370,69 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
     // D+ <= 8 ; D <= 10 ; D- <= 13 ;
     // F+ <= 15 ; F <= 20 ; F- >= 20 ;
     switch (true) {
-      case score == 0:
+      case score == 0: // Jump by .25
         grade = "A+";
         message += "No axe errors, great! Have you tested with a screen reader?"
         break;
-      case score <= 0.1:
+      case score <= 0.25:
         grade = "A";
         message += "Very few axe errors left! Don't forget manual testing."
         break;
-      case score <= 0.3:
+      case score <= 0.5:
         grade = "A-";
         message += "So close to getting the automated errors! Remember keyboard only testing."
         break;
-      case score <= 0.5:
+      case score <= 0.75: // Jump by 1.5
         grade = "B+";
         message += "More work to eliminate automated testing errors. Have you tested zooming the in 200% with your browser."
         break;
-      case score <= 0.7:
+      case score <= 2.25:
         grade = "B";
         message += "More work to eliminate automated testing errors. Are the text alternatives meaningful?"
         break;
-      case score <= 0.9:
+      case score <= 5.25:
         grade = "B-";
         message += "More work to eliminate automated testing errors. Don't forget manual testing."
         break;
-      case score <= 2:
+      case score <= 5.25: // Jump by 2
         grade = "C+";
         message += "More work to eliminate automated testing errors. Have you tested in grey scale to see color isn't conveying meaning?"
         break;
-      case score <= 4:
+      case score <= 7.25:
         grade = "C";
         message += "More work to eliminate automated testing errors. Have you checked if gradients or background images making it difficult to read text?"
         break;
-      case score <= 6:
+      case score <= 9.25:
         grade = "C-";
         message += "More work to eliminate automated testing errors. Don't forget manual testing."
         break;
-      case score <= 8:
+      case score <= 11:  // Jump by 3 (and round down to 11)
         grade = "D+";
         message += "A lot more work to eliminate automated testing errors. Most WCAG success criterion can be fully automated."
         break;
-      case score <= 10:
+      case score <= 14:
         grade = "D";
         message += "A lot more work to eliminate automated testing errors. Don't forget manual testing."
         break;
-      case score <= 13:
+      case score <= 17:
         grade = "D-";
         message += "A lot more work to eliminate automated testing errors. Can users navigate your site without using a mouse?"
         break;
-      case score <= 15:
+      case score <= 20:  // Jump by 4
         grade = "F+";
         message += "A lot more work to eliminate automated testing errors. Are there keyboard traps that stop users from navigating the site?"
         break;
-      case score <= 20:
-        grade = "F";
-        message += "A lot more work to eliminate automated testing errors. Don't forget manual testing."
-        break;
+      // case score <= 24: grade = "F-";
       default:
-        grade = "F-";
+        grade = "F";
         message += "A lot more work to eliminate automated testing errors. Considerable room for improvement."
+        break;
     }
   } else {
-    grade = '';
-    // grade = "?";
+    grade = 'NA';
     message += "Not enough URLs to evaluate grade or perhaps there was an error in the scan.";
   }
-  console.log(`Grade ${grade} - ${message}`)
+  console.log(`Grade (v2) ${grade} - ${message}`)
 
   // Count the number of errors per WCAG SC - Make function
   // TODO - Document how this works.
@@ -787,9 +794,8 @@ exports.mergeFiles = async (randomToken, domainURL, wappalyzer_json, startTime, 
   if (fs.existsSync(rootDomainPath)) {
     console.log(`The ${rootDomainPath} directory exists, so this scan has been run before.`);
 
-
         fs.readdir(rootDomainPath, (err, files) => {
-          console.log("Display files in each directory.");
+          console.log("Display directories.");
           console.log(files);
         })
         var dateFolders = fs.readdirSync(rootDomainPath)
@@ -798,41 +804,82 @@ exports.mergeFiles = async (randomToken, domainURL, wappalyzer_json, startTime, 
         var date = "";
         const countArray = wcagArray = dateScore = totalArrayAxe2 = totalArrayWCAG2 = [];
         const totalArrayAxe = totalArrayWCAG = [];
+        var aggregateAxeCount = aggregateWCAG = [];
         for (let i in dateFolders) {
           date = dateFolders[i];  // Note thate date isn't updating
           var rootDomainPathAndDate = `${rootDomainPath}/${date}/reports`;
           fs.readdir(rootDomainPathAndDate, (err, files) => {
             // console.log(`${err} ${files}`);
           });
+
           var dateFiles = fs.readdirSync(rootDomainPathAndDate);
           for (let ii in dateFiles) {
-            console.log(dateFiles[ii])
-/*
+            // if (dateFiles[ii].endsWith('csv')) { console.log(dateFiles[ii]); }
+
             // Load prior axe errors.
             if (dateFiles[ii] == "count.csv") {
               var countCSV = `${rootDomainPathAndDate}/count.csv`;
+              console.log(`Found prior axe errors - ${countCSV}`);
 
-              var parser3 = csv2.parse({delimiter: ','}, function(err, data){
+              fs.readFile(countCSV, 'utf8', function (err, data) {
+                if (data != undefined) {
+                  var dataArray = data.split(/\r?\n/);
+                  aggregateAxeCount[date] = [
+                    dataArray[1].slice(6), // 'minor,58',
+                    dataArray[2].slice(9), // 'moderate,1309',
+                    dataArray[3].slice(8), // 'serious,1015',
+                    dataArray[4].slice(9), // 'critical,2',
+                    dataArray[5].slice(9), // 'countURLs,995',
+                    dataArray[6].slice(6) // 'score,0.8155778894472362',
+                  ];
+                  console.log(`Date: ${date}`);
+                  console.log(`Parsed array: ${dataArray}`);
+                  console.log(`Aggregated aray: ${aggregateAxeCount}`);
+                }
+              });
+            }
+
+            // Load prior axe errors.
+            if (dateFiles[ii] == "wcagErrors.csv") {
+              var wcagErrorsCSV = `${rootDomainPathAndDate}/wcagErrors.csv`;
+              console.log(`Found prior WCAG errors - ${wcagErrorsCSV}`);
+
+              fs.readFile(wcagErrorsCSV, 'utf8', function (err2, data2) {
+                if (data2 != undefined) {
+                  var dataArray2 = data2.split(/\r?\n/);
+                  aggregateWCAG[date] = [dataArray2];
+                  console.log(`Date: ${date}`);
+                  console.log(`Parsed wcag array: ${dataArray2}`);
+                  console.log(`Aggregated wcag aray: ${aggregateWCAG}`);
+                }
+              });
+            }
+
+
+/* This probably isn't needed
+              var parser3 = csv2.parse({delimiter: ','}, function(err, data) {
+                  console.log(data);
+                  console.log(err);
                   let lastRowDataCount = data.length-1
                   var lastRow = data[lastRowDataCount];
                   let scoreColunnCount = lastRow.length-1
                   var score = lastRow[scoreColunnCount];
                   totalArrayAxe.push(dateFolders[i], data);
+                  console.log(totalArrayAxe);
                   console.log(`Date: ${dateFolders[i]} Score: ${Math.round(score * 100)/100}`);
-
-
                   // Writing aggregated value to disk
-                  // console.log("Writing history results to ./reports/axeHistoricalErrors.csv");
-                  // (async () => {
-                    // finalWCAGarray.unshift("WCAG Errors", "Count")
-                    // const csv_aH = new ObjectsToCsv(totalArrayAxe);
-                    // Save to file:
-                    // await csv_aH.toDisk(`${storagePath}/reports/axeHistoricalErrors.csv`);
-                    // console.log(await csv_wc.toString());
-                  })();
-
-
+                  console.log("Writing history results to ./reports/axeHistoricalErrors.csv");
+                  (async () => {
+                     finalWCAGarray.unshift("WCAG Errors", "Count")
+                     const csv_aH = new ObjectsToCsv(aggregateAxeCount);
+                     // Save to file:
+                     await csv_aH.toDisk(`${storagePath}/reports/axeHistoricalErrors.csv`);
+                     console.log(await csv_wc.toString());
+                   })();
               });
+            */
+
+/*
 // B - Spitting out error to console - Error: ENOENT: no such file or directory, open './results/eng-hiring.18f.gov_reports//2021-11-17/reports/count.csv'
 
               // try {
@@ -849,6 +896,7 @@ exports.mergeFiles = async (randomToken, domainURL, wappalyzer_json, startTime, 
 
             // Load prior WCAG errors.
             if (dateFiles[ii] == "wcagErrors.csv") {
+              console.log(dateFiles[ii]);
               var wcagCSV = `${rootDomainPathAndDate}/wcagErrors.csv`;
               var parser4 = csv2.parse({delimiter: ','}, function(err, data){
                   let lastRowDataWCAG = data.length-1
@@ -877,10 +925,14 @@ exports.mergeFiles = async (randomToken, domainURL, wappalyzer_json, startTime, 
             }
 */
 
+
+
           } // for (let ii in dateFiles)
 
           // console.log(totalArrayWCAG2);
           // console.log(totalArrayAxe2);
+
+
 
         } // end of - for (let i in dateFolders)
 

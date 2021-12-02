@@ -191,7 +191,7 @@ if [ -d "results/$currentDate/$randomToken" ]; then
   domain=$(echo "$page" | awk -F/ '{print $3}')
 
   # Add simlinks for simpler access
-  echo "Adding symbolic link to last scan of $domain."
+  echo "Adding symbolic link to last scan of $domain in run.sh."
   ln -sfn "results/$currentDate/$randomToken" "last-scan"
   cd results
 
@@ -259,8 +259,7 @@ if [ -d "results/$currentDate/$randomToken" ]; then
     # Add to Git report
     # Todo: This should be something that is explicitly set from the command line
     pwd
-    ls
-    
+
     # This isn't working properly
     # git checkout -B new_data_branch
     # git add "./data/$domain-$currentDate-count.csv"
@@ -285,7 +284,7 @@ if [ -d "results/$currentDate/$randomToken" ]; then
     fi # End [[ "$OPENBROWSER" == 1 ]]; then
 fi
   else
-    echo "No report.html file for $domain."
+    echo "No report.html file for $domain in run.sh."
   fi
 
 
