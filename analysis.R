@@ -35,7 +35,8 @@ create_summary <- function(directory) {
 summary_data <- create_summary("~/Documents/purple-hats/data/")
 
 # ARE WE GETTING MORE ACCESSIBLE OVER TIME? 
-# WHO ARE THE REALLY GOOD ONES? 
+# WHO ARE THE REALLY GOOD ONES? WHAT APPROACHES ARE THEY USING?
+# ARE THERE ANY REALLY BIG IMPROVEMENTS? 
 
 sum_by_day <- summary_data %>% 
     group_by(scan_date) %>% 
