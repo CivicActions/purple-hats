@@ -154,6 +154,6 @@ Scripts can now be run from the command line with `bash ./run.sh -o 0 -w 1 -d ht
 - https://github.com/alphagov/accessibility-monitoring
 - https://github.com/MSU-NatSci/DomainAccessibilityAudit
 - https://github.com/benbalter/Site-Inspector
-- https://github.com/accessibility-luxembourg ([https://github.com/accessibility-luxembourg/simplA11yGenReport](https://github.com/accessibility-luxembourg/simplA11yMonit), [simplA11yGenReport](https://github.com/accessibility-luxembourg/simplA11yGenReport), [simplA11yPDFCrawler](https://github.com/accessibility-luxembourg/simplA11yPDFCrawler))
+- https://github.com/accessibility-luxembourg ([simplA11yMonit](https://github.com/accessibility-luxembourg/simplA11yMonit), [simplA11yGenReport](https://github.com/accessibility-luxembourg/simplA11yGenReport), [simplA11yPDFCrawler](https://github.com/accessibility-luxembourg/simplA11yPDFCrawler))
 
 Also for PDFs checking out http://verapdf.org/
