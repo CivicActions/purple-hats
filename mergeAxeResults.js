@@ -263,52 +263,90 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
     for (let n in htmlElementArray) {
       if (htmlElementArray[n][0] == htmlElement) {
         if (htmlElementArray[n][1] > 1)
-          allissues[i].htmlElementCount = `<p><b>${htmlElementArray[n][1]} duplicate axe errors.</b></p>`;
+          allissues[i].htmlElementCount = htmlElementArray[n][1];
+          // allissues[i].htmlElementCountMessage = `<p><b>${htmlElementArray[n][1]} duplicate errors.</b></p>`;
       }
     }
 
-    // Customize the array to be exported.
+    // Optimize the array to be exported.
+/*
+    // Broken if there are multiple wcag results.
+    console.log(allissues[i].wcagID);
+    if (allissues[i].wcagID) {
+      if (wcagLinks.find((el) => el.wcag === allissues[i].wcagID) === 'undefined') {
+        console.log(`Something's wrong with ${allissues[i].wcagID}`);
+      } else {
+
+        // This seems to be opposite of what I need, but seems to work.
+        // Failure seems to occur when an error has more than one WCAG error associated with it.
+        if(wcagLinks.find((el) => el.wcag === allissues[i].wcagID) === 'undefined') {
+          // console.log(wcagLinks.find((el) => el.wcag === allissues[i].wcagID).href);
+          var wcagLinkHref = wcagLinks.find((el) => el.wcag === allissues[i].wcagID).href;
+
+          if (wcagLinks.find((el) => el.wcag === allissues[i].wcagID).wcag21 === 1) {
+            wcagLink21 = "2.1"
+          } else {
+            wcagLink21 = "2.0"
+          }
+
+        } else { // Single value
+          console.log("Testing 123 " + allissues[i].wcagID)
+          console.log(wcagLinks.find((el) => el.wcag === allissues[i].wcagID));
+        }
+
+      }
+      // TODO: Clean up output so that we can include the description of the WCAG violation & links
+      // The the role/desc could be combined if we strip out the URL & strip out the HTML.
+      // let wcagLinkRole = wcagLinks.find((el) => el.wcag === allissues[i].wcagID).role;
+      // let wcagLinkDesc = wcagLinks.find((el) => el.wcag === allissues[i].wcagID).desc;
+
+    } else {
+      var wcagLinkHref = wcagLink21 = "";
+    }
+    // console.log(wcagLinkHref + " " + wcagLink21);
+*/
+
     allissues_csv[i] = {
-      full_url:allissues[i].url,
-      error_description:allissues[i].description,
+      URL:`=HYPERLINK("${allissues[i].url}", "${allissues[i].page}")`,
+      error_description:`=HYPERLINK("${allissues[i].helpUrl}", "${allissues[i].description}")`,
       html_error:allissues[i].htmlElement,
+      errors_in_page:allissues[i].errorsPerURL,
+      duplicate_errors:allissues[i].htmlElementCount,
+      // wcag_id:`=HYPERLINK("${wcagLinkHref}", "${allissues[i].wcagID}")`, // dependent on multiple wcag results above being resolved.
       wcag_id:allissues[i].wcagID,
       impact:allissues[i].impact,
-      order:allissues[i].order, // This is similar to the impact.
       disabilities_affected:allissues[i].disabilities,
-      help_URL:allissues[i].helpUrl,
-      page:allissues[i].page,
-      errors_per_page:allissues[i].errorsPerURL,
-      scan_id:allissues[i].id,
+      // wcag_version:wcagLink21, // dependent on multiple wcag results above being resolved.
       sentence_count:allissues[i].sentenceCount,
       difficult_words:allissues[i].difficultWords,
       flesch_kincaid_grade:allissues[i].fleschKincaidGrade,
-      page:allissues[i].page,
+      scan_id:allissues[i].id,
       file_ext:allissues[i].fileExtension
     };
 
     // console.log("Can we provide a list of up to 10 links with the same error? ");
     // console.log(htmlElementArray);
+
   } // END for (let i in allissues)
 
-  console.log(allissues_csv);
-
-  // Create text for HTML report.
-  var sentenceCountMaxText = `Average sentences per page:  ${Math.round((totalSentenceCount / allissues.length))} <b>Most sentences on page: <a href="${domainURL + page}" target="_blank">${sentenceCountMax}</a></b>`;
-  var fleschKincaidGradeMaxText = `Average Flesch–Kincaid grade: ${Math.round((totalFleschKincaidGrade / allissues.length))} <b>Page with worst Flesch–Kincaid grade: <a href="${domainURL + page}" target="_blank">${Math.round(fleschKincaidGradeMax)}</a></b>`;
-  var difficultWordsMaxText = `Average difficult words per page: ${Math.round(totalDifficultWords / allissues.length)} <b>Most difficult words on a page: <a href="${domainURL + page}" target="_blank">${difficultWordsMax}</a></b>`;
+  // console.log(allissues_csv);
 
   // Write CSV file of all issues - Make function
   // Possibly call from writeResults to have cleaner results
   console.log("Writing results to ./reports/allissues.csv");
   (async () => {
-    const csv_a = new ObjectsToCsv(allissues);
-    // const csv_a = new ObjectsToCsv(allissues_csv);
+    // const csv_a = new ObjectsToCsv(allissues);
+    const csv_a = new ObjectsToCsv(allissues_csv);
 
     // Save to file:
     await csv_a.toDisk(`${storagePath}/reports/allissues.csv`);
     // console.log(await csv_a.toString());
   })();
+
+  // Create text for HTML report.
+  var sentenceCountMaxText = `Average sentences per page:  ${Math.round((totalSentenceCount / allissues.length))} <b>Most sentences on page: <a href="${domainURL + page}" target="_blank">${sentenceCountMax}</a></b>`;
+  var fleschKincaidGradeMaxText = `Average Flesch–Kincaid grade: ${Math.round((totalFleschKincaidGrade / allissues.length))} <b>Page with worst Flesch–Kincaid grade: <a href="${domainURL + page}" target="_blank">${Math.round(fleschKincaidGradeMax)}</a></b>`;
+  var difficultWordsMaxText = `Average difficult words per page: ${Math.round(totalDifficultWords / allissues.length)} <b>Most difficult words on a page: <a href="${domainURL + page}" target="_blank">${difficultWordsMax}</a></b>`;
 
   // This should be written for every crawl - Make function
   console.log("Writing results to ./reports/count.csv");
@@ -620,9 +658,13 @@ const flattenAxeResults = async (rPath, storagePath) => {
     /* pull out file extension from path */
     if (page.includes(".") && !page.includes("@")) {
       fileExtension = page.split('.').pop();
-      fileExtension = fileExtension.substring(0, fileExtension.indexOf('?'));
-      fileExtension = fileExtension.substring(0, fileExtension.indexOf('#'));
+
+      // TODO: strip characters after ? * #
+      // fileExtension = fileExtension.substring(0, fileExtension.indexOf('?'));
+      // fileExtension = fileExtension.substring(0, fileExtension.indexOf('#'));
       // fileExtension = limit(fileExtension, 6);
+
+      console.log(`File extension: ${fileExtension}`);
     }
 
     error.fixes.forEach(item => {
