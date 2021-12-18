@@ -248,6 +248,7 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
     }
 
     // Find page with most difficult words.
+    // TODO: Find why the value "{}" is being brought into the spreadsheet.
     if (!((allissues[i].difficultWords == null) || (allissues[i].difficultWords == undefined) || (typeof allissues[i].difficultWords !== 'number'))) {
       totalDifficultWords += allissues[i].difficultWords;
       if (allissues[i].difficultWords > difficultWordsMax) {
@@ -312,17 +313,17 @@ const writeHTML = async (allissues, storagePath, htmlElementArray, domainURL, wa
       html_error:allissues[i].htmlElement,
       errors_in_page:allissues[i].errorsPerURL,
       duplicate_errors:allissues[i].htmlElementCount,
-      // wcag_id:`=HYPERLINK("${wcagLinkHref}", "${allissues[i].wcagID}")`, // dependent on multiple wcag results above being resolved.
       wcag_id:allissues[i].wcagID,
       impact:allissues[i].impact,
       disabilities_affected:allissues[i].disabilities,
-      // wcag_version:wcagLink21, // dependent on multiple wcag results above being resolved.
       sentence_count:allissues[i].sentenceCount,
       difficult_words:allissues[i].difficultWords,
       flesch_kincaid_grade:allissues[i].fleschKincaidGrade,
       scan_id:allissues[i].id,
       file_ext:allissues[i].fileExtension
     };
+    // wcag_version:wcagLink21, // dependent on multiple wcag results above being resolved.
+    // wcag_id:`=HYPERLINK("${wcagLinkHref}", "${allissues[i].wcagID}")`, // dependent on multiple wcag results above being resolved.
 
     // console.log("Can we provide a list of up to 10 links with the same error? ");
     // console.log(htmlElementArray);
