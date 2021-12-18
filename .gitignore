@@ -16,3 +16,6 @@ cron_scripts.sh
 *.gzip
 old
 .icloud
+data
+data/*
+cron_*
