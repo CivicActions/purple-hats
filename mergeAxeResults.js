@@ -839,7 +839,7 @@ exports.mergeFiles = async (randomToken, domainURL, wappalyzer_json, startTime, 
 
         fs.readdir(rootDomainPath, (err, files) => {
           console.log("Display directories.");
-          console.log(files);
+          // console.log(files);
         })
         var dateFolders = fs.readdirSync(rootDomainPath)
 
@@ -850,7 +850,7 @@ exports.mergeFiles = async (randomToken, domainURL, wappalyzer_json, startTime, 
         var aggregateAxeCount = aggregateWCAG = [];
         for (let i in dateFolders) {
           date = dateFolders[i];  // Note thate date isn't updating
-          var rootDomainPathAndDate = `${rootDomainPath}/${date}/reports`;
+          var rootDomainPathAndDate = `${rootDomainPath}${date}/reports`;
           fs.readdir(rootDomainPathAndDate, (err, files) => {
             // console.log(`${err} ${files}`);
           });
@@ -867,6 +867,10 @@ exports.mergeFiles = async (randomToken, domainURL, wappalyzer_json, startTime, 
               fs.readFile(countCSV, 'utf8', function (err, data) {
                 if (data != undefined) {
                   var dataArray = data.split(/\r?\n/);
+                  var createValue = [];
+                  for(let value in dataArray) {
+                    createValue.push(dataArray[value].replace(',', ' = '));
+                  }
                   aggregateAxeCount[date] = [
                     dataArray[1].slice(6), // 'minor,58',
                     dataArray[2].slice(9), // 'moderate,1309',
@@ -875,9 +879,9 @@ exports.mergeFiles = async (randomToken, domainURL, wappalyzer_json, startTime, 
                     dataArray[5].slice(9), // 'countURLs,995',
                     dataArray[6].slice(6) // 'score,0.8155778894472362',
                   ];
-                  console.log(`Date: ${date}`);
-                  console.log(`Parsed array: ${dataArray}`);
-                  console.log(`Aggregated aray: ${aggregateAxeCount}`);
+                  console.log(`Date: ${dateFolders[i]}`);
+                  console.log(`Parsed array: ${createValue}`);
+                  console.log(`Aggregated array: ${aggregateAxeCount}`);
                 }
               });
             }
@@ -890,10 +894,14 @@ exports.mergeFiles = async (randomToken, domainURL, wappalyzer_json, startTime, 
               fs.readFile(wcagErrorsCSV, 'utf8', function (err2, data2) {
                 if (data2 != undefined) {
                   var dataArray2 = data2.split(/\r?\n/);
+                  var createValue = [];
+                  for(let value in dataArray2) {
+                    createValue.push(dataArray2[value].replace(',', ' = '));
+                  }
                   aggregateWCAG[date] = [dataArray2];
-                  console.log(`Date: ${date}`);
+                  console.log(`Date: ${dateFolders[i]}`);
                   console.log(`Parsed wcag array: ${dataArray2}`);
-                  console.log(`Aggregated wcag aray: ${aggregateWCAG}`);
+                  console.log(`Aggregated wcag array: ${aggregateWCAG}`);
                 }
               });
             }
