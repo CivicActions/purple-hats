@@ -1,4 +1,6 @@
-#purple-hats
+# purple-hats
+
+![The artist formerly known as Prince wearing a purple hat](https://i.pinimg.com/originals/3a/b9/c3/3ab9c3d46d5641fcae85408e5969654c.jpg)
 ----
 
 purple-hats is a customisable, automated accessibility testing tool that allows software development teams to assess whether their products are user-friendly to persons with disabilities (PWDs).
